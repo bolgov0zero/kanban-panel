@@ -306,7 +306,7 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 
 <!-- Footer -->
 <footer class="bg-gray-800 text-gray-400 text-center py-4 mt-auto">
-	2025 © bolgov0zero | Версия: <span id="appVersion">Загрузка...</span>
+	2025 © Болгов Иван
 </footer>
 
 <!-- Scripts -->

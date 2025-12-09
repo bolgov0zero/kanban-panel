@@ -1,5 +1,5 @@
 <?php
-date_default_timezone_set('Europe/Moscow');
+date_default_timezone_set('Europe/Moscow');  // <-- Добавлено: UTC+3 (Москва)
 session_start();
 if (!isset($_SESSION['user'])) exit('auth required');
 $db = new SQLite3(__DIR__ . '/db/db.sqlite');
@@ -33,16 +33,6 @@ $tg_settings = $db->querySingle("SELECT bot_token, chat_id FROM telegram_setting
 $bot_token = $tg_settings['bot_token'] ?? '';
 $chat_id = $tg_settings['chat_id'] ?? '';
 
-// Получаем настройки таймеров
-$timer_settings = $db->querySingle("SELECT * FROM timer_settings WHERE id=1", true);
-if (!$timer_settings) {
-	$timer_settings = [
-		'timer_hours' => 24,
-		'report_time' => '10:00',
-		'enabled' => 1
-	];
-}
-
 // Получаем имя текущего пользователя
 $user_name_stmt = $db->prepare("SELECT name FROM users WHERE username = :u");
 $user_name_stmt->bindValue(':u', $user, SQLITE3_TEXT);
@@ -74,32 +64,7 @@ switch ($action) {
 		echo json_encode(['success' => $result]);
 		break;
 
-	// Управление таймерами
-	case 'get_timer_settings':
-		if(!$isAdmin) exit('forbidden');
-		echo json_encode($timer_settings, JSON_UNESCAPED_UNICODE);
-		break;
-		
-	case 'save_timer_settings':
-		if(!$isAdmin) exit('forbidden');
-		$timer_hours = (int)($_POST['timer_hours'] ?? 24);
-		$report_time = trim($_POST['report_time'] ?? '10:00');
-		$enabled = (int)($_POST['enabled'] ?? 1);
-		
-		// Валидация времени
-		if (!preg_match('/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/', $report_time)) {
-			$report_time = '10:00';
-		}
-		
-		$stmt = $db->prepare("INSERT OR REPLACE INTO timer_settings (id, timer_hours, report_time, enabled) VALUES (1, :th, :rt, :en)");
-		$stmt->bindValue(':th', $timer_hours, SQLITE3_INTEGER);
-		$stmt->bindValue(':rt', $report_time, SQLITE3_TEXT);
-		$stmt->bindValue(':en', $enabled, SQLITE3_INTEGER);
-		$stmt->execute();
-		
-		echo json_encode(['success' => true]);
-		break;
-		
+	// НОВЫЙ CASE: Тестирование таймера
 	case 'test_timer_notification':
 		if(!$isAdmin) exit('forbidden');
 		
@@ -108,21 +73,48 @@ switch ($action) {
 			break;
 		}
 		
-		$timer_hours = $timer_settings['timer_hours'] ?? 24;
+		// Ищем задачу с включенным таймером для демонстрации
+		$task_query = "SELECT t.*, c.name as column_name, 
+							  COALESCE(u.name, t.responsible) as responsible_name
+					   FROM tasks t 
+					   JOIN columns c ON t.column_id = c.id 
+					   LEFT JOIN users u ON t.responsible = u.username
+					   WHERE c.timer = 1 
+					   LIMIT 1";
 		
-		$message = "⏰ <b>ТЕСТ: Уведомление о задаче</b>\n"
-				 . "<blockquote>"
-				 . "📋 <b>Задача:</b> <i>Пример задачи с таймером</i>\n"
-				 . "🧑‍💻 <b>Исполнитель:</b> <i>Иван Иванов</i>\n"
-				 . "📂 <b>Колонка:</b> <i>В работе</i>\n"
-				 . "⏱️ <b>Время уведомления:</b> {$timer_hours} часа(ов)\n"
-				 . "</blockquote>\n\n"
-				 . "<i>Это тестовое уведомление для проверки работы таймера.</i>";
+		$task = $db->query($task_query)->fetchArray(SQLITE3_ASSOC);
+		
+		if ($task) {
+			// Используем реальную задачу
+			$title = htmlspecialchars($task['title']);
+			$column_name = htmlspecialchars($task['column_name']);
+			$responsible = htmlspecialchars($task['responsible_name']);
+			
+			$message = "⏰ <b>ТЕСТ: Уведомление о 24-часовом таймере</b>\n"
+					 . "<blockquote>"
+					 . "📋 <b>Задача:</b> <i>{$title}</i>\n"
+					 . "📂 <b>Колонка:</b> <i>{$column_name}</i>\n"
+					 . "🧑‍💻 <b>Исполнитель:</b> <i>{$responsible}</i>\n"
+					 . "⏱️ <b>В колонке:</b> 24 часа (тестовое уведомление)\n"
+					 . "</blockquote>\n\n"
+					 . "<i>Это тестовое уведомление для проверки работы таймера.</i>";
+		} else {
+			// Демо-уведомление, если нет задач с таймером
+			$message = "⏰ <b>ТЕСТ: Уведомление о 24-часовом таймере</b>\n"
+					 . "<blockquote>"
+					 . "📋 <b>Задача:</b> <i>Пример задачи</i>\n"
+					 . "📂 <b>Колонка:</b> <i>В работе</i>\n"
+					 . "🧑‍💻 <b>Исполнитель:</b> <i>Иван Иванов</i>\n"
+					 . "⏱️ <b>В колонке:</b> 24 часа (тестовое уведомление)\n"
+					 . "</blockquote>\n\n"
+					 . "<i>Это тестовое уведомление для проверки работы таймера.</i>";
+		}
 		
 		$result = sendTelegram($bot_token, $chat_id, $message);
 		echo json_encode(['success' => $result]);
 		break;
-		
+
+	// НОВЫЙ CASE: Тестирование ежедневного отчета
 	case 'test_daily_report':
 		if(!$isAdmin) exit('forbidden');
 		
@@ -153,9 +145,8 @@ switch ($action) {
 		}
 		
 		// Формируем тестовое сообщение
-		$report_time = $timer_settings['report_time'] ?? '10:00';
 		$message = "📊 <b>ТЕСТ: Ежедневный отчет по открытым задачам</b>\n"
-				 . "<i>" . date('d.m.Y') . " {$report_time} (тестовый отчет)</i>\n\n";
+				 . "<i>" . date('d.m.Y H:i:s') . " (тестовый отчет)</i>\n\n";
 		
 		if (empty($tasks_by_column)) {
 			$message .= "🎉 <b>Все задачи завершены!</b>\nОтличная работа!\n\n";
@@ -177,37 +168,11 @@ switch ($action) {
 			
 			$total_tasks = array_sum(array_map('count', $tasks_by_column));
 			$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}\n\n";
-			$message .= "<i>Это тестовый отчет. Реальный отчет отправляется каждый день в {$report_time} по Москве.</i>";
+			$message .= "<i>Это тестовый отчет. Реальный отчет отправляется каждый день в 10:00 по Москве.</i>";
 		}
 		
 		$result = sendTelegram($bot_token, $chat_id, $message);
 		echo json_encode(['success' => $result]);
-		break;
-
-	case 'test_cron_status':
-		if(!$isAdmin) exit('forbidden');
-		
-		// Простая проверка работы cron
-		$cron_log = '/var/log/cron.log';
-		$result = ['success' => false, 'message' => '', 'log' => ''];
-		
-		if (file_exists($cron_log)) {
-			$log_content = file_get_contents($cron_log);
-			$result['log'] = $log_content;
-			
-			// Проверяем, были ли сегодня записи
-			$today = date('Y-m-d');
-			if (strpos($log_content, $today) !== false) {
-				$result['success'] = true;
-				$result['message'] = 'Cron работает, сегодня были записи в логе';
-			} else {
-				$result['message'] = 'Cron файл существует, но сегодня записей нет';
-			}
-		} else {
-			$result['message'] = 'Файл лога cron не найден';
-		}
-		
-		echo json_encode($result);
 		break;
 
 	case 'add_column':
@@ -236,7 +201,7 @@ switch ($action) {
 
 	case 'get_column':
 		$id = (int)$_POST['id'];
-		echo json_encode($db->query("SELECT * FROM columns WHERE id=$id")->fetchArray(SQLITE3_ASSOC), JSON_UNESCAPED_UNICODE);
+		echo json_encode($db->query("SELECT * FROM columns WHERE id=$id")->fetchArray(SQLITE3_ASSOC), JSON_UNESCAPED_UNICODE);  // Уже включает timer
 		break;
 
 	case 'get_columns':
@@ -250,7 +215,7 @@ switch ($action) {
 		foreach([':t'=>'title',':d'=>'description',':r'=>'responsible',':dl'=>'deadline',':i'=>'importance',':c'=>'column_id'] as $k=>$v)
 			$stmt->bindValue($k,$_POST[$v]);
 		$stmt->bindValue(':cr',date('Y-m-d H:i:s'));
-		$stmt->bindValue(':a',$user);
+		$stmt->bindValue(':a',$user); // Добавляем автора
 		$stmt->execute();
 		// Уведомление
 		if (!empty($bot_token) && !empty($chat_id)) {
@@ -272,6 +237,7 @@ switch ($action) {
 	case 'delete_task':
 		if(!$isAdmin) exit('forbidden');
 		$id=(int)$_POST['id'];
+		// Получаем данные задачи перед удалением
 		$task_data = $db->querySingle("SELECT title FROM tasks WHERE id=$id", true);
 		$db->exec("DELETE FROM tasks WHERE id=$id");
 		// Уведомление
@@ -281,6 +247,7 @@ switch ($action) {
 		}
 		break;
 
+	// <-- НОВЫЙ CASE: Загрузка данных задачи для редактирования
 	case 'get_task':
 		$id = (int)$_POST['id'];
 		$stmt = $db->prepare("SELECT * FROM tasks WHERE id = :id");
@@ -293,18 +260,24 @@ switch ($action) {
 		$task_id = (int)$_POST['task_id'];
 		$col_id = (int)$_POST['column_id'];
 		
+		// Получаем текущую колонку задачи (старая)
 		$old_col_id = $db->querySingle("SELECT column_id FROM tasks WHERE id = $task_id");
 		$old_auto_complete = $db->querySingle("SELECT auto_complete FROM columns WHERE id = $old_col_id") ?? 0;
 		
+		// Обновляем колонку и moved_at
 		$stmt = $db->prepare("UPDATE tasks SET column_id = :c, moved_at = :m WHERE id = :t");
 		$stmt->bindValue(':c', $col_id, SQLITE3_INTEGER);
 		$stmt->bindValue(':m', date('Y-m-d H:i:s'), SQLITE3_TEXT);
 		$stmt->bindValue(':t', $task_id, SQLITE3_INTEGER);
 		$stmt->execute();
 		
+		// Получаем auto_complete новой колонки
 		$new_auto_complete = $db->querySingle("SELECT auto_complete FROM columns WHERE id = $col_id") ?? 0;
+		
+		// Устанавливаем completed в соответствии с новой колонкой
 		$db->exec("UPDATE tasks SET completed = $new_auto_complete WHERE id = $task_id");
 		
+		// Уведомление: логика в зависимости от старой и новой колонки
 		$task_title = $db->querySingle("SELECT title FROM tasks WHERE id=$task_id", true)['title'] ?? 'Без названия';
 		$col_name = $db->querySingle("SELECT name FROM columns WHERE id=$col_id", true)['name'] ?? 'Неизвестная колонка';
 		$resp = $db->querySingle("SELECT responsible FROM tasks WHERE id=$task_id", true)['responsible'] ?? 'Не указан';
@@ -312,10 +285,13 @@ switch ($action) {
 		
 		if (!empty($bot_token) && !empty($chat_id)) {
 			if ($new_auto_complete == 1) {
+				// Перемещение в завершающую колонку
 				$text = "✅ <b>Задача завершена</b>\n<blockquote>👤 <b>Кем:</b> <i>$user_name</i>\n📋 <b>Задача:</b> <i>$task_title</i>\n🧑‍💻 <b>Исполнитель:</b> <i>$resp_name</i></blockquote>";
 			} elseif ($old_auto_complete == 1 && $new_auto_complete == 0) {
+				// Возобновление из завершающей колонки
 				$text = "🔄 <b>Задача возобновлена</b>\n<blockquote>👤 <b>Кем:</b> <i>$user_name</i>\n📋 <b>Задача:</b> <i>$task_title</i>\n📂 <b>В колонку:</b> <i>$col_name</i>\n🧑‍💻 <b>Исполнитель:</b> <i>$resp_name</i></blockquote>";
 			} else {
+				// Обычное перемещение
 				$text = "↔️ <b>Задача перемещена</b>\n<blockquote>👤 <b>Кем:</b> <i>$user_name</i>\n📋 <b>Задача:</b> <i>$task_title</i>\n📂 <b>В колонку:</b> <i>$col_name</i></blockquote>";
 			}
 			sendTelegram($bot_token, $chat_id, $text);
@@ -335,7 +311,7 @@ switch ($action) {
 			$stmt->bindValue(':a',date('Y-m-d H:i:s'));
 			$stmt->execute();
 			$db->exec("DELETE FROM tasks WHERE id=$id");
-			// Уведомление
+			// Уведомление (обновлено на имя)
 			if (!empty($bot_token) && !empty($chat_id)) {
 				$title = $row['title'] ?? 'Без названия';
 				$resp_name = $row['responsible_name'] ?? 'Не указан';
@@ -359,7 +335,7 @@ switch ($action) {
 				VALUES (:t,:d,:r,:dl,:i,:c,:cr)");
 			foreach([':t'=>'title',':d'=>'description',':r'=>'responsible',':dl'=>'deadline',':i'=>'importance'] as $k=>$v)
 				$stmt->bindValue($k,$row[$v]);
-			$stmt->bindValue(':c',1);
+			$stmt->bindValue(':c',1); // возвращаем в первую колонку
 			$stmt->bindValue(':cr',date('Y-m-d H:i:s'));
 			$stmt->execute();
 			$db->exec("DELETE FROM archive WHERE id=$id");

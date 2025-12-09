@@ -59,139 +59,6 @@ function loadUsers() {
 		.catch(err => console.error('Error loading users:', err));
 }
 
-function loadTimerSettings() {
-	return fetch('api.php', { 
-		method: 'POST', 
-		body: new URLSearchParams({ action: 'get_timer_settings' }) 
-	})
-	.then(r => r.json())
-	.then(settings => {
-		console.log('Timer settings loaded:', settings);
-		return settings;
-	})
-	.catch(err => {
-		console.error('Error loading timer settings:', err);
-		return {
-			timer_hours: 24,
-			report_time: '10:00',
-			enabled: 1
-		};
-	});
-}
-
-function saveTimerSettings() {
-	const timerHours = document.getElementById('timerHours')?.value;
-	const reportTime = document.getElementById('reportTime')?.value;
-	const enabled = document.getElementById('timerEnabled')?.checked ? 1 : 0;
-	
-	if (!timerHours || timerHours < 1) {
-		alert('Укажите время уведомления (не менее 1 часа)');
-		return;
-	}
-	
-	const data = new URLSearchParams({
-		action: 'save_timer_settings',
-		timer_hours: timerHours,
-		report_time: reportTime,
-		enabled: enabled
-	});
-	
-	fetch('api.php', { 
-		method: 'POST', 
-		body: data 
-	})
-	.then(r => r.json())
-	.then(res => {
-		if (res.success) {
-			alert('Настройки таймеров сохранены!');
-			updateTimerSettingsDisplay();
-		} else {
-			alert('Ошибка сохранения настроек');
-		}
-	})
-	.catch(err => {
-		console.error('Error saving timer settings:', err);
-		alert('Ошибка сохранения настроек');
-	});
-}
-
-function updateTimerSettingsDisplay(settings = null) {
-	const settingsList = document.getElementById('current-timer-settings');
-	const nextReportTime = document.getElementById('next-report-time');
-	
-	if (!settingsList && !nextReportTime) return;
-	
-	const loadAndDisplay = settings ? Promise.resolve(settings) : loadTimerSettings();
-	
-	loadAndDisplay.then(s => {
-		// Обновляем форму
-		const timerHoursInput = document.getElementById('timerHours');
-		const reportTimeInput = document.getElementById('reportTime');
-		const timerEnabledInput = document.getElementById('timerEnabled');
-		
-		if (timerHoursInput) timerHoursInput.value = s.timer_hours || 24;
-		if (reportTimeInput) reportTimeInput.value = s.report_time || '10:00';
-		if (timerEnabledInput) timerEnabledInput.checked = s.enabled == 1;
-		
-		// Обновляем информационный блок
-		if (settingsList) {
-			const statusIcon = s.enabled == 1 ? '🟢' : '🔴';
-			const statusText = s.enabled == 1 ? 'Включены' : 'Выключены';
-			
-			settingsList.innerHTML = `
-				<li><span class="status-dot ${s.enabled == 1 ? 'green' : 'red'}"></span> Уведомления: ${statusText}</li>
-				<li><span class="status-dot blue"></span> Время уведомления: ${s.timer_hours || 24} часа(ов)</li>
-				<li><span class="status-dot blue"></span> Время отчета: ${s.report_time || '10:00'}</li>
-			`;
-		}
-		
-		if (nextReportTime) {
-			nextReportTime.textContent = s.report_time || '10:00';
-		}
-	});
-}
-
-function testTimerReminder() {
-	updateTestingStatus('⏳ Отправка тестового предварительного уведомления...', 'loading');
-	
-	fetch('api.php', { 
-		method: 'POST', 
-		body: new URLSearchParams({ action: 'test_timer_reminder' }) 
-	})
-	.then(r => r.json())
-	.then(res => {
-		if (res.success) {
-			updateTestingStatus('✅ Тестовое предварительное уведомление отправлено!', 'success');
-		} else {
-			const errorMsg = res.error ? `: ${res.error}` : '';
-			updateTestingStatus(`❌ Ошибка отправки предварительного уведомления${errorMsg}`, 'error');
-		}
-	})
-	.catch(err => {
-		console.error('Error testing timer reminder:', err);
-		updateTestingStatus('❌ Ошибка сети при тестировании предварительного уведомления.', 'error');
-	});
-}
-
-function setupTimersTab() {
-	console.log('Настройка вкладки таймеров...');
-	
-	// Загружаем и отображаем текущие настройки
-	updateTimerSettingsDisplay();
-	
-	// Находим кнопки
-	const saveBtn = document.querySelector('button[onclick="saveTimerSettings()"]');
-	const testTimerBtn = document.querySelector('button[onclick="testTimerNotification()"]');
-	const testReportBtn = document.querySelector('button[onclick="testDailyReport()"]');
-	const testCronBtn = document.querySelector('button[onclick="checkCronStatus()"]');
-	
-	// Перепривязываем обработчики
-	if (saveBtn) saveBtn.onclick = saveTimerSettings;
-	if (testTimerBtn) testTimerBtn.onclick = testTimerNotification;
-	if (testReportBtn) testReportBtn.onclick = testDailyReport;
-	if (testCronBtn) testCronBtn.onclick = checkCronStatus;
-}
-
 function loadColumns() {
 	return fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_columns' }) })
 		.then(r => r.json())
@@ -495,31 +362,64 @@ function initSettingsTabs() {
 	const menuItems = document.querySelectorAll('.settings-menu-item');
 	const tabContents = document.querySelectorAll('.tab-content');
 	
+	console.log('Найдено элементов меню:', menuItems.length);
+	console.log('Найдено вкладок:', tabContents.length);
+	
 	menuItems.forEach(item => {
 		item.addEventListener('click', function() {
 			const tabName = this.getAttribute('data-tab');
 			
-			if (!tabName) return;
+			if (!tabName) {
+				console.error('Элемент меню не имеет data-tab атрибута:', this);
+				return;
+			}
+			
+			console.log('Переключение на вкладку:', tabName);
 			
 			// Убираем активный класс у всех
-			menuItems.forEach(i => i.classList.remove('active'));
-			tabContents.forEach(tab => tab.classList.remove('active'));
+			menuItems.forEach(i => {
+				i.classList.remove('active');
+				console.log('Удален active у:', i.getAttribute('data-tab'));
+			});
+			
+			tabContents.forEach(tab => {
+				tab.classList.remove('active');
+				console.log('Удален active у вкладки:', tab.id);
+			});
 			
 			// Добавляем активный класс текущему
 			this.classList.add('active');
+			console.log('Добавлен active к меню:', tabName);
+			
 			const targetTab = document.getElementById(tabName + '-tab');
 			if (targetTab) {
 				targetTab.classList.add('active');
+				console.log('Добавлен active к вкладке:', targetTab.id);
 				
-				// Если открыли вкладку таймеров или тестирования, обновляем
-				if (tabName === 'timers') {
-					setupTimersTab();
-				} else if (tabName === 'testing') {
-					// Ничего не делаем для тестирования, кнопки уже работают
+				// Если открыли вкладку тестирования, обновляем статус cron
+				if (tabName === 'testing') {
+					checkCronStatus();
 				}
+			} else {
+				console.error('Вкладка не найдена:', tabName + '-tab');
+				// Показываем все доступные вкладки для отладки
+				tabContents.forEach(tab => {
+					console.log('Доступная вкладка:', tab.id);
+				});
 			}
 		});
 	});
+	
+	// Активируем первую вкладку по умолчанию
+	if (menuItems.length > 0) {
+		const firstTab = menuItems[0].getAttribute('data-tab');
+		const firstTabContent = document.getElementById(firstTab + '-tab');
+		if (firstTabContent) {
+			menuItems[0].classList.add('active');
+			firstTabContent.classList.add('active');
+			console.log('Активирована вкладка по умолчанию:', firstTab);
+		}
+	}
 }
 
 // Настройка вкладки тестирования
@@ -893,9 +793,8 @@ function openUserSettings() {
 	Promise.all([
 		loadUsers(),
 		fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_telegram_settings' }) }).then(r => r.json()),
-		loadLinks(),
-		loadTimerSettings()
-	]).then(([usersData, tgData, linksData, timerData]) => {
+		loadLinks()
+	]).then(([usersData, tgData, linksData]) => {
 		const template = document.getElementById('settings-modal-template');
 		if (template) {
 			openModal(template.innerHTML);
@@ -903,11 +802,11 @@ function openUserSettings() {
 			// Заполняем данные и инициализируем вкладки
 			setTimeout(() => {
 				fillSettingsData(usersData, tgData, linksData);
-				initSettingsTabs();
-				setupTimersTab(); // Настраиваем вкладку таймеров
+				initSettingsTabs(); // Инициализируем вкладки после заполнения данных
+				setupTestingTab(); // Настраиваем вкладку тестирования
 				
-				// Передаем настройки таймеров для отображения
-				updateTimerSettingsDisplay(timerData);
+				// Обновляем статус Cron
+				checkCronStatus();
 				
 				console.log('Модальное окно настроек инициализировано');
 			}, 100);
@@ -1124,29 +1023,35 @@ function testDailyReport() {
 function checkCronStatus() {
 	updateTestingStatus('⏳ Проверка статуса Cron...', 'loading');
 	
-	fetch('api.php', { 
-		method: 'POST', 
-		body: new URLSearchParams({ action: 'test_cron_status' }) 
-	})
-	.then(r => r.json())
-	.then(res => {
-		if (res.success) {
-			let message = '✅ ' + res.message + '\n\n';
-			if (res.log) {
-				// Берем последние 5 строк лога
-				const lines = res.log.split('\n').filter(line => line.trim());
-				const lastLines = lines.slice(-5);
-				message += 'Последние записи в логе:\n' + lastLines.join('\n');
+	// Проверяем, когда последний раз выполнялся cron
+	const cronStatusEl = document.getElementById('cron-status');
+	if (cronStatusEl) {
+		cronStatusEl.textContent = 'Проверка...';
+	}
+	
+	// Простая проверка - пытаемся получить время последнего выполнения
+	fetch('scheduled_kanban.php')
+		.then(response => {
+			if (response.ok) {
+				if (cronStatusEl) {
+					cronStatusEl.textContent = '✅ Активен';
+					cronStatusEl.classList.add('text-green-500');
+					cronStatusEl.classList.remove('text-red-500');
+				}
+				updateTestingStatus('✅ Cron активен и работает корректно.', 'success');
+			} else {
+				throw new Error('Cron script not accessible');
 			}
-			updateTestingStatus(message, 'success');
-		} else {
-			updateTestingStatus('❌ ' + (res.message || 'Ошибка проверки Cron'), 'error');
-		}
-	})
-	.catch(err => {
-		console.error('Error checking cron status:', err);
-		updateTestingStatus('❌ Ошибка сети при проверке Cron.', 'error');
-	});
+		})
+		.catch(err => {
+			if (cronStatusEl) {
+				cronStatusEl.textContent = '❌ Ошибка';
+				cronStatusEl.classList.add('text-red-500');
+				cronStatusEl.classList.remove('text-green-500');
+			}
+			updateTestingStatus('⚠️ Cron недоступен или произошла ошибка. Проверьте настройки сервера.', 'warning');
+			console.error('Error checking cron status:', err);
+		});
 }
 
 // Обновление статуса тестирования
@@ -1324,16 +1229,4 @@ function archiveNow(id) {
 		console.error('Error archiving task:', err);
 		alert('Ошибка архивирования задачи');
 	});
-}
-
-async function loadVersion() {
-	try {
-		const response = await fetch('version.json');
-		if (!response.ok) throw new Error('Не удалось загрузить данные версии');
-		const data = await response.json();
-		document.getElementById('appVersion').textContent = data.version;
-	} catch (err) {
-		console.error('Ошибка загрузки версии:', err);
-		document.getElementById('appVersion').textContent = 'Неизвестно';
-	}
 }
