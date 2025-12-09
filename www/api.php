@@ -178,10 +178,11 @@ switch ($action) {
 				foreach ($tasks as $task) {
 					$message .= "<blockquote>";
 					$message .= "📋 <b>Задача:</b> <i>{$task['task_title']}</i>\n👤 <b>Автор:</b> <i>{$task['responsible_name']}</i>";
-					$message .= "</blockquote>\n\n";
+					$message .= "</blockquote>\n";
 				}
 			}
 			
+			$total_tasks = array_sum(array_map('count', $tasks_by_column));
 			$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}";
 		}
 		
