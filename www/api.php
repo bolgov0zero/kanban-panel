@@ -168,30 +168,22 @@ switch ($action) {
 		}
 		
 		// Формируем тестовое сообщение
-		$message = "📊 <b>ТЕСТ: Ежедневный отчет по открытым задачам</b>\n"
-				 . "<i>" . date('d.m.Y') . " {$report_time} (тестовый отчет)</i>\n\n";
+		$message = "📊 <b>ТЕСТ: Ежедневный отчет</b>\n\n";
 		
 		if (empty($tasks_by_column)) {
-			$message .= "🎉 <b>Все задачи завершены!</b>\nОтличная работа!\n\n";
-			$message .= "<i>Это тестовый отчет. В реальном отчете будет показано, если есть открытые задачи.</i>";
+			$message .= "🎉 <b>Все задачи завершены!</b>\nОтличная работа!";
 		} else {
 			foreach ($tasks_by_column as $column_name => $tasks) {
-				$message .= "\n<b>📂 Колонка: {$column_name}</b>\n";
-				
+				$message .= "\n<b>📂 {$column_name}</b>\n";
+				$message .= "<blockquote>";
 				foreach ($tasks as $task) {
-					$importance_icon = match($task['importance']) {
-						'срочно' => '🔴',
-						'средне' => '🟡',
-						default => '🟢'
-					};
-					
-					$message .= "{$importance_icon} <i>{$task['task_title']}</i> (👤 {$task['responsible_name']})\n";
+					$message .= "📋 <b>Задача:</b> <i>{$task['task_title']}</i>\n👤 <b>Автор:</b> <i>{$task['responsible_name']}</i>\n";
+					<br/>
 				}
+				$message .= "</blockquote>\n\n";
 			}
 			
-			$total_tasks = array_sum(array_map('count', $tasks_by_column));
-			$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}\n\n";
-			$message .= "<i>Это тестовый отчет. Реальный отчет отправляется каждый день в {$report_time} по Москве.</i>";
+			$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}";
 		}
 		
 		$result = sendTelegram($bot_token, $chat_id, $message);
