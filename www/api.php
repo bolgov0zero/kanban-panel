@@ -168,21 +168,20 @@ switch ($action) {
 		}
 		
 		// Формируем тестовое сообщение
-		$message = "📊 <b>ТЕСТ: Ежедневный отчет</b>\n\n";
+		$message = "📊 <b>Ежедневный отчет</b>\n\n";
 		
 		if (empty($tasks_by_column)) {
-			$message .= "🎉 <b>Все задачи завершены!</b>\nОтличная работа!";
+			$message .= "🎉 <b>Все задачи завершены!</b>";
 		} else {
 			foreach ($tasks_by_column as $column_name => $tasks) {
-				$message .= "\n<b>📂 {$column_name}</b>\n";
+				$message .= "<b>📂 {$column_name}</b>\n";
 				foreach ($tasks as $task) {
 					$message .= "<blockquote>";
-					$message .= "📋 <b>Задача:</b> <i>{$task['task_title']}</i>\n👤 <b>Автор:</b> <i>{$task['responsible_name']}</i>";
-					$message .= "</blockquote>\n";
+					$message .= "📋 <b>Задача:</b> <i>{$task['task_title']}</i>\n🧑‍💻 <b>Исполнитель:</b> <i>{$task['responsible_name']}</i>";
+					$message .= "</blockquote>";
 				}
 			}
 			
-			$total_tasks = array_sum(array_map('count', $tasks_by_column));
 			$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}";
 		}
 		
