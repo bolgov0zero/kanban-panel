@@ -157,12 +157,6 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 			<!-- Column Header -->
 			<div class="column-header" style="background:<?= $col['bg_color'] ?>;color:<?= getContrastColor($col['bg_color']) ?>;">
 				<div class="column-header-content">
-					<?php if ($col['timer'] == 1): ?>
-						<span class="mr-2" title="Таймер включен">⏱️</span>
-					<?php endif; ?>
-					<?php if ($col['auto_complete'] == 1): ?>
-						<span class="mr-2" title="Автозавершение">✅</span>
-					<?php endif; ?>
 					<h2 class="column-title"><?= $col['name'] ?></h2>
 				</div>
 				
@@ -305,10 +299,13 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 		<?php endwhile; ?>
 	</div>
 </main>
-
+<?php
+$version_data = json_decode(file_get_contents(__DIR__ . '/version.json'), true);
+$version = $version_data['version'] ?? 'неизвестно';
+?>
 <!-- Footer -->
 <footer class="bg-gray-800 text-gray-400 text-center py-4 mt-auto">
-	2025 © bolgov0zero | Версия: <span id="appVersion">Загрузка...</span>
+	2025 © bolgov0zero | Версия: <?php echo htmlspecialchars($version); ?>
 </footer>
 
 <!-- Scripts -->

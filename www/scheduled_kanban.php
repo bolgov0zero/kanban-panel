@@ -237,7 +237,7 @@ function sendDailyReport($db, $bot_token, $chat_id, $report_time) {
 			$message = "📊 <b>Ежедневный отчет</b>\n\n";
 			
 			if (empty($tasks_by_column)) {
-				$message .= "🎉 <b>Все задачи завершены!</b>\nОтличная работа!";
+				$message .= "🎉 <b>Все задачи завершены!</b>";
 			} else {
 				foreach ($tasks_by_column as $column_name => $tasks) {
 					$message .= "\n<b>📂 {$column_name}</b>\n";
