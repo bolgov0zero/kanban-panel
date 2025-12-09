@@ -137,7 +137,6 @@ function checkTimerNotifications($db, $bot_token, $chat_id, $timer_minutes) {
 						 . "📋 <b>Задача:</b> <i>{$title}</i>\n"
 						 . "📂 <b>Колонка:</b> <i>{$column_name}</i>\n"
 						 . "🧑‍💻 <b>Исполнитель:</b> <i>{$responsible}</i>\n"
-						 . "⏱️ <b>В колонке:</b> " . round($minutes_in_column, 1) . " минут\n"
 						 . "</blockquote>";
 				
 				if (sendTelegram($bot_token, $chat_id, $message)) {
@@ -241,12 +240,13 @@ function sendDailyReport($db, $bot_token, $chat_id, $report_time) {
 				$message .= "🎉 <b>Все задачи завершены!</b>\nОтличная работа!";
 			} else {
 				foreach ($tasks_by_column as $column_name => $tasks) {
-					$message .= "\n<b>📂 Колонка: {$column_name}</b>\n";
+					$message .= "\n<b>📂 {$column_name}</b>\n";
 					$message .= "<blockquote>";
 					foreach ($tasks as $task) {
-						$message .= "<i>{$task['task_title']}</i> (👤 {$task['responsible_name']})\n";
+						$message .= "📋 <b>Задача:</b> <i>{$task['task_title']}</i>\n👤 <b>Автор:</b> {$task['responsible_name']})\n";
+						<br/>
 					}
-					$message .= "</blockquote>";
+					$message .= "</blockquote>\n\n";
 				}
 				
 				$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}";
