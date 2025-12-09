@@ -1,6 +1,19 @@
+[file name]: init_db.php
+[file content begin]
 <?php
 date_default_timezone_set('Europe/Moscow');
-$db = new SQLite3(__DIR__ . '/var/www/html/db/db.sqlite');
+
+// Определяем правильный путь к базе данных
+$db_path = __DIR__ . '/db/db.sqlite';
+$db_dir = __DIR__ . '/db';
+
+// Создаем директорию для базы данных если её нет
+if (!file_exists($db_dir)) {
+	mkdir($db_dir, 0755, true);
+}
+
+// Создаем соединение с базой данных
+$db = new SQLite3($db_path);
 
 function ensureColumn($table, $column, $definition) {
 	global $db;
@@ -118,9 +131,19 @@ if ($columns_count == 0) {
 		$stmt->bindValue(':timer', $column['timer'], SQLITE3_INTEGER);
 		$stmt->execute();
 	}
+	
+	echo "<p>✅ Созданы начальные колонки</p>";
+}
+
+// Проверяем создание базы
+if (file_exists($db_path)) {
+	$size = filesize($db_path);
+	echo "<p>✅ База данных создана: " . basename($db_path) . " (" . $size . " bytes)</p>";
+} else {
+	echo "<p>❌ Ошибка: База данных не создана</p>";
 }
 
 echo "<h2 class='text-green-500 font-bold'>База данных успешно инициализирована!</h2>";
-echo "<p>Создано несколько начальных колонок для работы.</p>";
 echo "<p><a href='auth.php' class='text-blue-400 underline'>Перейти к авторизации</a></p>";
 ?>
+[file content end]

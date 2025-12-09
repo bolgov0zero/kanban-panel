@@ -1,6 +1,6 @@
 <?php
 session_start();
-$db = new SQLite3(__DIR__ . '/var/www/html/db/db.sqlite');
+$db = new SQLite3(__DIR__ . '/db/db.sqlite');
 
 $first_user = false;
 $error = '';

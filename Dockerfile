@@ -30,6 +30,10 @@ RUN a2enmod headers
 RUN mkdir -p /var/www/html/db
 RUN mkdir -p /etc/ssl/kanban
 
+# Устанавливаем правильные права для директории db
+RUN chown -R www-data:www-data /var/www/html/db \
+    && chmod 755 /var/www/html/db
+
 # Генерируем самоподписанный SSL сертификат на 10 лет
 RUN openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
     -keyout /etc/ssl/kanban/kanban-panel.key \
@@ -100,9 +104,10 @@ RUN echo 'Listen 80\nListen 443' > /etc/apache2/ports.conf
 COPY www/ /var/www/html/
 COPY version.json /var/www/html/
 
-# Настраиваем права
+# Настраиваем права для всех файлов
 RUN chown -R www-data:www-data /var/www/html/ \
-    && chmod -R 755 /var/www/html/
+    && chmod -R 755 /var/www/html/ \
+    && chmod 777 /var/www/html/db
 
 # Настраиваем cron
 RUN echo '* * * * * www-data cd /var/www/html && /usr/local/bin/php scheduled_kanban.php >> /var/log/cron.log 2>&1' > /etc/cron.d/kanban \
@@ -110,7 +115,7 @@ RUN echo '* * * * * www-data cd /var/www/html && /usr/local/bin/php scheduled_ka
     && touch /var/log/cron.log \
     && chown www-data:www-data /var/log/cron.log
 
-# Создаем entrypoint для запуска cron и apache
+# Создаем entrypoint для запуска cron и инициализации базы
 RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
@@ -119,14 +124,32 @@ echo "SSL сертификат: /etc/ssl/kanban/kanban-panel.crt (10 лет)"\n\
 echo "Доступ по HTTPS: https://localhost"\n\
 echo "HTTP перенаправляется на HTTPS"\n\
 \n\
+echo "Проверяем директорию базы данных..."\n\
+ls -la /var/www/html/db/\n\
+\n\
 echo "Starting cron..."\n\
 cron\n\
 \n\
-echo "Checking database..."\n\
-if [ ! -f /var/www/html/db.sqlite ]; then\n\
-    echo "Initializing database..."\n\
-    php /var/www/html/init_db.php > /dev/null 2>&1 || true\n\
+echo "Проверяем и инициализируем базу данных..."\n\
+if [ ! -f /var/www/html/db/db.sqlite ]; then\n\
+    echo "Создаем базу данных..."\n\
+    cd /var/www/html\n\
+    php init_db.php 2>&1\n\
+    echo "Проверяем создание базы..."\n\
+    if [ -f /var/www/html/db/db.sqlite ]; then\n\
+        echo "✅ База данных успешно создана"\n\
+        chown www-data:www-data /var/www/html/db/db.sqlite\n\
+        chmod 666 /var/www/html/db/db.sqlite\n\
+    else\n\
+        echo "❌ Ошибка: база данных не создана"\n\
+        ls -la /var/www/html/db/\n\
+    fi\n\
+else\n\
+    echo "✅ База данных уже существует"\n\
 fi\n\
+\n\
+echo "Проверяем доступность базы..."\n\
+ls -la /var/www/html/db/db.sqlite 2>/dev/null && echo "✅ Файл базы найден" || echo "❌ Файл базы не найден"\n\
 \n\
 echo "Starting Apache with SSL..."\n\
 exec apache2-foreground\n' > /usr/local/bin/docker-entrypoint.sh \

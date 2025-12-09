@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set('Europe/Moscow');
 
-$db_path = __DIR__ . '/var/www/html/db/db.sqlite';
+$db_path = __DIR__ . '/db/db.sqlite';
 
 if (!file_exists($db_path)) {
 	error_log('Database file not found: ' . $db_path);
