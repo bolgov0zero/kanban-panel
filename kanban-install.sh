@@ -42,15 +42,15 @@ services:
     ports:
       - "80:80"
     volumes:
-      - logs:/var/log
-      - db_data:/var/www/html/db
-    restart: unless-stopped
+      - kanban_data:/var/www/html/db
+      - kanban_logs:/var/log
     environment:
-    - TZ=Europe/Moscow
+      - TZ=Europe/Moscow
+    restart: unless-stopped
 
 volumes:
-  logs:
-  db_data:
+    kanban_data:
+    kanban_logs:
 EOF
 sleep 2
 if [ $? -eq 0 ]; then

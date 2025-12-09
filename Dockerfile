@@ -41,13 +41,16 @@ RUN chown -R www-data:www-data /var/www/html/ \
 COPY www/ /var/www/html/
 COPY version.json /var/www/html/
 
-# Копируем cron задание
+# Копируем cron задание и настраиваем
 COPY cronfile /etc/cron.d/kanban-cron
 RUN chmod 0644 /etc/cron.d/kanban-cron \
-    && crontab /etc/cron.d/kanban-cron
+    && touch /var/log/cron.log \
+    && chown www-data:www-data /var/log/cron.log
 
-# Создаем лог файл для cron
-RUN touch /var/log/cron.log
+# Создаем init скрипт для запуска cron
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Запускаем cron и apache
-CMD ["sh", "-c", "cron && apache2-foreground"]
+# Запускаем apache через entrypoint
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["apache2-foreground"]
