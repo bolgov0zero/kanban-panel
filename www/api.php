@@ -182,7 +182,8 @@ switch ($action) {
 				}
 			}
 			
-			$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}";
+			$total_tasks = array_sum(array_map('count', $tasks_by_column));
+			$message .= "\n\n<b>Всего открытых задач:</b> {$total_tasks}";
 		}
 		
 		$result = sendTelegram($bot_token, $chat_id, $message);

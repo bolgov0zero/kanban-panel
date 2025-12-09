@@ -248,7 +248,7 @@ function sendDailyReport($db, $bot_token, $chat_id, $report_time) {
 					}
 				}
 				
-				$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}";
+				$message .= "\n\n<b>Всего открытых задач:</b> {$total_tasks}";
 			}
 			
 			if (sendTelegram($bot_token, $chat_id, $message)) {
