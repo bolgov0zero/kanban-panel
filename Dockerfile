@@ -1,56 +1,53 @@
 FROM php:8.2-apache
 
-# Устанавливаем системные пакеты
+# Устанавливаем необходимые пакеты
 RUN apt-get update && apt-get install -y \
-    libssh2-1-dev \
-    libssh2-1 \
-    cron \
     sqlite3 \
-    git \
-    build-essential \
-    autoconf \
-    automake \
-    libtool \
     libsqlite3-dev \
-    libonig-dev \
-    libxml2-dev \
-    libzip-dev \
-    zip \
-    unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Устанавливаем расширения PHP
-RUN docker-php-ext-install \
-    pdo \
-    pdo_sqlite \
-    mbstring \
-    xml \
-    zip
+RUN docker-php-ext-install pdo pdo_sqlite
 
-# Включаем модули Apache
+# Включаем модуль rewrite
 RUN a2enmod rewrite
 
-# Создаем директории
-RUN mkdir -p /var/www/html/db
+# Отключаем SSL и HTTPS перенаправления
+RUN a2dismod ssl
+RUN a2dissite default-ssl
+
+# Создаем простую конфигурацию
+RUN echo '<VirtualHost *:80>\n\
+    ServerAdmin webmaster@localhost\n\
+    DocumentRoot /var/www/html\n\
+    ErrorLog ${APACHE_LOG_DIR}/error.log\n\
+    CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
+    <Directory /var/www/html>\n\
+        Options Indexes FollowSymLinks\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>\n\
+</VirtualHost>' > /etc/apache2/sites-available/000-kanban.conf
+
+RUN a2dissite 000-default.conf
+RUN a2ensite 000-kanban.conf
+
+# Копируем файлы приложения
+COPY www/ /var/www/html/
 
 # Настраиваем права
 RUN chown -R www-data:www-data /var/www/html/ \
     && chmod -R 755 /var/www/html/
 
-# Копируем ВСЕ файлы приложения
-COPY www/ /var/www/html/
-COPY version.json /var/www/html/
+# Создаем .htaccess без HTTPS перенаправлений
+RUN echo 'Options +FollowSymLinks\n\
+RewriteEngine On\n\
+\n\
+# Блокируем доступ к системным файлам\n\
+<FilesMatch "\.(sqlite|db|ini|log|bak)$">\n\
+    Order deny,allow\n\
+    Deny from all\n\
+</FilesMatch>' > /var/www/html/.htaccess
 
-# Копируем cron задание и настраиваем
-COPY cronfile /etc/cron.d/kanban-cron
-RUN chmod 0644 /etc/cron.d/kanban-cron \
-    && touch /var/log/cron.log \
-    && chown www-data:www-data /var/log/cron.log
-
-# Создаем init скрипт для запуска cron
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-# Запускаем apache через entrypoint
-ENTRYPOINT ["docker-entrypoint.sh"]
+# Запускаем Apache
 CMD ["apache2-foreground"]
