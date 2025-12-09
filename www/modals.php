@@ -203,6 +203,20 @@
 								</div>
 							</div>
 							
+							<!-- НОВЫЕ НАСТРОЙКИ: Время отправки отчета и таймер -->
+							<div class="form-grid">
+								<div class="form-group">
+									<label class="form-label">Время ежедневного отчета (МСК)</label>
+									<input id="dailyReportTime" type="time" value="10:00" class="form-input">
+									<p class="form-hint">Время отправки ежедневного отчета (формат ЧЧ:ММ)</p>
+								</div>
+								<div class="form-group">
+									<label class="form-label">Таймер уведомления (минуты)</label>
+									<input id="timerNotificationMinutes" type="number" min="1" max="43200" value="1440" class="form-input">
+									<p class="form-hint">Через сколько минут отправлять уведомление о задаче (1-43200 = 30 дней)</p>
+								</div>
+							</div>
+							
 							<div class="action-buttons">
 								<button onclick="saveTelegram()" class="btn-primary">
 									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -326,7 +340,7 @@
 									</button>
 								</div>
 
-								<!-- Тест 24-часового таймера -->
+								<!-- Тест таймера -->
 								<div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
 									<div class="flex items-center mb-3">
 										<div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center mr-3">
@@ -334,9 +348,9 @@
 												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
 											</svg>
 										</div>
-										<h5 class="font-medium">Уведомление о 24-часовом таймере</h5>
+										<h5 class="font-medium">Уведомление о таймере</h5>
 									</div>
-									<p class="text-sm text-gray-400 mb-3">Тест уведомления о задаче, которая находится в колонке более 24 часов.</p>
+									<p class="text-sm text-gray-400 mb-3">Тест уведомления о задаче, которая находится в колонке заданное время.</p>
 									<button onclick="testTimerNotification()" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2">
 										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -355,7 +369,7 @@
 										</div>
 										<h5 class="font-medium">Ежедневный отчет</h5>
 									</div>
-									<p class="text-sm text-gray-400 mb-3">Тест ежедневного отчета по открытым задачам (отправляется в 10:00).</p>
+									<p class="text-sm text-gray-400 mb-3">Тест ежедневного отчета по открытым задачам.</p>
 									<button onclick="testDailyReport()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2">
 										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -403,11 +417,11 @@
 										<ul class="text-sm text-gray-400 space-y-1">
 											<li class="flex items-center gap-2">
 												<span class="w-2 h-2 bg-green-500 rounded-full"></span>
-												<span>Таймер 24 часа: проверяется каждую минуту</span>
+												<span>Таймер: проверяется каждую минуту</span>
 											</li>
 											<li class="flex items-center gap-2">
 												<span class="w-2 h-2 bg-green-500 rounded-full"></span>
-												<span>Ежедневный отчет: отправляется в 10:00 по Москве</span>
+												<span>Ежедневный отчет: отправляется в настраиваемое время</span>
 											</li>
 											<li class="flex items-center gap-2">
 												<span class="w-2 h-2 bg-green-500 rounded-full"></span>
@@ -416,15 +430,15 @@
 										</ul>
 									</div>
 									<div>
-										<h6 class="font-medium mb-2">Логирование</h6>
+										<h6 class="font-medium mb-2">Текущие настройки</h6>
 										<ul class="text-sm text-gray-400 space-y-1">
 											<li class="flex items-center gap-2">
 												<span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-												<span>Логи cron: /var/log/cron.log</span>
+												<span>Время отчета: <span id="current-report-time">10:00</span></span>
 											</li>
 											<li class="flex items-center gap-2">
 												<span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-												<span>Логи ошибок: системные логи PHP</span>
+												<span>Таймер: <span id="current-timer-minutes">1440</span> минут</span>
 											</li>
 										</ul>
 									</div>
@@ -568,7 +582,7 @@
 
 			<div class="checkbox-group">
 				<label class="checkbox-label">
-					<input id='editTimer' type='checkbox' class='checkbox-input'>
+					<input id='editTimer' type='checkbox' class="checkbox-input">
 					<span class="checkbox-custom"></span>
 					<span class="checkbox-text">Включить таймер для задач</span>
 				</label>

@@ -29,7 +29,7 @@ function sendTelegram($bot_token, $chat_id, $text) {
 }
 
 // Получаем Telegram настройки
-$tg_settings = $db->querySingle("SELECT bot_token, chat_id FROM telegram_settings WHERE id=1", true);
+$tg_settings = $db->querySingle("SELECT bot_token, chat_id, daily_report_time, timer_notification_minutes FROM telegram_settings WHERE id=1", true);
 $bot_token = $tg_settings['bot_token'] ?? '';
 $chat_id = $tg_settings['chat_id'] ?? '';
 
@@ -41,18 +41,32 @@ $user_name = $user_name_stmt->execute()->fetchArray(SQLITE3_ASSOC)['name'] ?? $u
 switch ($action) {
 	case 'get_telegram_settings':
 		if(!$isAdmin) exit('forbidden');
-		$stmt = $db->prepare("SELECT bot_token, chat_id FROM telegram_settings WHERE id=1");
+		$stmt = $db->prepare("SELECT bot_token, chat_id, daily_report_time, timer_notification_minutes FROM telegram_settings WHERE id=1");
 		$res = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
-		echo json_encode($res ?: ['bot_token' => '', 'chat_id' => ''], JSON_UNESCAPED_UNICODE);
+		echo json_encode($res ?: ['bot_token' => '', 'chat_id' => '', 'daily_report_time' => '10:00', 'timer_notification_minutes' => 1440], JSON_UNESCAPED_UNICODE);
 		break;
 
 	case 'save_telegram_settings':
 		if(!$isAdmin) exit('forbidden');
 		$token = trim($_POST['bot_token'] ?? '');
 		$chat = trim($_POST['chat_id'] ?? '');
-		$stmt = $db->prepare("INSERT OR REPLACE INTO telegram_settings (id, bot_token, chat_id) VALUES (1, :t, :c)");
+		$daily_report_time = trim($_POST['daily_report_time'] ?? '10:00');
+		$timer_minutes = (int)($_POST['timer_notification_minutes'] ?? 1440);
+		
+		// Валидация времени
+		if (!preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $daily_report_time)) {
+			$daily_report_time = '10:00';
+		}
+		
+		// Валидация минут (от 1 минуты до 30 дней)
+		if ($timer_minutes < 1) $timer_minutes = 1;
+		if ($timer_minutes > 43200) $timer_minutes = 43200; // 30 дней
+		
+		$stmt = $db->prepare("INSERT OR REPLACE INTO telegram_settings (id, bot_token, chat_id, daily_report_time, timer_notification_minutes) VALUES (1, :t, :c, :drt, :tnm)");
 		$stmt->bindValue(':t', $token, SQLITE3_TEXT);
 		$stmt->bindValue(':c', $chat, SQLITE3_TEXT);
+		$stmt->bindValue(':drt', $daily_report_time, SQLITE3_TEXT);
+		$stmt->bindValue(':tnm', $timer_minutes, SQLITE3_INTEGER);
 		$stmt->execute();
 		echo json_encode(['success' => true]);
 		break;
@@ -73,6 +87,12 @@ switch ($action) {
 			break;
 		}
 		
+		// Получаем настройки таймера
+		$timer_minutes = $tg_settings['timer_notification_minutes'] ?? 1440;
+		$hours = floor($timer_minutes / 60);
+		$minutes = $timer_minutes % 60;
+		$time_text = $hours > 0 ? "{$hours}ч {$minutes}м" : "{$minutes}м";
+		
 		// Ищем задачу с включенным таймером для демонстрации
 		$task_query = "SELECT t.*, c.name as column_name, 
 							  COALESCE(u.name, t.responsible) as responsible_name
@@ -90,22 +110,22 @@ switch ($action) {
 			$column_name = htmlspecialchars($task['column_name']);
 			$responsible = htmlspecialchars($task['responsible_name']);
 			
-			$message = "⏰ <b>ТЕСТ: Уведомление о 24-часовом таймере</b>\n"
+			$message = "⏰ <b>ТЕСТ: Уведомление о таймере ({$time_text})</b>\n"
 					 . "<blockquote>"
 					 . "📋 <b>Задача:</b> <i>{$title}</i>\n"
 					 . "📂 <b>Колонка:</b> <i>{$column_name}</i>\n"
 					 . "🧑‍💻 <b>Исполнитель:</b> <i>{$responsible}</i>\n"
-					 . "⏱️ <b>В колонке:</b> 24 часа (тестовое уведомление)\n"
+					 . "⏱️ <b>В колонке:</b> {$time_text} (тестовое уведомление)\n"
 					 . "</blockquote>\n\n"
 					 . "<i>Это тестовое уведомление для проверки работы таймера.</i>";
 		} else {
 			// Демо-уведомление, если нет задач с таймером
-			$message = "⏰ <b>ТЕСТ: Уведомление о 24-часовом таймере</b>\n"
+			$message = "⏰ <b>ТЕСТ: Уведомление о таймере ({$time_text})</b>\n"
 					 . "<blockquote>"
 					 . "📋 <b>Задача:</b> <i>Пример задачи</i>\n"
 					 . "📂 <b>Колонка:</b> <i>В работе</i>\n"
 					 . "🧑‍💻 <b>Исполнитель:</b> <i>Иван Иванов</i>\n"
-					 . "⏱️ <b>В колонке:</b> 24 часа (тестовое уведомление)\n"
+					 . "⏱️ <b>В колонке:</b> {$time_text} (тестовое уведомление)\n"
 					 . "</blockquote>\n\n"
 					 . "<i>Это тестовое уведомление для проверки работы таймера.</i>";
 		}
@@ -122,6 +142,9 @@ switch ($action) {
 			echo json_encode(['success' => false, 'error' => 'Telegram не настроен']);
 			break;
 		}
+		
+		// Получаем время отчета из настроек
+		$report_time = $tg_settings['daily_report_time'] ?? '10:00';
 		
 		// Получаем все не завершенные задачи для отчета
 		$query = "SELECT c.name as column_name, t.title as task_title, 
@@ -146,7 +169,7 @@ switch ($action) {
 		
 		// Формируем тестовое сообщение
 		$message = "📊 <b>ТЕСТ: Ежедневный отчет по открытым задачам</b>\n"
-				 . "<i>" . date('d.m.Y H:i:s') . " (тестовый отчет)</i>\n\n";
+				 . "<i>" . date('d.m.Y') . " {$report_time} (тестовый отчет)</i>\n\n";
 		
 		if (empty($tasks_by_column)) {
 			$message .= "🎉 <b>Все задачи завершены!</b>\nОтличная работа!\n\n";
@@ -168,7 +191,7 @@ switch ($action) {
 			
 			$total_tasks = array_sum(array_map('count', $tasks_by_column));
 			$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}\n\n";
-			$message .= "<i>Это тестовый отчет. Реальный отчет отправляется каждый день в 10:00 по Москве.</i>";
+			$message .= "<i>Это тестовый отчет. Реальный отчет отправляется каждый день в {$report_time} по Москве.</i>";
 		}
 		
 		$result = sendTelegram($bot_token, $chat_id, $message);

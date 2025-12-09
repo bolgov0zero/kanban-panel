@@ -1,5 +1,3 @@
-[file name]: init_db.php
-[file content begin]
 <?php
 date_default_timezone_set('Europe/Moscow');
 
@@ -42,7 +40,9 @@ $db->exec("CREATE TABLE IF NOT EXISTS users (
 $db->exec("CREATE TABLE IF NOT EXISTS telegram_settings (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	bot_token TEXT,
-	chat_id TEXT
+	chat_id TEXT,
+	daily_report_time TEXT DEFAULT '10:00',
+	timer_notification_minutes INTEGER DEFAULT 1440
 )");
 
 $db->exec("CREATE TABLE IF NOT EXISTS columns (
@@ -93,11 +93,13 @@ ensureColumn('tasks', 'created_at', 'TEXT');
 ensureColumn('tasks', 'moved_at', 'TEXT');
 ensureColumn('tasks', 'author', 'TEXT');
 ensureColumn('archive', 'responsible_name', 'TEXT');
+ensureColumn('telegram_settings', 'daily_report_time', 'TEXT DEFAULT "10:00"');
+ensureColumn('telegram_settings', 'timer_notification_minutes', 'INTEGER DEFAULT 1440');
 
 // === Начальные Telegram настройки: добавляем только если не существуют ===
 $tg_exists = $db->querySingle("SELECT COUNT(*) FROM telegram_settings WHERE id=1");
 if ($tg_exists == 0) {
-	$stmt = $db->prepare("INSERT INTO telegram_settings (id, bot_token, chat_id) VALUES (1, '', '')");
+	$stmt = $db->prepare("INSERT INTO telegram_settings (id, bot_token, chat_id, daily_report_time, timer_notification_minutes) VALUES (1, '', '', '10:00', 1440)");
 	$stmt->execute();
 }
 
@@ -146,4 +148,3 @@ if (file_exists($db_path)) {
 echo "<h2 class='text-green-500 font-bold'>База данных успешно инициализирована!</h2>";
 echo "<p><a href='auth.php' class='text-blue-400 underline'>Перейти к авторизации</a></p>";
 ?>
-[file content end]

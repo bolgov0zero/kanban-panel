@@ -1,1813 +1,1276 @@
-/* ===== GLOBAL STYLES ===== */
-.bg-gradient-dark {
-	background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-	min-height: 100vh;
-}
-
-.glass {
-	background: rgba(30, 41, 59, 0.7);
-	backdrop-filter: blur(10px);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* ===== HEADER STYLES ===== */
-.logo-icon {
-	width: 2.5rem;
-	height: 2.5rem;
-	background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-	border-radius: 0.75rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-}
-
-.logo-text {
-	font-size: 1.5rem;
-	font-weight: 700;
-	background: linear-gradient(to right, #ffffff, #cbd5e1);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
-}
-
-.action-buttons {
-	display: flex;
-	align-items: center;
-	gap: 0.25rem;
-	background: rgba(30, 41, 59, 0.5);
-	border-radius: 0.75rem;
-	padding: 0.25rem;
-	border: 1px solid rgba(100, 116, 139, 0.3);
-}
-
-.nav-btn {
-	padding: 0.5rem;
-	border-radius: 0.5rem;
-	color: #cbd5e1;
-	transition: all 0.3s ease;
-}
-
-.nav-btn:hover {
-	color: white;
-	background: rgba(100, 116, 139, 0.3);
-}
-
-.user-avatar {
-	width: 2rem;
-	height: 2rem;
-	background: linear-gradient(to right, #10b981, #3b82f6);
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: white;
-	font-size: 0.75rem;
-	font-weight: 500;
-	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-}
-
-.username-text {
-	color: #e2e8f0;
-	font-weight: 500;
-}
-
-.logout-btn {
-	background: rgba(239, 68, 68, 0.2);
-	color: #fca5a5;
-	padding: 0.5rem 1rem;
-	border-radius: 0.75rem;
-	border: 1px solid rgba(248, 113, 113, 0.3);
-	transition: all 0.3s ease;
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	font-size: 0.875rem;
-}
-
-.logout-btn:hover {
-	background: rgba(239, 68, 68, 0.3);
-	color: #fecaca;
-}
-
-/* ===== COLUMN STYLES ===== */
-.column-wrapper {
-	width: 20rem;
-	flex-shrink: 0;
-	background: rgba(30, 41, 59, 0.5);
-	border-radius: 1rem;
-	padding: 1rem;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.column-header {
-	padding: 0.4rem;
-	border-radius: 0.5rem;
-	margin-bottom: 1rem;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	position: relative; /* Добавляем для позиционирования */
-}
-
-.column-status-indicator {
-	width: 0.5rem;
-	height: 0.5rem;
-	border-radius: 50%;
-}
-
-.column-title {
-	font-weight: 600;
-	font-size: 1.125rem;
-}
-
-.task-count {
-	background: rgba(0, 0, 0, 0.18);
-	color: inherit;
-	padding: 0.15rem 0.5rem;
-	border-radius: 1.75rem;
-	font-size: 0.75rem;
-	font-weight: 600;
-	border-color: rgb(80, 80, 80);
-	border-width: 2px;
-	margin-right: 10px;
-}
-
-.column-header-content {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	flex: 1;
-	padding-left: 10px;
-}
-
-.column-edit-btn {
-	opacity: 0.7;
-	transition: opacity 0.2s ease;
-	margin-left: auto; /* Прижимаем к правому краю */
-	flex-shrink: 0; /* Запрещаем сжатие */
-	padding-right: 6px;
-}
-
-.column-edit-btn:hover {
-	opacity: 1;
-	transform: scale(1.1);
-}
-
-.tasks-container {
-	min-height: 200px;
-	transition: all 0.3s ease;
-}
-
-.task-card {
-	background: #FFFFFF !important; /* Принудительно белый фон */
-	border-radius: 0.75rem;
-	padding: 1rem;
-	margin-bottom: 0.75rem;
-	border-left: 7px solid; /* Корешок задачи */
-	border-radius: 0.5rem !important;
-	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-	transform-origin: center;
-	animation: slideIn 0.3s ease-out;
-	transition: all 0.3s ease;
-	position: relative;
-	color: #000000 !important; /* Черный текст для контраста */
-}
-
-.ava-hed-style {
-	border: 1px solid rgba(74, 51, 153, 0.55);
-	border-radius: 8px;
-	padding: 0 7px 0 7px;
-	font-weight: 500;
-	font-size: 1.3rem;
-	line-height: 1.25rem;
-}
-
-.ava-style {
-	border: 1px solid rgba(74, 51, 153, 0.55);
-	border-radius: 4px;
-	padding: 0 7px 0 7px;
-}
-
-/* Убедитесь, что при перетаскивании сохраняется белый фон */
-.task-card[draggable="true"] {
-	background: #FFFFFF !important;
-	color: #000000 !important;
-}
-
-/* Стиль при перетаскивании */
-.task-card:active, .task-card:focus {
-	background: #FFFFFF !important;
-	color: #000000 !important;
-}
-
-.task-card:hover {
-	box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.3);
-}
-
-@keyframes slideIn {
-	from {
-		opacity: 0;
-		transform: translateY(10px) scale(0.95);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0) scale(1);
-	}
-}
-
-.task-header {
-	margin-bottom: 0.75rem;
-}
-
-.created-date {
-	font-size: 0.7rem;
-	color: #6b7280;
-	margin-bottom: -0.25rem;
-}
-
-.task-title {
-	font-weight: 600;
-	font-size: 0.875rem;
-	line-height: 1.25;
-	flex: 1;
-	margin-right: 0.5rem;
-}
-
-.task-edit-btn {
-	opacity: 0;
-	transition: all 0.2s ease;
-	font-size: 0.75rem;
-}
-
-.task-card:hover .task-edit-btn {
-	opacity: 0.7;
-}
-
-.task-card:hover .task-edit-btn:hover {
-	opacity: 1;
-	transform: scale(1.2);
-}
-
-.task-description {
-	font-size: 0.75rem;
-	color: inherit;
-	margin-bottom: 1rem;
-	line-height: 1.4;
-	opacity: 0.9;
-}
-
-.task-link {
-	color: inherit;
-	text-decoration: underline;
-	transition: color 0.2s ease;
-	opacity: 0.8;
-}
-
-.task-link:hover {
-	opacity: 1;
-}
-
-/* ===== TASK META STYLES ===== */
-.task-meta {
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-}
-
-.deadline-tag {
-	background: rgba(248, 113, 113, 0.2);
-	color: inherit;
-	padding: 0.25rem 0.5rem;
-	border-radius: 0.5rem;
-	font-size: 0.7rem;
-	border: 1px solid rgba(248, 113, 113, 0.3);
-	width: fit-content;
-	opacity: 0.9;
-}
-
-.task-footer {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-end;
-	gap: 0.5rem;
-}
-
-.users-container {
-	display: flex;
-	gap: 0.5rem;
-	flex: 1;
-	align-items: center;
-}
-
-.user-avatar-small {
-	width: 1.5rem;
-	height: 1.5rem;
-	background: linear-gradient(to right, #10b981, #3b82f6);
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: white;
-	font-size: 0.6rem;
-	font-weight: 600;
-}
-
-.task-actions {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 0.25rem;
-}
-
-.completed-badge {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	background: rgba(59, 130, 246, 0.2);
-	color: inherit;
-	padding: 0.25rem 0.5rem;
-	border-radius: 0.5rem;
-	font-size: 0.7rem;
-	border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-.archive-btn {
-	transition: all 0.2s ease;
-	cursor: pointer;
-}
-
-.archive-btn:hover {
-	transform: scale(1.2);
-}
-
-.status-container {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 0.25rem;
-}
-
-.importance-tag {
-	color: white;
-	padding: 0.25rem 0.5rem;
-	border-radius: 0.5rem;
-	font-size: 0.7rem;
-	font-weight: 600;
-}
-
-.timer-tag {
-	background: rgba(180, 22, 22, 0.2);
-	color: inherit;
-	padding: 0.25rem 0.5rem;
-	border-radius: 0.5rem;
-	font-size: 0.7rem;
-	border: 1px solid rgba(180, 22, 22, 0.3);
-}
-
-/* ===== ADD TASK BUTTON ===== */
-.add-task-btn {
-	width: 100%;
-	padding: 0.75rem;
-	border: 2px dashed #4b5563;
-	border-radius: 0.75rem;
-	color: #9ca3af;
-	transition: all 0.3s ease;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.5rem;
-	margin-top: 0.5rem;
-}
-
-.add-task-btn:hover {
-	color: #d1d5db;
-	border-color: #6b7280;
-	background: rgba(75, 85, 99, 0.1);
-}
-
-/* ===== FOOTER ===== */
-.footer {
-	background: #1e293b;
-	color: #94a3b8;
-	text-align: center;
-	padding: 1.5rem;
-	margin-top: auto;
-	font-size: 0.875rem;
-	border-top: 1px solid #334155;
-}
-
-/* ===== DRAG & DROP ===== */
-.drop-hover {
-	outline: 2px dashed #3b82f6;
-	outline-offset: -4px;
-	background: rgba(59, 130, 246, 0.05);
-}
-
-/* ===== SCROLLBAR STYLING ===== */
-::-webkit-scrollbar {
-	width: 6px;
-	height: 6px;
-}
-
-::-webkit-scrollbar-track {
-	background: #1e293b;
-	border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-	background: #475569;
-	border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background: #64748b;
-}
-
-/* ===== MODAL STYLES ===== */
-.modal-backdrop {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.6);
-	backdrop-filter: blur(4px);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 50;
-	padding: 1rem;
-	animation: fadeIn 0.3s ease-out;
-}
-
-.modal-backdrop.hidden {
-	display: none;
-}
-
-@keyframes fadeIn {
-	from { opacity: 0; }
-	to { opacity: 1; }
-}
-
-.modal-container {
-	background: #1e293b;
-	border-radius: 1rem;
-	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	width: auto;
-	max-width: 90vw;
-	transform: scale(0.95);
-	animation: modalAppear 0.3s ease-out forwards;
-	max-height: 90vh;
-	overflow: hidden;
-}
-
-.modal-container.small {
-	max-width: 500px;
-}
-
-.modal-container.medium {
-	max-width: 600px;
-}
-
-.modal-container.large {
-	max-width: 800px;
-}
-
-.modal-container.xlarge {
-	max-width: 1000px;
-}
-
-@keyframes modalAppear {
-	to {
-		transform: scale(1);
-	}
-}
-
-.modal-content {
-	overflow: visible;
-}
-
-/* Modal Header */
-.modal-header {
-	padding: 1.5rem 1.5rem 1rem;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
-
-.modal-title {
-	font-size: 1.25rem;
-	font-weight: 600;
-	color: white;
-	margin: 0;
-}
-
-.modal-close-btn {
-	color: #94a3b8;
-	background: none;
-	border: none;
-	padding: 0.5rem;
-	border-radius: 0.5rem;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.modal-close-btn:hover {
-	color: white;
-	background: rgba(255, 255, 255, 0.1);
-}
-
-/* Modal Body */
-.modal-body {
-	padding: 1.5rem;
-}
-
-.modal-body::-webkit-scrollbar {
-	width: 6px;
-}
-
-.modal-body::-webkit-scrollbar-track {
-	background: rgba(30, 41, 59, 0.5);
-	border-radius: 3px;
-}
-
-.modal-body::-webkit-scrollbar-thumb {
-	background: #475569;
-	border-radius: 3px;
-}
-
-.modal-body::-webkit-scrollbar-thumb:hover {
-	background: #64748b;
-}
-
-.form-group {
-	margin-bottom: 1.5rem;
-}
-
-.form-label {
-	display: block;
-	font-size: 0.875rem;
-	font-weight: 500;
-	color: #e2e8f0;
-	margin-bottom: 0.5rem;
-}
-
-.form-input {
-	width: 100%;
-	background: rgba(30, 41, 59, 0.8);
-	border: 1px solid rgba(100, 116, 139, 0.3);
-	border-radius: 0.75rem;
-	padding: 0.75rem 1rem;
-	font-size: 0.875rem;
-	color: white;
-	transition: all 0.2s ease;
-}
-
-.form-input:focus {
-	outline: none;
-	border-color: #3b82f6;
-	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.form-input::placeholder {
-	color: #94a3b8;
-}
-
-/* Color Input Group */
-.color-input-group {
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-}
-
-.color-input {
-	width: 3rem;
-	height: 3rem;
-	border: none;
-	border-radius: 0.5rem;
-	cursor: pointer;
-	background: none;
-}
-
-.color-input::-webkit-color-swatch {
-	border: none;
-	border-radius: 0.5rem;
-	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-}
-
-.color-input::-webkit-color-swatch-wrapper {
-	padding: 0;
-	border: none;
-	border-radius: 0.5rem;
-}
-
-.color-value {
-	font-size: 0.875rem;
-	color: #cbd5e1;
-	font-family: monospace;
-}
-
-/* Textarea with Link Picker */
-.textarea-with-picker {
-	position: relative;
-}
-
-.textarea-with-picker textarea {
-	min-height: 100px;
-	resize: vertical;
-}
-
-.textarea-with-picker textarea:focus {
-	outline: none;
-	border-color: #3b82f6;
-	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.link-picker-btn {
-	position: absolute;
-	right: 0.75rem;
-	bottom: 0.75rem;
-	color: #94a3b8;
-	background: none;
-	border: none;
-	padding: 0.5rem;
-	border-radius: 0.5rem;
-	cursor: pointer;
-	transition: all 0.2s ease;
-}
-
-.link-picker-btn:hover {
-	color: white;
-	background: rgba(255, 255, 255, 0.1);
-}
-
-/* Select Styles */
-.form-select {
-	width: 100%;
-	height: 50px;
-	background: rgba(30, 41, 59, 0.8);
-	border: 1px solid rgba(100, 116, 139, 0.3);
-	border-radius: 0.75rem;
-	padding: 0.75rem 1rem;
-	font-size: 0.875rem;
-	color: white;
-	transition: all 0.2s ease;
-	cursor: pointer;
-}
-
-.form-select:focus {
-	outline: none;
-	border-color: #3b82f6;
-	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.form-select option {
-	background: #1e293b;
-	color: white;
-}
-
-/* Checkbox Styles */
-.checkbox-group {
-	margin-bottom: 1rem;
-}
-
-.checkbox-label {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	cursor: pointer;
-	padding: 0.5rem 0;
-}
-
-.checkbox-input {
-	display: none;
-}
-
-.checkbox-custom {
-	width: 1.25rem;
-	height: 1.25rem;
-	border: 2px solid #4b5563;
-	border-radius: 0.375rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: all 0.2s ease;
-	flex-shrink: 0;
-}
-
-.checkbox-input:checked + .checkbox-custom {
-	background: #3b82f6;
-	border-color: #3b82f6;
-}
-
-.checkbox-input:checked + .checkbox-custom::after {
-	content: '✓';
-	color: white;
-	font-size: 0.75rem;
-	font-weight: bold;
-}
-
-.checkbox-text {
-	font-size: 0.875rem;
-	color: #e2e8f0;
-	line-height: 1.4;
-}
-
-/* Modal Footer */
-.modal-footer {
-	padding: 1rem 1.5rem 1.5rem;
-	border-top: 1px solid rgba(255, 255, 255, 0.1);
-	display: flex;
-	gap: 0.75rem;
-	justify-content: flex-end;
-}
-
-.btn-primary {
-	background: #3b82f6;
-	color: white;
-	border: none;
-	border-radius: 0.75rem;
-	padding: 0.75rem 1.5rem;
-	font-size: 0.875rem;
-	font-weight: 500;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-.btn-primary:hover {
-	background: #2563eb;
-	transform: translateY(-1px);
-}
-
-.btn-secondary {
-	background: rgba(75, 85, 99, 0.5);
-	color: #d1d5db;
-	border: 1px solid rgba(100, 116, 139, 0.3);
-	border-radius: 0.75rem;
-	padding: 0.75rem 1.5rem;
-	font-size: 0.875rem;
-	font-weight: 500;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-.btn-secondary:hover {
-	background: rgba(75, 85, 99, 0.7);
-	color: white;
-}
-
-.btn-danger {
-	background: rgba(239, 68, 68, 0.2);
-	color: #fca5a5;
-	border: 1px solid rgba(248, 113, 113, 0.3);
-	border-radius: 0.75rem;
-	padding: 0.75rem 1.5rem;
-	font-size: 0.875rem;
-	font-weight: 500;
-	cursor: pointer;
-	transition: all 0.2s ease;
-}
-
-.btn-danger:hover {
-	background: rgba(239, 68, 68, 0.3);
-	color: #fecaca;
-}
-
-/* ===== LINK PICKER MODAL ===== */
-.link-picker-container {
-	background: #1e293b;
-	border-radius: 0.75rem;
-	padding: 1rem;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	max-height: 24rem;
-	overflow-y: auto;
-	animation: modalAppear 0.3s ease-out forwards;
-	width: 300px;
-}
-
-.link-picker-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 1rem;
-	padding-bottom: 0.75rem;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.link-picker-title {
-	font-size: 1.125rem;
-	font-weight: 600;
-	color: white;
-	margin: 0;
-}
-
-.link-picker-close {
-	color: #94a3b8;
-	background: none;
-	border: none;
-	padding: 0.25rem;
-	border-radius: 0.375rem;
-	cursor: pointer;
-	transition: all 0.2s ease;
-}
-
-.link-picker-close:hover {
-	color: white;
-	background: rgba(255, 255, 255, 0.1);
-}
-
-.links-list {
-	margin-bottom: 1rem;
-	max-height: 12rem;
-	overflow-y: auto;
-}
-
-.links-list > div {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 0.5rem;
-	border-radius: 0.5rem;
-	transition: background-color 0.2s ease;
-}
-
-.links-list > div:hover {
-	background: rgba(255, 255, 255, 0.05);
-}
-
-.links-list span {
-	font-size: 0.875rem;
-	color: #93c5fd;
-	cursor: pointer;
-	transition: color 0.2s ease;
-}
-
-.links-list span:hover {
-	color: #bfdbfe;
-	text-decoration: underline;
-}
-
-.links-list button {
-	color: #ef4444;
-	background: none;
-	border: none;
-	font-size: 0.75rem;
-	cursor: pointer;
-	padding: 0.25rem;
-	border-radius: 0.25rem;
-	transition: all 0.2s ease;
-}
-
-.links-list button:hover {
-	background: rgba(239, 68, 68, 0.1);
-}
-
-.link-picker-form {
-	border-top: 1px solid rgba(255, 255, 255, 0.1);
-	padding-top: 1rem;
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-}
-
-.link-input {
-	background: rgba(30, 41, 59, 0.8);
-	border: 1px solid rgba(100, 116, 139, 0.3);
-	border-radius: 0.5rem;
-	padding: 0.5rem 0.75rem;
-	font-size: 0.875rem;
-	color: white;
-	transition: all 0.2s ease;
-}
-
-.link-input:focus {
-	outline: none;
-	border-color: #3b82f6;
-	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.link-input::placeholder {
-	color: #94a3b8;
-}
-
-.link-add-btn {
-	background: #3b82f6;
-	color: white;
-	border: none;
-	border-radius: 0.5rem;
-	padding: 0.5rem 0.75rem;
-	font-size: 0.875rem;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.5rem;
-}
-
-.link-add-btn:hover {
-	background: #2563eb;
-	transform: translateY(-1px);
-}
-
-/* Empty state for links */
-.links-list:empty::before {
-	content: "Нет сохранённых ссылок";
-	color: #64748b;
-	font-size: 0.875rem;
-	text-align: center;
-	display: block;
-	padding: 1rem;
-}
-
-/* ===== SETTINGS MODAL STYLES ===== */
-.settings-layout {
-	display: flex;
-	height: 600px;
-	background: #1e293b;
-	border-radius: 0.75rem;
-	overflow: hidden;
-}
-
-/* Sidebar */
-.settings-sidebar {
-	width: 280px;
-	background: rgba(15, 23, 42, 0.95);
-	border-right: 1px solid rgba(255, 255, 255, 0.1);
-	display: flex;
-	flex-direction: column;
-	padding: 1.5rem 0;
-}
-
-.settings-nav {
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-	padding: 0 1rem;
-	flex: 1;
-}
-
-.settings-menu-item {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	padding: 0.75rem 1rem;
-	border: none;
-	background: none;
-	color: #94a3b8;
-	border-radius: 0.5rem;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	font-size: 0.875rem;
-	font-weight: 500;
-}
-
-.settings-menu-item:hover {
-	background: rgba(255, 255, 255, 0.05);
-	color: #e2e8f0;
-}
-
-.settings-menu-item.active {
-	background: rgba(59, 130, 246, 0.15);
-	color: #3b82f6;
-	border-left: 3px solid #3b82f6;
-}
-
-.nav-icon {
-	width: 1.25rem;
-	height: 1.25rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.nav-text {
-	flex: 1;
-	text-align: left;
-}
-
-.sidebar-footer {
-	padding: 1rem 1.5rem 0;
-	border-top: 1px solid rgba(255, 255, 255, 0.1);
-	margin-top: auto;
-}
-
-.system-status {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	padding: 0.75rem;
-	background: rgba(34, 197, 94, 0.1);
-	border: 1px solid rgba(34, 197, 94, 0.2);
-	border-radius: 0.5rem;
-}
-
-.status-indicator {
-	width: 0.5rem;
-	height: 0.5rem;
-	border-radius: 50%;
-	background: #22c55e;
-	animation: pulse 2s infinite;
-}
-
-.status-indicator.online {
-	background: #22c55e;
-}
-
-@keyframes pulse {
-	0%, 100% { opacity: 1; }
-	50% { opacity: 0.5; }
-}
-
-.status-text {
-	font-size: 0.75rem;
-	color: #22c55e;
-	font-weight: 500;
-}
-
-/* Main Content */
-.settings-main {
-	flex: 1;
-	padding: 1.5rem 2rem;
-	overflow-y: auto;
-	background: #1e293b;
-}
-
-.tab-content {
-	display: none;
-	animation: fadeIn 0.3s ease;
-}
-
-.tab-content.active {
-	display: block;
-}
-
-@keyframes fadeIn {
-	from { opacity: 0; transform: translateY(10px); }
-	to { opacity: 1; transform: translateY(0); }
-}
-
-.tab-header {
-	margin-bottom: 2rem;
-	padding-bottom: 1rem;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.tab-title {
-	font-size: 1.5rem;
-	font-weight: 700;
-	color: white;
-	margin-bottom: 0.5rem;
-}
-
-.tab-description {
-	color: #94a3b8;
-	font-size: 0.875rem;
-	line-height: 1.5;
-}
-
-/* Content Sections */
-.content-section {
-	margin-bottom: 2rem;
-	padding: 1.5rem;
-	background: rgba(30, 41, 59, 0.5);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 0.75rem;
-}
-
-.section-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 1rem;
-}
-
-.section-title {
-	font-size: 1.125rem;
-	font-weight: 600;
-	color: white;
-	margin-bottom: 0.5rem;
-}
-
-.users-count,
-.links-count {
-	font-size: 0.75rem;
-	color: #64748b;
-	background: rgba(100, 116, 139, 0.2);
-	padding: 0.25rem 0.5rem;
-	border-radius: 0.375rem;
-}
-
-/* Improved Forms */
-.form-grid {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 1rem;
-	margin-bottom: 1.5rem;
-}
-
-.form-grid.compact {
-	grid-template-columns: 1fr 1fr;
-	gap: 1rem;
-}
-
-.form-group {
-	display: flex;
-	flex-direction: column;
-}
-
-.form-label {
-	font-size: 0.875rem;
-	font-weight: 500;
-	color: #e2e8f0;
-	margin-bottom: 0.5rem;
-}
-
-.form-input {
-	background: rgba(15, 23, 42, 0.8);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 0.5rem;
-	padding: 0.75rem 1rem;
-	color: white;
-	font-size: 0.875rem;
-	transition: all 0.2s ease;
-}
-
-.form-input:focus {
-	outline: none;
-	border-color: #3b82f6;
-	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.form-hint {
-	font-size: 0.75rem;
-	color: #64748b;
-	margin-top: 0.5rem;
-}
-
-/* Improved Checkboxes */
-.checkbox-label.large {
-	padding: 1rem;
-	background: rgba(15, 23, 42, 0.5);
-	border-radius: 0.5rem;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.checkbox-label.large .checkbox-text {
-	font-size: 0.875rem;
-	font-weight: 500;
-}
-
-/* Action Buttons */
-.action-buttons {
-	display: flex;
-	gap: 13.7rem;
-}
-
-.btn-primary.full-width {
-	width: 100%;
-	justify-content: center;
-}
-
-/* Users List */
-.users-list {
-	display: flex;
-	flex-direction: column;
-	gap: 0.75rem;
-}
-
-.user-card {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 1rem;
-	background: rgba(15, 23, 42, 0.5);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 0.5rem;
-	transition: all 0.2s ease;
-}
-
-.user-card:hover {
-	border-color: rgba(59, 130, 246, 0.3);
-	background: rgba(15, 23, 42, 0.7);
-}
-
-.user-info {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	flex: 1;
-}
-
-.user-avatar-medium {
-	width: 2.5rem;
-	height: 2.5rem;
-	background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: white;
-	font-weight: 600;
-	font-size: 0.875rem;
-}
-
-.user-details {
-	display: flex;
-	flex-direction: column;
-}
-
-.user-username {
-	font-weight: 600;
-	color: white;
-	font-size: 0.875rem;
-}
-
-.user-name {
-	font-size: 0.75rem;
-	color: #94a3b8;
-}
-
-.user-badges {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-.admin-badge {
-	background: #3b82f6;
-	color: white;
-	padding: 0.25rem 0.5rem;
-	border-radius: 0.375rem;
-	font-size: 0.75rem;
-	font-weight: 500;
-}
-
-.user-actions {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-.user-action-btn {
-	padding: 0.5rem;
-	border-radius: 0.375rem;
-	transition: all 0.2s ease;
-	background: none;
-	border: none;
-	cursor: pointer;
-}
-
-.user-edit-btn {
-	color: #3b82f6;
-}
-
-.user-edit-btn:hover {
-	background: rgba(59, 130, 246, 0.1);
-}
-
-.user-delete-btn {
-	color: #ef4444;
-}
-
-.user-delete-btn:hover {
-	background: rgba(239, 68, 68, 0.1);
-}
-
-/* Links Grid */
-.links-grid {
-	display: flex;
-	flex-direction: column;
-	gap: 0.75rem;
-}
-
-.link-card {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 1rem;
-	background: rgba(15, 23, 42, 0.5);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 0.5rem;
-	transition: all 0.2s ease;
-}
-
-.link-card:hover {
-	border-color: rgba(59, 130, 246, 0.3);
-}
-
-.link-info {
-	flex: 1;
-}
-
-.link-name {
-	font-weight: 600;
-	color: white;
-	font-size: 0.875rem;
-	margin-bottom: 0.25rem;
-}
-
-.link-url {
-	font-size: 0.75rem;
-	color: #94a3b8;
-	word-break: break-all;
-}
-
-/* System Info */
-.system-info {
-	display: flex;
-	flex-direction: column;
-	gap: 0.75rem;
-}
-
-.info-row {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 0.75rem;
-	background: rgba(15, 23, 42, 0.5);
-	border-radius: 0.5rem;
-}
-
-.info-label {
-	font-size: 0.875rem;
-	color: #94a3b8;
-}
-
-.info-value {
-	font-size: 0.875rem;
-	color: white;
-	font-weight: 600;
-}
-
-/* Danger Zone */
-.danger-actions {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-}
-
-.danger-action {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 1rem;
-	background: rgba(239, 68, 68, 0.05);
-	border: 1px solid rgba(239, 68, 68, 0.2);
-	border-radius: 0.5rem;
-}
-
-.danger-info {
-	flex: 1;
-}
-
-.danger-title {
-	font-weight: 600;
-	color: white;
-	font-size: 0.875rem;
-	margin-bottom: 0.25rem;
-}
-
-.danger-description {
-	font-size: 0.75rem;
-	color: #94a3b8;
-	padding-right: 20px;
-}
-
-/* Scrollbar */
-.settings-main::-webkit-scrollbar {
-	width: 6px;
-}
-
-.settings-main::-webkit-scrollbar-track {
-	background: #1e293b;
-}
-
-.settings-main::-webkit-scrollbar-thumb {
-	background: #475569;
-	border-radius: 3px;
-}
-
-.settings-main::-webkit-scrollbar-thumb:hover {
-	background: #64748b;
-}
-
-/* Archive Styles */
-.archive-list {
-	max-height: 300px;
-	overflow-y: auto;
-	margin-bottom: 1rem;
-}
-
-.archive-item {
-	background: rgba(30, 41, 59, 0.5);
-	border-radius: 0.75rem;
-	padding: 1rem;
-	margin-bottom: 0.75rem;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.archive-title {
-	font-weight: 600;
-	color: white;
-	margin-bottom: 0.5rem;
-}
-
-.archive-description {
-	font-size: 0.875rem;
-	color: #d1d5db;
-	margin-bottom: 0.75rem;
-}
-
-.archive-meta {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	font-size: 0.75rem;
-	color: #94a3b8;
-}
-
-.restore-btn {
-	color: #10b981;
-	background: none;
-	border: none;
-	cursor: pointer;
-	transition: color 0.2s ease;
-}
-
-.restore-btn:hover {
-	color: #34d399;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-	.modal-container {
-		margin: 0.5rem;
-		max-width: calc(100vw - 1rem);
-		max-height: calc(100vh - 1rem);
+// Глобальные переменные
+let users = [];
+let columns = [];
+let links = [];
+let currentEditId = null;
+
+// === Drag & Drop ===
+function allowDrop(ev) { ev.preventDefault(); }
+function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+function highlightDrop(el, on) { if (on) el.classList.add('drop-hover'); else el.classList.remove('drop-hover'); }
+
+function drop(ev) {
+	ev.preventDefault();
+	let taskId = ev.dataTransfer.getData("text").replace('task', '');
+	let colId  = ev.currentTarget.dataset.colId;
+	let task   = document.getElementById('task' + taskId);
+	let target = ev.currentTarget.querySelector('#col' + colId);
+	if (!target) return;
+	target.appendChild(task);
+
+	// Немедленно применяем стили - белый фон и цвет корешка из колонки
+	let colBg = ev.currentTarget.dataset.colBg || '#374151';
+	let txt = getContrastColor('#FFFFFF');
+	
+	// Сразу применяем стили
+	task.style.background = '#FFFFFF';
+	task.style.color = txt;
+	task.style.borderLeftColor = colBg;
+
+	ev.currentTarget.classList.remove('drop-hover');
+
+	// Отправляем запрос на сервер и обновляем страницу
+	fetch('api.php', {
+		method: 'POST',
+		body: new URLSearchParams({ action: 'move_task', task_id: taskId, column_id: colId })
+	}).then(() => {
+		location.reload(); // Обновляем страницу для применения всех изменений
+	});
+}
+
+function getContrastColor(hex) {
+	if (!hex) return '#fff';
+	hex = hex.replace('#', '');
+	if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+	let r = parseInt(hex.substr(0, 2), 16);
+	let g = parseInt(hex.substr(2, 2), 16);
+	let b = parseInt(hex.substr(4, 2), 16);
+	return (0.299 * r + 0.587 * g + 0.114 * b) > 160 ? '#000' : '#fff';
+}
+
+function loadUsers() {
+	return fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_users' }) })
+		.then(r => r.json())
+		.then(data => { 
+			users = data;
+			window.users = data; // Обновляем глобальную переменную
+			return data; 
+		})
+		.catch(err => console.error('Error loading users:', err));
+}
+
+function loadColumns() {
+	return fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_columns' }) })
+		.then(r => r.json())
+		.then(data => { 
+			columns = data;
+			window.columns = data; // Обновляем глобальную переменную
+			return data; 
+		})
+		.catch(err => console.error('Error loading columns:', err));
+}
+
+function loadLinks() {
+	return fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_links' }) })
+		.then(r => r.json())
+		.then(data => { links = data; return data; })
+		.catch(err => console.error('Error loading links:', err));
+}
+
+// Загрузка при старте
+document.addEventListener('DOMContentLoaded', function() {
+	loadUsers();
+	loadColumns();
+	loadLinks();
+});
+
+function openModal(html) {
+	const modalBg = document.getElementById('modal-bg');
+	const modalContent = document.getElementById('modal-content');
+	
+	if (!modalBg || !modalContent) {
+		console.error('Modal elements not found');
+		return;
 	}
 	
-	.modal-container .modal-body {
-		max-height: 50vh;
-		padding: 1rem;
+	modalContent.innerHTML = html;
+	modalBg.classList.remove('hidden');
+	
+	// Перепривязываем обработчики для кнопок ссылок
+	setTimeout(() => {
+		const linkPickerBtns = modalContent.querySelectorAll('.link-picker-btn');
+		linkPickerBtns.forEach(btn => {
+			btn.onclick = openLinkPicker;
+		});
+	}, 100);
+	
+	// Добавляем обработчик Escape для закрытия
+	const handleEscape = (e) => {
+		if (e.key === 'Escape') {
+			closeModal();
+		}
+	};
+	
+	document.addEventListener('keydown', handleEscape);
+	modalBg._escapeHandler = handleEscape;
+	
+	// Фокусируемся на первом инпуте
+	const firstInput = modalContent.querySelector('input, textarea, select');
+	if (firstInput) {
+		setTimeout(() => firstInput.focus(), 100);
 	}
 	
-	.link-picker-container {
-		margin: 1rem;
-		max-width: calc(100vw - 2rem);
+	// Предотвращаем прокрутку body при открытой модалке
+	document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+	const modalBg = document.getElementById('modal-bg');
+	if (modalBg) {
+		modalBg.classList.add('hidden');
+		currentEditId = null;
+		
+		// Убираем обработчик Escape
+		if (modalBg._escapeHandler) {
+			document.removeEventListener('keydown', modalBg._escapeHandler);
+		}
 	}
 	
-	.settings-layout {
-		flex-direction: column;
-		height: auto;
-		max-height: 80vh;
+	// Восстанавливаем прокрутку body
+	document.body.style.overflow = '';
+}
+
+function closeLinkPicker() {
+	const linkPicker = document.getElementById('link-picker');
+	if (linkPicker) {
+		linkPicker.classList.add('hidden');
+	}
+}
+
+// === Колонки ===
+function openAddColumn() {
+	const template = document.getElementById('add-column-modal-template');
+	if (template) {
+		openModal(template.innerHTML);
+		
+		// Настройка обновления цветов
+		setTimeout(() => {
+			setupColorInputs('colBg', 'colBgValue');
+			setupColorInputs('taskBg', 'taskBgValue');
+		}, 100);
+	}
+}
+
+function editColumn(id) {
+	currentEditId = id;
+	
+	fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_column', id }) })
+		.then(r => r.json())
+		.then(c => {
+			if (!c) {
+				alert('Колонка не найдена');
+				return;
+			}
+			
+			const template = document.getElementById('edit-column-modal-template');
+			if (template) {
+				openModal(template.innerHTML);
+				
+				// Заполняем данные после открытия модалки
+				setTimeout(() => {
+					fillColumnForm(c);
+				}, 100);
+			}
+		})
+		.catch(err => {
+			console.error('Error loading column:', err);
+			alert('Ошибка при загрузке колонки');
+		});
+}
+
+function setupColorInputs(inputId, valueId) {
+	const colorInput = document.getElementById(inputId);
+	const valueElement = document.getElementById(valueId);
+	
+	if (colorInput && valueElement) {
+		colorInput.addEventListener('input', function(e) {
+			valueElement.textContent = e.target.value;
+		});
+	}
+}
+
+function saveColumn() {
+	const name = document.getElementById('colName')?.value;
+	
+	if (!name) {
+		alert('Введите название колонки');
+		return;
 	}
 	
-	.settings-sidebar {
-		width: 100%;
-		flex-direction: row;
-		height: 4rem;
-		padding: 0.5rem;
+	let data = new URLSearchParams({
+		action: 'add_column',
+		name: name,
+		bg_color: document.getElementById('colBg')?.value || '#374151',
+		auto_complete: document.getElementById('autoComplete')?.checked ? 1 : 0,
+		timer: document.getElementById('timer')?.checked ? 1 : 0
+	});
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: data 
+	})
+	.then(response => {
+		if (response.ok) {
+			location.reload();
+		} else {
+			alert('Ошибка при создании колонки');
+		}
+	})
+	.catch(err => {
+		console.error('Error:', err);
+		alert('Ошибка при создании колонки');
+	});
+}
+
+function fillColumnForm(column) {
+	const nameInput = document.getElementById('editColName');
+	const colBgInput = document.getElementById('editColBg');
+	const colBgValue = document.getElementById('editColBgValue');
+	const autoCompleteInput = document.getElementById('editAutoComplete');
+	const timerInput = document.getElementById('editTimer');
+	
+	if (nameInput) nameInput.value = column.name || '';
+	if (colBgInput) {
+		colBgInput.value = column.bg_color || '#FFFFFF';
+		if (colBgValue) colBgValue.textContent = column.bg_color || '#FFFFFF';
+	}
+	if (autoCompleteInput) autoCompleteInput.checked = column.auto_complete == 1;
+	if (timerInput) timerInput.checked = column.timer == 1;
+	
+	// Настройка обновления цвета в реальном времени
+	setupColorInputs('editColBg', 'editColBgValue');
+}
+
+function updateColumn() {
+	if (!currentEditId) return;
+	
+	const name = document.getElementById('editColName')?.value;
+	
+	if (!name) {
+		alert('Введите название колонки');
+		return;
 	}
 	
-	.settings-nav {
-		flex-direction: row;
-		overflow-x: auto;
+	let data = new URLSearchParams({
+		action: 'update_column',
+		id: currentEditId,
+		name: name,
+		bg_color: document.getElementById('editColBg')?.value || '#374151',
+		auto_complete: document.getElementById('editAutoComplete')?.checked ? 1 : 0,
+		timer: document.getElementById('editTimer')?.checked ? 1 : 0
+	});
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: data 
+	})
+	.then(response => {
+		if (response.ok) {
+			location.reload();
+		} else {
+			alert('Ошибка при обновлении колонки');
+		}
+	})
+	.catch(err => {
+		console.error('Error:', err);
+		alert('Ошибка при обновлении колонки');
+	});
+}
+
+// Новая система вкладок для настроек
+function fillSettingsData(usersData, tgData, linksData) {
+	// Заполняем список пользователей
+	const usersList = document.getElementById('users-list');
+	if (usersList) {
+		usersList.innerHTML = usersData.map(u => `
+			<div class="user-card">
+				<div class="user-info">
+					<div class="user-avatar-medium">${getAvatarFromName(u.name || u.username)}</div>
+					<div class="user-details">
+						<div class="user-username">${u.username}</div>
+						<div class="user-name">${u.name || 'Без имени'}</div>
+					</div>
+				</div>
+				<div class="user-actions">
+					${u.is_admin ? '<span class="admin-badge">Admin</span>' : ''}
+					<button onclick="editUserSettings('${u.username}')" class="user-action-btn user-edit-btn" title="Редактировать">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+						</svg>
+					</button>
+					<button onclick="deleteUser('${u.username}')" class="user-action-btn user-delete-btn" title="Удалить">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+		`).join('');
+		
+		// Обновляем счетчик пользователей
+		const usersCount = document.getElementById('users-count');
+		if (usersCount) {
+			usersCount.textContent = usersData.length + ' пользователей';
+		}
+	}
+
+	// Заполняем список ссылок
+	const linksList = document.getElementById('admin-links-list');
+	if (linksList) {
+		linksList.innerHTML = linksData.map(l => `
+			<div class="link-card">
+				<div class="link-info">
+					<div class="link-name">${l.name}</div>
+					<div class="link-url">${l.url}</div>
+				</div>
+				<div class="user-actions">
+					<button onclick="deleteLink(${l.id})" class="user-action-btn user-delete-btn" title="Удалить">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+		`).join('');
+		
+		// Обновляем счетчик ссылок
+		const linksCount = document.getElementById('links-count');
+		if (linksCount) {
+			linksCount.textContent = linksData.length + ' ссылок';
+		}
+	}
+
+	// Заполняем Telegram настройки
+	const tgToken = document.getElementById('tgToken');
+	const tgChat = document.getElementById('tgChat');
+	const dailyReportTime = document.getElementById('dailyReportTime');
+	const timerNotificationMinutes = document.getElementById('timerNotificationMinutes');
+	
+	if (tgToken) tgToken.value = tgData.bot_token || '';
+	if (tgChat) tgChat.value = tgData.chat_id || '';
+	if (dailyReportTime) dailyReportTime.value = tgData.daily_report_time || '10:00';
+	if (timerNotificationMinutes) timerNotificationMinutes.value = tgData.timer_notification_minutes || 1440;
+	
+	// Обновляем информацию о текущих настройках на вкладке тестирования
+	const currentReportTime = document.getElementById('current-report-time');
+	const currentTimerMinutes = document.getElementById('current-timer-minutes');
+	
+	if (currentReportTime) currentReportTime.textContent = tgData.daily_report_time || '10:00';
+	if (currentTimerMinutes) currentTimerMinutes.textContent = tgData.timer_notification_minutes || 1440;
+}
+
+// Инициализация вкладок настроек
+function initSettingsTabs() {
+	const menuItems = document.querySelectorAll('.settings-menu-item');
+	const tabContents = document.querySelectorAll('.tab-content');
+	
+	console.log('Найдено элементов меню:', menuItems.length);
+	console.log('Найдено вкладок:', tabContents.length);
+	
+	menuItems.forEach(item => {
+		item.addEventListener('click', function() {
+			const tabName = this.getAttribute('data-tab');
+			
+			if (!tabName) {
+				console.error('Элемент меню не имеет data-tab атрибута:', this);
+				return;
+			}
+			
+			console.log('Переключение на вкладку:', tabName);
+			
+			// Убираем активный класс у всех
+			menuItems.forEach(i => {
+				i.classList.remove('active');
+				console.log('Удален active у:', i.getAttribute('data-tab'));
+			});
+			
+			tabContents.forEach(tab => {
+				tab.classList.remove('active');
+				console.log('Удален active у вкладки:', tab.id);
+			});
+			
+			// Добавляем активный класс текущему
+			this.classList.add('active');
+			console.log('Добавлен active к меню:', tabName);
+			
+			const targetTab = document.getElementById(tabName + '-tab');
+			if (targetTab) {
+				targetTab.classList.add('active');
+				console.log('Добавлен active к вкладке:', targetTab.id);
+				
+				// Если открыли вкладку тестирования, обновляем статус cron
+				if (tabName === 'testing') {
+					checkCronStatus();
+				}
+			} else {
+				console.error('Вкладка не найдена:', tabName + '-tab');
+				// Показываем все доступные вкладки для отладки
+				tabContents.forEach(tab => {
+					console.log('Доступная вкладка:', tab.id);
+				});
+			}
+		});
+	});
+	
+	// Активируем первую вкладку по умолчанию
+	if (menuItems.length > 0) {
+		const firstTab = menuItems[0].getAttribute('data-tab');
+		const firstTabContent = document.getElementById(firstTab + '-tab');
+		if (firstTabContent) {
+			menuItems[0].classList.add('active');
+			firstTabContent.classList.add('active');
+			console.log('Активирована вкладка по умолчанию:', firstTab);
+		}
+	}
+}
+
+// Настройка вкладки тестирования
+function setupTestingTab() {
+	console.log('Настройка вкладки тестирования...');
+	
+	// Находим кнопки тестирования
+	const testTelegramBtn = document.querySelector('button[onclick="testTelegram()"]');
+	const testTimerBtn = document.querySelector('button[onclick="testTimerNotification()"]');
+	const testReportBtn = document.querySelector('button[onclick="testDailyReport()"]');
+	const testCronBtn = document.querySelector('button[onclick="checkCronStatus()"]');
+	
+	console.log('Найдено кнопок тестирования:', {
+		telegram: !!testTelegramBtn,
+		timer: !!testTimerBtn,
+		report: !!testReportBtn,
+		cron: !!testCronBtn
+	});
+	
+	// Перепривязываем обработчики на случай динамической загрузки
+	if (testTelegramBtn) {
+		testTelegramBtn.onclick = testTelegram;
+	}
+	if (testTimerBtn) {
+		testTimerBtn.onclick = testTimerNotification;
+	}
+	if (testReportBtn) {
+		testReportBtn.onclick = testDailyReport;
+	}
+	if (testCronBtn) {
+		testCronBtn.onclick = checkCronStatus;
 	}
 	
-	.settings-menu-item {
-		flex-shrink: 0;
-		padding: 0.5rem 1rem;
+	// Обновляем статус Cron при открытии вкладки
+	const testingTab = document.getElementById('testing-tab');
+	if (testingTab) {
+		testingTab.addEventListener('click', function() {
+			checkCronStatus();
+		});
+	}
+}
+
+function getAvatarFromName(name) {
+	if (!name) return '?';
+	
+	const words = name.split(' ').filter(word => word.length > 0);
+	let initials = '';
+	
+	if (words.length > 0) {
+		initials += words[0].charAt(0).toUpperCase();
+	}
+	if (words.length > 1) {
+		initials += words[1].charAt(0).toUpperCase();
 	}
 	
-	.form-grid {
-		grid-template-columns: 1fr;
-		gap: 1rem;
+	return initials || name.charAt(0).toUpperCase();
+}
+
+// Функция экспорта данных (заглушка)
+function exportData() {
+	alert('Функция экспорта данных будет реализована в будущем');
+}
+
+function deleteColumn() {
+	if (!currentEditId) return;
+	
+	if (!confirm('Удалить колонку и все задачи в ней?')) return;
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: new URLSearchParams({ action: 'delete_column', id: currentEditId }) 
+	})
+	.then(response => {
+		if (response.ok) {
+			location.reload();
+		} else {
+			alert('Ошибка при удалении колонки');
+		}
+	})
+	.catch(err => {
+		console.error('Error:', err);
+		alert('Ошибка при удалении колонки');
+	});
+}
+
+// === Задачи ===
+function openAddTask(columnId = null) {
+	const template = document.getElementById('add-task-modal-template');
+	if (template) {
+		openModal(template.innerHTML);
+		
+		// Заполняем данные после открытия модалки
+		setTimeout(() => {
+			fillTaskForm(null, columnId);
+		}, 100);
 	}
 }
 
-/* Увеличенные размеры модальных окон */
-.modal-container.small {
-	max-width: 500px;
+function editTask(id) {
+	currentEditId = id;
+	
+	fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_task', id }) })
+		.then(r => r.json())
+		.then(task => {
+			if (!task || !task.id) {
+				alert('Задача не найдена');
+				return;
+			}
+			
+			const template = document.getElementById('edit-task-modal-template');
+			if (template) {
+				openModal(template.innerHTML);
+				
+				// Ждем полного рендеринга модального окна
+				setTimeout(() => {
+					fillEditTaskForm(task);
+				}, 150);
+			}
+		})
+		.catch(err => {
+			console.error('Error loading task:', err);
+			alert('Ошибка при загрузке задачи');
+		});
 }
 
-.modal-container.medium {
-	max-width: 700px;
-}
-
-.modal-container.large {
-	max-width: 900px;
-}
-
-.modal-container.xlarge {
-	max-width: 1100px;
-}
-
-/* Улучшенные формы для больших модальных окон */
-.modal-container.large .form-grid,
-.modal-container.xlarge .form-grid {
-	grid-template-columns: 1fr 1fr;
-	gap: 1.5rem;
-}
-
-.modal-container.large .form-group,
-.modal-container.xlarge .form-group {
-	margin-bottom: 1.5rem;
-}
-
-.modal-container.large .form-input,
-.modal-container.large .form-select,
-.modal-container.xlarge .form-input,
-.modal-container.xlarge .form-select {
-	padding: 0.875rem 1rem;
-	font-size: 0.9rem;
-}
-
-.modal-container.large textarea.form-input,
-.modal-container.xlarge textarea.form-input {
-	min-height: 8rem;
-}
-
-/* Адаптивность для мобильных устройств */
-@media (max-width: 1024px) {
-	.modal-container.large {
-		max-width: 95vw;
-		margin: 1rem;
+// Новая функция специально для редактирования задачи
+function fillEditTaskForm(task) {
+	console.log('Filling edit form with:', task);
+	
+	// Заполняем основные поля
+	const titleInput = document.getElementById('editTaskTitle');
+	const descInput = document.getElementById('editTaskDesc');
+	const deadlineInput = document.getElementById('editTaskDeadline');
+	const impSelect = document.getElementById('editTaskImp');
+	const respSelect = document.getElementById('editTaskResp');
+	const colSelect = document.getElementById('editTaskCol');
+	
+	if (titleInput) titleInput.value = task.title || '';
+	if (descInput) descInput.value = task.description || '';
+	
+	// Форматируем дату для input type="date"
+	if (deadlineInput && task.deadline) {
+		const date = new Date(task.deadline + 'T00:00:00');
+		const formattedDate = date.toISOString().split('T')[0];
+		deadlineInput.value = formattedDate;
 	}
 	
-	.modal-container.xlarge {
-		max-width: 98vw;
-		margin: 0.5rem;
-	}
-}
-
-@media (max-width: 768px) {
-	.modal-container.medium,
-	.modal-container.large,
-	.modal-container.xlarge {
-		max-width: 95vw;
-		margin: 1rem;
+	if (impSelect) impSelect.value = task.importance || 'не срочно';
+	
+	// Заполняем исполнителей
+	if (respSelect && window.users) {
+		respSelect.innerHTML = window.users.map(u => 
+			`<option value='${u.username}' ${u.username === task.responsible ? 'selected' : ''}>${u.name || u.username}</option>`
+		).join('');
 	}
 	
-	.modal-container.large .form-grid,
-	.modal-container.xlarge .form-grid {
-		grid-template-columns: 1fr;
-		gap: 1rem;
-	}
-}
-
-.task-mod-win {
-	width: 500px;
-}
-
-.arrow {
-	margin-top: 2px;
-	margin-left: -7px;
-	margin-right: -7px;
-}
-
-.testing-container {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-	gap: 1rem;
-	margin-bottom: 1.5rem;
-}
-
-.testing-card {
-	background: rgba(30, 41, 59, 0.7);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 0.75rem;
-	padding: 1.5rem;
-	transition: all 0.3s ease;
-}
-
-.testing-card:hover {
-	border-color: rgba(59, 130, 246, 0.3);
-	background: rgba(30, 41, 59, 0.9);
-}
-
-.testing-card-header {
-	display: flex;
-	align-items: center;
-	margin-bottom: 1rem;
-}
-
-.testing-card-icon {
-	width: 2.5rem;
-	height: 2.5rem;
-	border-radius: 0.5rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin-right: 1rem;
-	flex-shrink: 0;
-}
-
-.testing-card-title {
-	font-weight: 600;
-	font-size: 1rem;
-	color: white;
-}
-
-.testing-card-description {
-	font-size: 0.875rem;
-	color: #94a3b8;
-	margin-bottom: 1rem;
-	line-height: 1.5;
-}
-
-.testing-button {
-	width: 100%;
-	padding: 0.75rem;
-	border-radius: 0.5rem;
-	font-weight: 500;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.5rem;
-	transition: all 0.2s ease;
-	border: none;
-	cursor: pointer;
-}
-
-.testing-button:hover {
-	transform: translateY(-1px);
-}
-
-.testing-button-blue {
-	background: #3b82f6;
-	color: white;
-}
-
-.testing-button-blue:hover {
-	background: #2563eb;
-}
-
-.testing-button-yellow {
-	background: #f59e0b;
-	color: white;
-}
-
-.testing-button-yellow:hover {
-	background: #d97706;
-}
-
-.testing-button-green {
-	background: #10b981;
-	color: white;
-}
-
-.testing-button-green:hover {
-	background: #059669;
-}
-
-.testing-button-purple {
-	background: #8b5cf6;
-	color: white;
-}
-
-.testing-button-purple:hover {
-	background: #7c3aed;
-}
-
-/* Статус тестирования */
-.testing-status-container {
-	background: rgba(30, 41, 59, 0.7);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 0.75rem;
-	padding: 1.5rem;
-	margin-top: 1.5rem;
-}
-
-.testing-status-title {
-	font-weight: 600;
-	color: white;
-	margin-bottom: 1rem;
-	font-size: 1.125rem;
-}
-
-#testing-status {
-	font-size: 0.875rem;
-	padding: 0.75rem;
-	background: rgba(15, 23, 42, 0.5);
-	border-radius: 0.5rem;
-	min-height: 2.5rem;
-	display: flex;
-	align-items: center;
-}
-
-/* Информация о настройках */
-.settings-info-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-	gap: 1rem;
-	margin-top: 1rem;
-}
-
-.settings-info-section {
-	background: rgba(15, 23, 42, 0.5);
-	border-radius: 0.5rem;
-	padding: 1rem;
-}
-
-.settings-info-section h6 {
-	font-weight: 600;
-	color: white;
-	margin-bottom: 0.75rem;
-	font-size: 0.875rem;
-}
-
-.settings-info-list {
-	list-style: none;
-	padding: 0;
-}
-
-.settings-info-list li {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	margin-bottom: 0.5rem;
-	font-size: 0.75rem;
-	color: #94a3b8;
-}
-
-.settings-info-list li:last-child {
-	margin-bottom: 0;
-}
-
-.status-indicator {
-	width: 0.5rem;
-	height: 0.5rem;
-	border-radius: 50%;
-	flex-shrink: 0;
-}
-
-.status-indicator.green {
-	background: #10b981;
-	animation: pulse-green 2s infinite;
-}
-
-.status-indicator.blue {
-	background: #3b82f6;
-}
-
-.status-indicator.red {
-	background: #ef4444;
-}
-
-@keyframes pulse-green {
-	0%, 100% { opacity: 1; }
-	50% { opacity: 0.5; }
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-	.testing-container {
-		grid-template-columns: 1fr;
+	// Заполняем колонки
+	if (colSelect && window.columns) {
+		colSelect.innerHTML = window.columns.map(c => 
+			`<option value='${c.id}' ${c.id == task.column_id ? 'selected' : ''}>${c.name}</option>`
+		).join('');
 	}
 	
-	.settings-info-grid {
-		grid-template-columns: 1fr;
+	console.log('Form filled successfully');
+}
+
+// Обновим также функцию fillTaskForm для создания задач
+function fillTaskForm(task = null, defaultColumnId = null) {
+	// Для создания задач используем старые ID полей
+	const titleInput = document.getElementById('taskTitle');
+	const descInput = document.getElementById('taskDesc');
+	const deadlineInput = document.getElementById('taskDeadline');
+	const impSelect = document.getElementById('taskImp');
+	const respSelect = document.getElementById('taskResp');
+	const colSelect = document.getElementById('taskCol');
+	
+	if (titleInput) titleInput.value = task ? task.title : '';
+	if (descInput) descInput.value = task ? task.description : '';
+	
+	if (deadlineInput) {
+		if (task && task.deadline) {
+			const date = new Date(task.deadline + 'T00:00:00');
+			deadlineInput.value = date.toISOString().split('T')[0];
+		} else {
+			deadlineInput.value = '';
+		}
+	}
+	
+	if (impSelect) impSelect.value = task ? task.importance : 'не срочно';
+	
+	// Заполняем исполнителей
+	if (respSelect && window.users) {
+		respSelect.innerHTML = window.users.map(u => 
+			`<option value='${u.username}' ${(task && u.username === task.responsible) ? 'selected' : ''}>${u.name || u.username}</option>`
+		).join('');
+	}
+	
+	// Заполняем колонки
+	if (colSelect && window.columns) {
+		colSelect.innerHTML = window.columns.map(c => 
+			`<option value='${c.id}' ${(task && c.id == task.column_id) || (!task && defaultColumnId == c.id) ? 'selected' : ''}>${c.name}</option>`
+		).join('');
 	}
 }
 
-/* Обновленные цвета для статуса */
-.text-green-500 {
-	color: #10b981;
+function saveTask() {
+	const title = document.getElementById('taskTitle')?.value;
+	
+	if (!title) {
+		alert('Введите заголовок задачи');
+		return;
+	}
+	
+	let data = new URLSearchParams({
+		action: 'add_task',
+		title: title,
+		description: document.getElementById('taskDesc')?.value || '',
+		responsible: document.getElementById('taskResp')?.value || '',
+		deadline: document.getElementById('taskDeadline')?.value || '',
+		importance: document.getElementById('taskImp')?.value || 'не срочно',
+		column_id: document.getElementById('taskCol')?.value || '1'
+	});
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: data 
+	})
+	.then(response => {
+		if (response.ok) {
+			location.reload();
+		} else {
+			alert('Ошибка при создании задачи');
+		}
+	})
+	.catch(err => {
+		console.error('Error:', err);
+		alert('Ошибка при создании задачи');
+	});
 }
 
-.text-red-500 {
-	color: #ef4444;
+function updateTask() {
+	if (!currentEditId) return;
+	
+	const title = document.getElementById('editTaskTitle')?.value;
+	
+	if (!title) {
+		alert('Введите заголовок задачи');
+		return;
+	}
+	
+	let data = new URLSearchParams({
+		action: 'update_task',
+		id: currentEditId,
+		title: title,
+		description: document.getElementById('editTaskDesc')?.value || '',
+		responsible: document.getElementById('editTaskResp')?.value || '',
+		deadline: document.getElementById('editTaskDeadline')?.value || '',
+		importance: document.getElementById('editTaskImp')?.value || 'не срочно'
+	});
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: data 
+	})
+	.then(response => {
+		if (response.ok) {
+			location.reload();
+		} else {
+			alert('Ошибка при обновлении задачи');
+		}
+	})
+	.catch(err => {
+		console.error('Error:', err);
+		alert('Ошибка при обновлении задачи');
+	});
 }
 
-.text-yellow-500 {
-	color: #f59e0b;
+function deleteTask() {
+	if (!currentEditId) return;
+	
+	if (!confirm('Удалить задачу?')) return;
+	
+	fetch('api.php', {
+		method: 'POST',
+		body: new URLSearchParams({ action: 'delete_task', id: currentEditId })
+	})
+	.then(response => {
+		if (response.ok) {
+			location.reload();
+		} else {
+			alert('Ошибка при удалении задачи');
+		}
+	})
+	.catch(err => {
+		console.error('Error:', err);
+		alert('Ошибка при удалении задачи');
+	});
 }
 
-.text-blue-500 {
-	color: #3b82f6;
+// === Архив ===
+function openArchive() {
+	fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_archive' }) })
+		.then(r => r.json())
+		.then(archive => {
+			const template = document.getElementById('archive-modal-template');
+			if (template) {
+				let html = template.innerHTML;
+				
+				// Заменяем содержимое archive-list
+				const archiveHTML = archive.length ? archive.map(t => `
+					<div class="archive-item">
+						<h4 class="archive-title">${t.title}</h4>
+						<p class="archive-description">${t.description || ''}</p>
+						<div class="archive-meta">
+							<span>👤 ${t.responsible_name || t.responsible}</span>
+							<button onclick="restore(${t.id})" class="restore-btn">Восстановить</button>
+						</div>
+					</div>
+				`).join('') : '<p class="text-gray-400 text-center py-4">Архив пуст</p>';
+				
+				html = html.replace('<!-- Archive items will be inserted here -->', archiveHTML);
+				
+				// Скрываем кнопку очистки если не админ
+				if (!window.isAdmin) {
+					html = html.replace('<button onclick="clearArchive()" class="btn-danger">Очистить архив</button>', '');
+				}
+				
+				openModal(html);
+			}
+		})
+		.catch(err => {
+			console.error('Error loading archive:', err);
+			alert('Ошибка при загрузке архива');
+		});
 }
 
-.text-purple-500 {
-	color: #8b5cf6;
+function restore(id) {
+	fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'restore_task', id }) })
+		.then(() => location.reload())
+		.catch(err => {
+			console.error('Error restoring task:', err);
+			alert('Ошибка при восстановлении задачи');
+		});
 }
 
-/* Анимация загрузки */
-@keyframes spin {
-	0% { transform: rotate(0deg); }
-	100% { transform: rotate(360deg); }
+function clearArchive() {
+	if (!confirm('Удалить ВСЕ задачи из архива? Это действие необратимо!')) return;
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: new URLSearchParams({ action: 'clear_archive' }) 
+	})
+	.then(r => r.json())
+	.then(res => {
+		if (res.success) {
+			alert('Архив очищен!');
+			closeModal();
+			location.reload();
+		} else {
+			alert('Ошибка очистки: ' + (res.error || 'Неизвестная ошибка'));
+		}
+	})
+	.catch(err => {
+		console.error('Error clearing archive:', err);
+		alert('Ошибка сети: ' + err);
+	});
 }
 
-.loading-spinner {
-	animation: spin 1s linear infinite;
-	display: inline-block;
+// === Настройки ===
+function openUserSettings() {
+	Promise.all([
+		loadUsers(),
+		fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_telegram_settings' }) }).then(r => r.json()),
+		loadLinks()
+	]).then(([usersData, tgData, linksData]) => {
+		const template = document.getElementById('settings-modal-template');
+		if (template) {
+			openModal(template.innerHTML);
+			
+			// Заполняем данные и инициализируем вкладки
+			setTimeout(() => {
+				fillSettingsData(usersData, tgData, linksData);
+				initSettingsTabs(); // Инициализируем вкладки после заполнения данных
+				setupTestingTab(); // Настраиваем вкладку тестирования
+				
+				// Обновляем статус Cron
+				checkCronStatus();
+				
+				console.log('Модальное окно настроек инициализировано');
+			}, 100);
+		}
+	})
+	.catch(err => {
+		console.error('Error loading settings:', err);
+		alert('Ошибка при загрузке настроек');
+	});
+}
+
+// Редактирование пользователя в настройках
+function editUserSettings(username) {
+	currentEditId = username;
+	
+	fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_user', username }) })
+		.then(r => r.json())
+		.then(u => {
+			const template = document.getElementById('edit-user-modal-template');
+			if (template) {
+				openModal(template.innerHTML);
+				
+				// Заполняем данные
+				setTimeout(() => {
+					const editUser = document.getElementById('editUser');
+					const editName = document.getElementById('editName');
+					const editIsAdmin = document.getElementById('editIsAdmin');
+					
+					if (editUser) editUser.value = u.username || '';
+					if (editName) editName.value = u.name || '';
+					if (editIsAdmin) editIsAdmin.checked = u.is_admin == 1;
+				}, 100);
+			}
+		})
+		.catch(err => {
+			console.error('Error loading user:', err);
+			alert('Ошибка при загрузке пользователя');
+		});
+}
+
+function updateUser() {
+	if (!currentEditId) return;
+	
+	let data = new URLSearchParams({
+		action: 'update_user',
+		username: currentEditId,
+		name: document.getElementById('editName')?.value || '',
+		is_admin: document.getElementById('editIsAdmin')?.checked ? 1 : 0
+	});
+	
+	const password = document.getElementById('editPass')?.value;
+	if (password) {
+		data.append('password', password);
+	}
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: data 
+	})
+	.then(response => {
+		if (response.ok) {
+			location.reload();
+		} else {
+			alert('Ошибка при обновлении пользователя');
+		}
+	})
+	.catch(err => {
+		console.error('Error:', err);
+		alert('Ошибка при обновлении пользователя');
+	});
+}
+
+function addUser() {
+	const username = document.getElementById('newUser')?.value;
+	const password = document.getElementById('newPass')?.value;
+	
+	if (!username || !password) {
+		alert('Заполните логин и пароль');
+		return;
+	}
+	
+	let data = new URLSearchParams({
+		action: 'add_user',
+		username: username,
+		password: password,
+		name: document.getElementById('newName')?.value || '',
+		is_admin: document.getElementById('newIsAdmin')?.checked ? 1 : 0
+	});
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: data 
+	})
+	.then(response => {
+		if (response.ok) {
+			location.reload();
+		} else {
+			alert('Ошибка при создании пользователя');
+		}
+	})
+	.catch(err => {
+		console.error('Error:', err);
+		alert('Ошибка при создании пользователя');
+	});
+}
+
+function deleteUser(username) {
+	if (!confirm(`Удалить пользователя ${username}?`)) return;
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: new URLSearchParams({ action: 'delete_user', username }) 
+	})
+	.then(response => {
+		if (response.ok) {
+			location.reload();
+		} else {
+			alert('Ошибка при удалении пользователя');
+		}
+	})
+	.catch(err => {
+		console.error('Error:', err);
+		alert('Ошибка при удалении пользователя');
+	});
+}
+
+// Обновленная функция сохранения Telegram настроек
+function saveTelegram() {
+	const token = document.getElementById('tgToken')?.value || '';
+	const chat = document.getElementById('tgChat')?.value || '';
+	const dailyReportTime = document.getElementById('dailyReportTime')?.value || '10:00';
+	const timerMinutes = parseInt(document.getElementById('timerNotificationMinutes')?.value || '1440');
+	
+	// Валидация времени
+	if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(dailyReportTime)) {
+		alert('Неверный формат времени. Используйте формат ЧЧ:ММ (например, 10:00)');
+		return;
+	}
+	
+	// Валидация минут
+	if (timerMinutes < 1 || timerMinutes > 43200) {
+		alert('Количество минут должно быть от 1 до 43200 (30 дней)');
+		return;
+	}
+	
+	let data = new URLSearchParams({
+		action: 'save_telegram_settings',
+		bot_token: token,
+		chat_id: chat,
+		daily_report_time: dailyReportTime,
+		timer_notification_minutes: timerMinutes
+	});
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: data 
+	})
+	.then(r => r.json())
+	.then(res => {
+		if (res.success) {
+			alert('Настройки успешно сохранены!');
+			// Обновляем информацию о текущих настройках
+			const currentReportTime = document.getElementById('current-report-time');
+			const currentTimerMinutes = document.getElementById('current-timer-minutes');
+			
+			if (currentReportTime) currentReportTime.textContent = dailyReportTime;
+			if (currentTimerMinutes) currentTimerMinutes.textContent = timerMinutes;
+		} else {
+			alert('Ошибка сохранения настроек');
+		}
+	})
+	.catch(err => {
+		console.error('Error saving telegram:', err);
+		alert('Ошибка сохранения');
+	});
+}
+
+function testTelegram() {
+	fetch('api.php', { 
+		method: 'POST', 
+		body: new URLSearchParams({ action: 'test_telegram' }) 
+	})
+	.then(r => r.json())
+	.then(res => {
+		if (res.success) {
+			updateTestingStatus('✅ Тестовое уведомление успешно отправлено в Telegram!', 'success');
+		} else {
+			updateTestingStatus('❌ Ошибка отправки тестового уведомления. Проверьте настройки Telegram.', 'error');
+		}
+	})
+	.catch(err => {
+		console.error('Error testing telegram:', err);
+		updateTestingStatus('❌ Ошибка сети при тестировании Telegram.', 'error');
+	});
+}
+
+// === НОВЫЕ ФУНКЦИИ ТЕСТИРОВАНИЯ ===
+
+// Тестирование уведомления о таймере
+function testTimerNotification() {
+	updateTestingStatus('⏳ Отправка тестового уведомления о таймере...', 'loading');
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: new URLSearchParams({ action: 'test_timer_notification' }) 
+	})
+	.then(r => r.json())
+	.then(res => {
+		if (res.success) {
+			updateTestingStatus('✅ Тестовое уведомление о таймере успешно отправлено!', 'success');
+		} else {
+			const errorMsg = res.error ? `: ${res.error}` : '';
+			updateTestingStatus(`❌ Ошибка отправки уведомления таймера${errorMsg}`, 'error');
+		}
+	})
+	.catch(err => {
+		console.error('Error testing timer notification:', err);
+		updateTestingStatus('❌ Ошибка сети при тестировании уведомления таймера.', 'error');
+	});
+}
+
+// Тестирование ежедневного отчета
+function testDailyReport() {
+	updateTestingStatus('⏳ Отправка тестового ежедневного отчета...', 'loading');
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: new URLSearchParams({ action: 'test_daily_report' }) 
+	})
+	.then(r => r.json())
+	.then(res => {
+		if (res.success) {
+			updateTestingStatus('✅ Тестовый ежедневный отчет успешно отправлен!', 'success');
+		} else {
+			const errorMsg = res.error ? `: ${res.error}` : '';
+			updateTestingStatus(`❌ Ошибка отправки ежедневного отчета${errorMsg}`, 'error');
+		}
+	})
+	.catch(err => {
+		console.error('Error testing daily report:', err);
+		updateTestingStatus('❌ Ошибка сети при тестировании ежедневного отчета.', 'error');
+	});
+}
+
+// Проверка статуса Cron
+function checkCronStatus() {
+	updateTestingStatus('⏳ Проверка статуса Cron...', 'loading');
+	
+	// Проверяем, когда последний раз выполнялся cron
+	const cronStatusEl = document.getElementById('cron-status');
+	if (cronStatusEl) {
+		cronStatusEl.textContent = 'Проверка...';
+	}
+	
+	// Простая проверка - пытаемся получить время последнего выполнения
+	fetch('scheduled_kanban.php')
+		.then(response => {
+			if (response.ok) {
+				if (cronStatusEl) {
+					cronStatusEl.textContent = '✅ Активен';
+					cronStatusEl.classList.add('text-green-500');
+					cronStatusEl.classList.remove('text-red-500');
+				}
+				updateTestingStatus('✅ Cron активен и работает корректно.', 'success');
+			} else {
+				throw new Error('Cron script not accessible');
+			}
+		})
+		.catch(err => {
+			if (cronStatusEl) {
+				cronStatusEl.textContent = '❌ Ошибка';
+				cronStatusEl.classList.add('text-red-500');
+				cronStatusEl.classList.remove('text-green-500');
+			}
+			updateTestingStatus('⚠️ Cron недоступен или произошла ошибка. Проверьте настройки сервера.', 'warning');
+			console.error('Error checking cron status:', err);
+		});
+}
+
+// Обновление статуса тестирования
+function updateTestingStatus(message, type = 'info') {
+	const statusEl = document.getElementById('testing-status');
+	if (!statusEl) return;
+	
+	let icon = '';
+	let colorClass = '';
+	
+	switch (type) {
+		case 'success':
+			icon = '✅ ';
+			colorClass = 'text-green-400';
+			break;
+		case 'error':
+			icon = '❌ ';
+			colorClass = 'text-red-400';
+			break;
+		case 'warning':
+			icon = '⚠️ ';
+			colorClass = 'text-yellow-400';
+			break;
+		case 'loading':
+			icon = '⏳ ';
+			colorClass = 'text-blue-400';
+			break;
+		default:
+			icon = 'ℹ️ ';
+			colorClass = 'text-gray-400';
+	}
+	
+	statusEl.innerHTML = `<span class="${colorClass}">${icon}${message}</span>`;
+	
+	// Автоматически очищаем сообщение через 10 секунд (кроме загрузки)
+	if (type !== 'loading') {
+		setTimeout(() => {
+			if (statusEl.innerHTML.includes(message)) {
+				statusEl.innerHTML = 'Нажмите на кнопки выше для тестирования различных уведомлений.';
+			}
+		}, 10000);
+	}
+}
+
+// === Ссылки ===
+function openLinkPicker() {
+	const linkPicker = document.getElementById('link-picker');
+	if (linkPicker) {
+		linkPicker.classList.remove('hidden');
+		loadLinksList();
+	}
+}
+
+function loadLinksList() {
+	fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_links' }) })
+		.then(r => r.json())
+		.then(data => {
+			const linksList = document.getElementById('links-list');
+			if (linksList) {
+				linksList.innerHTML = data.length ? data.map(l => `
+					<div class="flex justify-between items-center p-1 hover:bg-gray-600 rounded">
+						<span class="text-sm cursor-pointer text-blue-400 hover:underline" onclick="insertLink('${l.name}', '${l.url}')">${l.name}</span>
+						<button onclick="deleteLink(${l.id})" class="text-red-400 text-xs">✖</button>
+					</div>
+				`).join('') : '<p class="text-gray-500 text-xs">Нет сохранённых ссылок</p>';
+			}
+		})
+		.catch(err => console.error('Error loading links:', err));
+}
+
+function insertLink(name, url) {
+	// Ищем активное текстовое поле в любой открытой модалке
+	let desc = null;
+	
+	// Сначала проверяем модалку редактирования задачи
+	desc = document.getElementById('editTaskDesc');
+	if (!desc) {
+		// Проверяем модалку создания задачи
+		desc = document.getElementById('taskDesc');
+	}
+	
+	if (!desc) {
+		console.error('Could not find description textarea');
+		return;
+	}
+	
+	const start = desc.selectionStart;
+	const end = desc.selectionEnd;
+	const text = desc.value;
+	const insert = `[${name}](${url})`;
+	
+	desc.value = text.slice(0, start) + insert + text.slice(end);
+	desc.focus();
+	desc.setSelectionRange(start + insert.length, start + insert.length);
+	closeLinkPicker();
+}
+
+function saveLink() {
+	const name = document.getElementById('linkName')?.value.trim();
+	const url = document.getElementById('linkUrl')?.value.trim();
+	
+	if (!name || !url) {
+		alert('Заполните имя и URL');
+		return;
+	}
+	
+	fetch('api.php', {
+		method: 'POST',
+		body: new URLSearchParams({ action: 'add_link', name, url })
+	})
+	.then(() => {
+		document.getElementById('linkName').value = '';
+		document.getElementById('linkUrl').value = '';
+		loadLinksList();
+	})
+	.catch(err => {
+		console.error('Error saving link:', err);
+		alert('Ошибка сохранения ссылки');
+	});
+}
+
+function adminAddLink() {
+	const name = document.getElementById('newLinkName')?.value.trim();
+	const url = document.getElementById('newLinkUrl')?.value.trim();
+	
+	if (!name || !url) {
+		alert('Заполните поля');
+		return;
+	}
+	
+	fetch('api.php', {
+		method: 'POST',
+		body: new URLSearchParams({ action: 'add_link', name, url })
+	})
+	.then(() => {
+		document.getElementById('newLinkName').value = '';
+		document.getElementById('newLinkUrl').value = '';
+		openUserSettings(); // Перезагружаем настройки
+	})
+	.catch(err => {
+		console.error('Error adding link:', err);
+		alert('Ошибка добавления ссылки');
+	});
+}
+
+function deleteLink(id) {
+	if (!confirm('Удалить ссылку?')) return;
+	
+	fetch('api.php', {
+		method: 'POST',
+		body: new URLSearchParams({ action: 'delete_link', id })
+	})
+	.then(() => {
+		loadLinksList();
+		// Если открыты настройки, обновляем их
+		if (!document.getElementById('modal-bg').classList.contains('hidden')) {
+			openUserSettings();
+		}
+	})
+	.catch(err => {
+		console.error('Error deleting link:', err);
+		alert('Ошибка удаления ссылки');
+	});
+}
+
+function archiveNow(id) {
+	if (!confirm('Отправить в архив?')) return;
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: new URLSearchParams({ action: 'archive_now', id }) 
+	})
+	.then(() => location.reload())
+	.catch(err => {
+		console.error('Error archiving task:', err);
+		alert('Ошибка архивирования задачи');
+	});
 }
