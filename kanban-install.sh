@@ -40,17 +40,24 @@ services:
     image: bolgov0zero/kanban-panel:latest
     container_name: kanban-panel
     ports:
-      - "80:80"
+          - "80:80"
+          - "443:443"
+        volumes:
+          - kanban_data:/var/www/html/db
+          - kanban_logs:/var/log
+        environment:
+          - TZ=Europe/Moscow
+        restart: unless-stopped
+        networks:
+          - kanban-network
+    
+    networks:
+      kanban-network:
+        driver: bridge
+    
     volumes:
-      - kanban_data:/var/www/html/db
-      - kanban_logs:/var/log
-    environment:
-      - TZ=Europe/Moscow
-    restart: unless-stopped
-
-volumes:
-    kanban_data:
-    kanban_logs:
+      kanban_data:
+      kanban_logs:
 EOF
 sleep 2
 if [ $? -eq 0 ]; then
