@@ -53,6 +53,20 @@ $db->exec("CREATE TABLE IF NOT EXISTS columns (
 	timer INTEGER DEFAULT 0
 )");
 
+$db->exec("CREATE TABLE IF NOT EXISTS task_notifications (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	task_id INTEGER,
+	notification_type TEXT, -- 'timer' или другой тип
+	date TEXT, -- дата в формате YYYY-MM-DD
+	sent_at TEXT,
+	FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+)");
+
+$db->exec("CREATE TABLE IF NOT EXISTS system_logs (
+	key TEXT PRIMARY KEY,
+	value TEXT
+)");
+
 $db->exec("CREATE TABLE IF NOT EXISTS tasks (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	title TEXT,

@@ -54,6 +54,15 @@ function checkTimerNotifications($db, $bot_token, $chat_id, $timer_minutes) {
 	$minutes_remainder = $timer_minutes % 60;
 	$time_text = $hours > 0 ? "{$hours}ч {$minutes_remainder}м" : "{$minutes_remainder}м";
 	
+	// Получаем текущую минуту часа (0-59)
+	$current_minute = (int)date('i');
+	
+	// Запускаем проверку только в определенные минуты (например, каждую 5-ю минуту)
+	// Это предотвратит многократную проверку одной и той же задачи
+	if ($current_minute % 5 !== 0) {
+		return;
+	}
+	
 	// Получаем задачи с включенным таймером, которые находятся в колонках с таймером
 	$query = "SELECT t.*, c.name as column_name, c.timer as column_timer, 
 					 COALESCE(u.name, t.responsible) as responsible_name
@@ -71,23 +80,34 @@ function checkTimerNotifications($db, $bot_token, $chat_id, $timer_minutes) {
 		$current_time = time();
 		$minutes_in_column = ($current_time - $moved_at) / 60;
 		
-		// Проверяем, прошло ли заданное количество минут (с точностью до 1 минуты)
-		if ($minutes_in_column >= $timer_minutes && $minutes_in_column < ($timer_minutes + 1)) {
-			// Отправляем уведомление
-			$title = htmlspecialchars($task['title']);
-			$column_name = htmlspecialchars($task['column_name']);
-			$responsible = htmlspecialchars($task['responsible_name']);
+		// Проверяем, прошло ли заданное количество минут
+		// Используем точное сравнение с небольшим допуском для задач, которые только что достигли времени
+		if ($minutes_in_column >= $timer_minutes && $minutes_in_column < $timer_minutes + 1) {
+			// Проверяем, не было ли уже уведомления для этой задачи сегодня
+			$task_id = $task['id'];
+			$today = date('Y-m-d');
+			$last_notification = $db->querySingle("SELECT value FROM task_notifications WHERE task_id = {$task_id} AND notification_type = 'timer' AND date = '{$today}'");
 			
-			$message = "⏰ <b>Задача находится в колонке {$time_text}</b>\n"
-					 . "<blockquote>"
-					 . "📋 <b>Задача:</b> <i>{$title}</i>\n"
-					 . "📂 <b>Колонка:</b> <i>{$column_name}</i>\n"
-					 . "🧑‍💻 <b>Исполнитель:</b> <i>{$responsible}</i>\n"
-					 . "⏱️ <b>В колонке:</b> {$time_text}\n"
-					 . "</blockquote>";
-			
-			sendTelegram($bot_token, $chat_id, $message);
-			error_log("Timer notification sent for task ID: {$task['id']} after {$timer_minutes} minutes");
+			if (!$last_notification) {
+				// Отправляем уведомление
+				$title = htmlspecialchars($task['title']);
+				$column_name = htmlspecialchars($task['column_name']);
+				$responsible = htmlspecialchars($task['responsible_name']);
+				
+				$message = "⏰ <b>Задача находится в колонке {$time_text}</b>\n"
+						 . "<blockquote>"
+						 . "📋 <b>Задача:</b> <i>{$title}</i>\n"
+						 . "📂 <b>Колонка:</b> <i>{$column_name}</i>\n"
+						 . "🧑‍💻 <b>Исполнитель:</b> <i>{$responsible}</i>\n"
+						 . "⏱️ <b>В колонке:</b> {$time_text}\n"
+						 . "</blockquote>";
+				
+				if (sendTelegram($bot_token, $chat_id, $message)) {
+					// Сохраняем факт отправки уведомления
+					$db->exec("INSERT INTO task_notifications (task_id, notification_type, date, sent_at) VALUES ({$task_id}, 'timer', '{$today}', datetime('now'))");
+					error_log("Timer notification sent for task ID: {$task_id} after {$timer_minutes} minutes");
+				}
+			}
 		}
 	}
 }
@@ -95,64 +115,68 @@ function checkTimerNotifications($db, $bot_token, $chat_id, $timer_minutes) {
 // === Ежедневный отчет в настраиваемое время ===
 function sendDailyReport($db, $bot_token, $chat_id, $report_time) {
 	// Текущее время в Москве
-	$current_hour = (int)date('H');
-	$current_minute = (int)date('i');
+	$current_time = date('H:i');
 	
-	// Парсим настраиваемое время
-	list($report_hour, $report_minute) = explode(':', $report_time);
-	$report_hour = (int)$report_hour;
-	$report_minute = (int)$report_minute;
-	
-	// Проверяем, что сейчас установленное время (с допуском в 1 минуту)
-	if ($current_hour == $report_hour && $current_minute <= $report_minute + 1 && $current_minute >= $report_minute) {
-		// Получаем все не завершенные задачи, сгруппированные по колонкам
-		$query = "SELECT c.name as column_name, t.title as task_title, 
-						 COALESCE(u.name, t.responsible) as responsible_name,
-						 t.importance
-				  FROM tasks t 
-				  JOIN columns c ON t.column_id = c.id 
-				  LEFT JOIN users u ON t.responsible = u.username
-				  WHERE t.completed = 0 
-				  ORDER BY c.id, t.importance DESC, t.created_at";
+	// Проверяем точное совпадение времени
+	if ($current_time === $report_time) {
+		// Проверяем, не отправляли ли отчет в эту минуту уже
+		$today = date('Y-m-d');
+		$last_report = $db->querySingle("SELECT value FROM system_logs WHERE key = 'last_daily_report' AND value = '{$today}_{$report_time}'");
 		
-		$result = $db->query($query);
-		
-		$tasks_by_column = [];
-		while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-			$column_name = $row['column_name'];
-			if (!isset($tasks_by_column[$column_name])) {
-				$tasks_by_column[$column_name] = [];
-			}
-			$tasks_by_column[$column_name][] = $row;
-		}
-		
-		// Формируем сообщение
-		$message = "📊 <b>Ежедневный отчет по открытым задачам</b>\n"
-				 . "<i>" . date('d.m.Y') . " {$report_time}</i>\n\n";
-		
-		if (empty($tasks_by_column)) {
-			$message .= "🎉 <b>Все задачи завершены!</b>\nОтличная работа!";
-		} else {
-			foreach ($tasks_by_column as $column_name => $tasks) {
-				$message .= "\n<b>📂 Колонка: {$column_name}</b>\n";
-				
-				foreach ($tasks as $task) {
-					$importance_icon = match($task['importance']) {
-						'срочно' => '🔴',
-						'средне' => '🟡',
-						default => '🟢'
-					};
-					
-					$message .= "{$importance_icon} <i>{$task['task_title']}</i> (👤 {$task['responsible_name']})\n";
+		if (!$last_report) {
+			// Получаем все не завершенные задачи, сгруппированные по колонкам
+			$query = "SELECT c.name as column_name, t.title as task_title, 
+							 COALESCE(u.name, t.responsible) as responsible_name,
+							 t.importance
+					  FROM tasks t 
+					  JOIN columns c ON t.column_id = c.id 
+					  LEFT JOIN users u ON t.responsible = u.username
+					  WHERE t.completed = 0 
+					  ORDER BY c.id, t.importance DESC, t.created_at";
+			
+			$result = $db->query($query);
+			
+			$tasks_by_column = [];
+			while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+				$column_name = $row['column_name'];
+				if (!isset($tasks_by_column[$column_name])) {
+					$tasks_by_column[$column_name] = [];
 				}
+				$tasks_by_column[$column_name][] = $row;
 			}
 			
-			$total_tasks = array_sum(array_map('count', $tasks_by_column));
-			$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}";
+			// Формируем сообщение
+			$message = "📊 <b>Ежедневный отчет по открытым задачам</b>\n"
+					 . "<i>" . date('d.m.Y') . " {$report_time}</i>\n\n";
+			
+			if (empty($tasks_by_column)) {
+				$message .= "🎉 <b>Все задачи завершены!</b>\nОтличная работа!";
+			} else {
+				foreach ($tasks_by_column as $column_name => $tasks) {
+					$message .= "\n<b>📂 Колонка: {$column_name}</b>\n";
+					
+					foreach ($tasks as $task) {
+						$importance_icon = match($task['importance']) {
+							'срочно' => '🔴',
+							'средне' => '🟡',
+							default => '🟢'
+						};
+						
+						$message .= "{$importance_icon} <i>{$task['task_title']}</i> (👤 {$task['responsible_name']})\n";
+					}
+				}
+				
+				$total_tasks = array_sum(array_map('count', $tasks_by_column));
+				$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}";
+			}
+			
+			if (sendTelegram($bot_token, $chat_id, $message)) {
+				// Сохраняем факт отправки отчета
+				$report_key = "{$today}_{$report_time}";
+				$db->exec("INSERT OR REPLACE INTO system_logs (key, value) VALUES ('last_daily_report', '{$report_key}')");
+				error_log("Daily report sent at " . date('Y-m-d H:i:s') . " (scheduled time: {$report_time})");
+			}
 		}
-		
-		sendTelegram($bot_token, $chat_id, $message);
-		error_log("Daily report sent at " . date('Y-m-d H:i:s') . " (scheduled time: {$report_time})");
 	}
 }
 
