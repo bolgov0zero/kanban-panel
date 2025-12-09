@@ -97,13 +97,20 @@ function openModal(html) {
 	modalContent.innerHTML = html;
 	modalBg.classList.remove('hidden');
 	
-	// Перепривязываем обработчики для кнопок ссылок
+	// Перепривязываем обработчики для кнопок ссылок СРАЗУ
 	setTimeout(() => {
 		const linkPickerBtns = modalContent.querySelectorAll('.link-picker-btn');
 		linkPickerBtns.forEach(btn => {
 			btn.onclick = openLinkPicker;
 		});
-	}, 100);
+		
+		// Также перепривязываем обработчики для текстовых полей описания
+		const textareas = modalContent.querySelectorAll('textarea');
+		textareas.forEach(textarea => {
+			// Сохраняем ссылку на текстовое поле для использования в insertLink
+			textarea.dataset.hasPicker = 'true';
+		});
+	}, 0); // Уменьшаем таймаут до 0
 	
 	// Добавляем обработчик Escape для закрытия
 	const handleEscape = (e) => {
@@ -1091,6 +1098,9 @@ function openLinkPicker() {
 	if (linkPicker) {
 		linkPicker.classList.remove('hidden');
 		loadLinksList();
+		
+		// Убедимся, что пикер поверх основной модалки
+		linkPicker.style.zIndex = '100';
 	}
 }
 
@@ -1112,18 +1122,29 @@ function loadLinksList() {
 }
 
 function insertLink(name, url) {
-	// Ищем активное текстовое поле в любой открытой модалке
+	// Получаем текущее активное текстовое поле
 	let desc = null;
 	
-	// Сначала проверяем модалку редактирования задачи
-	desc = document.getElementById('editTaskDesc');
-	if (!desc) {
-		// Проверяем модалку создания задачи
-		desc = document.getElementById('taskDesc');
+	// Ищем активное текстовое поле в текущей модалке
+	const modalContent = document.getElementById('modal-content');
+	if (modalContent) {
+		// Сначала пробуем найти текстовое поле, которое сейчас в фокусе
+		const activeElement = document.activeElement;
+		if (activeElement && (activeElement.tagName === 'TEXTAREA' || 
+			(activeElement.tagName === 'INPUT' && activeElement.type === 'text'))) {
+			desc = activeElement;
+		}
+		
+		// Если не нашли активный элемент, ищем текстовые поля с описанием задачи
+		if (!desc) {
+			desc = modalContent.querySelector('#editTaskDesc') || 
+				   modalContent.querySelector('#taskDesc');
+		}
 	}
 	
 	if (!desc) {
-		console.error('Could not find description textarea');
+		console.error('Could not find textarea for inserting link');
+		alert('Сначала кликните в поле описания, чтобы вставить ссылку');
 		return;
 	}
 	
@@ -1135,6 +1156,8 @@ function insertLink(name, url) {
 	desc.value = text.slice(0, start) + insert + text.slice(end);
 	desc.focus();
 	desc.setSelectionRange(start + insert.length, start + insert.length);
+	
+	// Закрываем пикер ссылок
 	closeLinkPicker();
 }
 
