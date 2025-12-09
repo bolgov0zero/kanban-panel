@@ -175,11 +175,11 @@ switch ($action) {
 		} else {
 			foreach ($tasks_by_column as $column_name => $tasks) {
 				$message .= "\n<b>📂 {$column_name}</b>\n";
-				$message .= "<blockquote>";
 				foreach ($tasks as $task) {
-					$message .= "📋 <b>Задача:</b> <i>{$task['task_title']}</i>\n👤 <b>Автор:</b> <i>{$task['responsible_name']}</i>\n";
+					$message .= "<blockquote>";
+					$message .= "📋 <b>Задача:</b> <i>{$task['task_title']}</i>\n👤 <b>Автор:</b> <i>{$task['responsible_name']}</i>";
+					$message .= "</blockquote>\n\n";
 				}
-				$message .= "</blockquote>\n\n";
 			}
 			
 			$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}";
