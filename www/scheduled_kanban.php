@@ -132,7 +132,7 @@ function checkTimerNotifications($db, $bot_token, $chat_id, $timer_minutes) {
 				$column_name = htmlspecialchars($task['column_name']);
 				$responsible = htmlspecialchars($task['responsible_name']);
 				
-				$message = "⏰ <b>Задача находится в колонке {$time_text}</b>\n"
+				$message = "⏰ <b>Задача в работе {$time_text}</b>\n"
 						 . "<blockquote>"
 						 . "📋 <b>Задача:</b> <i>{$title}</i>\n"
 						 . "📂 <b>Колонка:</b> <i>{$column_name}</i>\n"
@@ -235,15 +235,14 @@ function sendDailyReport($db, $bot_token, $chat_id, $report_time) {
 			error_log("Found {$total_tasks} open tasks");
 			
 			// Формируем сообщение
-			$message = "📊 <b>Ежедневный отчет по открытым задачам</b>\n"
-					 . "<i>" . date('d.m.Y') . " {$report_time}</i>\n\n";
+			$message = "📊 <b>Ежедневный отчет</b>\n\n";
 			
 			if (empty($tasks_by_column)) {
 				$message .= "🎉 <b>Все задачи завершены!</b>\nОтличная работа!";
 			} else {
 				foreach ($tasks_by_column as $column_name => $tasks) {
 					$message .= "\n<b>📂 Колонка: {$column_name}</b>\n";
-					
+					$message = "<blockquote>";
 					foreach ($tasks as $task) {
 						$importance_icon = match($task['importance']) {
 							'срочно' => '🔴',
@@ -253,6 +252,7 @@ function sendDailyReport($db, $bot_token, $chat_id, $report_time) {
 						
 						$message .= "{$importance_icon} <i>{$task['task_title']}</i> (👤 {$task['responsible_name']})\n";
 					}
+					$message = "<blockquote>";
 				}
 				
 				$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}";
