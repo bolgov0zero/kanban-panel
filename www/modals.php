@@ -150,7 +150,7 @@
 							<h3 class="tab-title">Управление таймерами и уведомлениями</h3>
 							<p class="tab-description">Настройка автоматических уведомлений о задачах и времени отчетов</p>
 						</div>
-
+					
 						<div class="content-section">
 							<h4 class="section-title">Основные настройки таймеров</h4>
 							
@@ -162,7 +162,7 @@
 								</label>
 								<p class="form-hint">При отключении уведомления отправляться не будут</p>
 							</div>
-
+					
 							<div class="form-grid">
 								<div class="form-group">
 									<label class="form-label">Время уведомления (часы)</label>
@@ -172,23 +172,14 @@
 									</div>
 									<p class="form-hint">Через сколько часов отправлять уведомление о задаче в колонке</p>
 								</div>
-
+					
 								<div class="form-group">
-									<label class="form-label">Предварительное уведомление</label>
-									<div class="input-with-unit">
-										<input id="notifyBeforeHours" type="number" min="0" max="24" class="form-input" placeholder="2">
-										<span class="input-unit">часов</span>
-									</div>
-									<p class="form-hint">За сколько часов до основного уведомления отправлять предупреждение</p>
+									<label class="form-label">Время ежедневного отчета</label>
+									<input id="reportTime" type="time" class="form-input" value="10:00">
+									<p class="form-hint">Время отправки ежедневного отчета по задачам (по Москве)</p>
 								</div>
 							</div>
-
-							<div class="form-group">
-								<label class="form-label">Время ежедневного отчета</label>
-								<input id="reportTime" type="time" class="form-input" value="10:00">
-								<p class="form-hint">Время отправки ежедневного отчета по задачам (по Москве)</p>
-							</div>
-
+					
 							<div class="action-buttons">
 								<button onclick="saveTimerSettings()" class="btn-primary">
 									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,7 +189,7 @@
 								</button>
 							</div>
 						</div>
-
+					
 						<div class="content-section">
 							<h4 class="section-title">Информация о текущих настройках</h4>
 							<div class="settings-info-box">
@@ -220,7 +211,7 @@
 								</div>
 							</div>
 						</div>
-
+					
 						<div class="content-section">
 							<h4 class="section-title">Тестирование уведомлений</h4>
 							<div class="testing-grid">
@@ -231,27 +222,50 @@
 												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
 											</svg>
 										</div>
-										<h5 class="testing-card-title">Основное уведомление</h5>
+										<h5 class="testing-card-title">Уведомление о таймере</h5>
 									</div>
 									<p class="testing-card-description">Тест уведомления о задаче, которая находится в колонке установленное время</p>
 									<button onclick="testTimerNotification()" class="testing-btn testing-btn-yellow">
-										Тест основного уведомления
+										Тест уведомления таймера
 									</button>
 								</div>
-
+					
 								<div class="testing-card">
 									<div class="testing-card-header">
-										<div class="testing-icon testing-icon-blue">
+										<div class="testing-icon testing-icon-green">
 											<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
 											</svg>
 										</div>
-										<h5 class="testing-card-title">Предварительное уведомление</h5>
+										<h5 class="testing-card-title">Ежедневный отчет</h5>
 									</div>
-									<p class="testing-card-description">Тест уведомления за N часов до истечения времени</p>
-									<button onclick="testTimerReminder()" class="testing-btn testing-btn-blue">
-										Тест предварительного уведомления
+									<p class="testing-card-description">Тест ежедневного отчета по открытым задачам</p>
+									<button onclick="testDailyReport()" class="testing-btn testing-btn-green">
+										Тест ежедневного отчета
 									</button>
+								</div>
+					
+								<div class="testing-card">
+									<div class="testing-card-header">
+										<div class="testing-icon testing-icon-purple">
+											<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+											</svg>
+										</div>
+										<h5 class="testing-card-title">Проверка Cron</h5>
+									</div>
+									<p class="testing-card-description">Проверка работы автоматических задач и логов</p>
+									<button onclick="checkCronStatus()" class="testing-btn testing-btn-purple">
+										Проверить статус Cron
+									</button>
+								</div>
+							</div>
+							
+							<div class="testing-status-box mt-4">
+								<h5 class="testing-status-title">Статус тестирования</h5>
+								<div id="testing-status" class="text-sm">
+									Нажмите на кнопки выше для тестирования различных уведомлений.
 								</div>
 							</div>
 						</div>

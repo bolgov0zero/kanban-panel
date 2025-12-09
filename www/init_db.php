@@ -82,12 +82,11 @@ $db->exec("CREATE TABLE IF NOT EXISTS links (
 	url TEXT NOT NULL
 )");
 
-// === НОВАЯ ТАБЛИЦА: Настройки таймеров ===
+// === ТАБЛИЦА: Настройки таймеров (упрощенная) ===
 $db->exec("CREATE TABLE IF NOT EXISTS timer_settings (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	timer_hours INTEGER DEFAULT 24,
 	report_time TEXT DEFAULT '10:00',
-	notify_before_hours INTEGER DEFAULT 2,
 	enabled INTEGER DEFAULT 1
 )");
 
@@ -111,7 +110,7 @@ if ($tg_exists == 0) {
 // === Начальные настройки таймеров: добавляем только если не существуют ===
 $timer_exists = $db->querySingle("SELECT COUNT(*) FROM timer_settings WHERE id=1");
 if ($timer_exists == 0) {
-	$stmt = $db->prepare("INSERT INTO timer_settings (id, timer_hours, report_time, notify_before_hours, enabled) VALUES (1, 24, '10:00', 2, 1)");
+	$stmt = $db->prepare("INSERT INTO timer_settings (id, timer_hours, report_time, enabled) VALUES (1, 24, '10:00', 1)");
 	$stmt->execute();
 }
 
