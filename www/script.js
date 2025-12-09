@@ -362,29 +362,104 @@ function initSettingsTabs() {
 	const menuItems = document.querySelectorAll('.settings-menu-item');
 	const tabContents = document.querySelectorAll('.tab-content');
 	
+	console.log('Найдено элементов меню:', menuItems.length);
+	console.log('Найдено вкладок:', tabContents.length);
+	
 	menuItems.forEach(item => {
 		item.addEventListener('click', function() {
 			const tabName = this.getAttribute('data-tab');
 			
-			if (!tabName) return;
+			if (!tabName) {
+				console.error('Элемент меню не имеет data-tab атрибута:', this);
+				return;
+			}
+			
+			console.log('Переключение на вкладку:', tabName);
 			
 			// Убираем активный класс у всех
-			menuItems.forEach(i => i.classList.remove('active'));
-			tabContents.forEach(tab => tab.classList.remove('active'));
+			menuItems.forEach(i => {
+				i.classList.remove('active');
+				console.log('Удален active у:', i.getAttribute('data-tab'));
+			});
+			
+			tabContents.forEach(tab => {
+				tab.classList.remove('active');
+				console.log('Удален active у вкладки:', tab.id);
+			});
 			
 			// Добавляем активный класс текущему
 			this.classList.add('active');
+			console.log('Добавлен active к меню:', tabName);
+			
 			const targetTab = document.getElementById(tabName + '-tab');
 			if (targetTab) {
 				targetTab.classList.add('active');
-			}
-			
-			// Если открыли вкладку тестирования, обновляем статус cron
-			if (tabName === 'testing') {
-				checkCronStatus();
+				console.log('Добавлен active к вкладке:', targetTab.id);
+				
+				// Если открыли вкладку тестирования, обновляем статус cron
+				if (tabName === 'testing') {
+					checkCronStatus();
+				}
+			} else {
+				console.error('Вкладка не найдена:', tabName + '-tab');
+				// Показываем все доступные вкладки для отладки
+				tabContents.forEach(tab => {
+					console.log('Доступная вкладка:', tab.id);
+				});
 			}
 		});
 	});
+	
+	// Активируем первую вкладку по умолчанию
+	if (menuItems.length > 0) {
+		const firstTab = menuItems[0].getAttribute('data-tab');
+		const firstTabContent = document.getElementById(firstTab + '-tab');
+		if (firstTabContent) {
+			menuItems[0].classList.add('active');
+			firstTabContent.classList.add('active');
+			console.log('Активирована вкладка по умолчанию:', firstTab);
+		}
+	}
+}
+
+// Настройка вкладки тестирования
+function setupTestingTab() {
+	console.log('Настройка вкладки тестирования...');
+	
+	// Находим кнопки тестирования
+	const testTelegramBtn = document.querySelector('button[onclick="testTelegram()"]');
+	const testTimerBtn = document.querySelector('button[onclick="testTimerNotification()"]');
+	const testReportBtn = document.querySelector('button[onclick="testDailyReport()"]');
+	const testCronBtn = document.querySelector('button[onclick="checkCronStatus()"]');
+	
+	console.log('Найдено кнопок тестирования:', {
+		telegram: !!testTelegramBtn,
+		timer: !!testTimerBtn,
+		report: !!testReportBtn,
+		cron: !!testCronBtn
+	});
+	
+	// Перепривязываем обработчики на случай динамической загрузки
+	if (testTelegramBtn) {
+		testTelegramBtn.onclick = testTelegram;
+	}
+	if (testTimerBtn) {
+		testTimerBtn.onclick = testTimerNotification;
+	}
+	if (testReportBtn) {
+		testReportBtn.onclick = testDailyReport;
+	}
+	if (testCronBtn) {
+		testCronBtn.onclick = checkCronStatus;
+	}
+	
+	// Обновляем статус Cron при открытии вкладки
+	const testingTab = document.getElementById('testing-tab');
+	if (testingTab) {
+		testingTab.addEventListener('click', function() {
+			checkCronStatus();
+		});
+	}
 }
 
 function getAvatarFromName(name) {
@@ -728,6 +803,12 @@ function openUserSettings() {
 			setTimeout(() => {
 				fillSettingsData(usersData, tgData, linksData);
 				initSettingsTabs(); // Инициализируем вкладки после заполнения данных
+				setupTestingTab(); // Настраиваем вкладку тестирования
+				
+				// Обновляем статус Cron
+				checkCronStatus();
+				
+				console.log('Модальное окно настроек инициализировано');
 			}, 100);
 		}
 	})
