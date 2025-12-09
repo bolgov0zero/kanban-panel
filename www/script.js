@@ -59,6 +59,148 @@ function loadUsers() {
 		.catch(err => console.error('Error loading users:', err));
 }
 
+function loadTimerSettings() {
+	return fetch('api.php', { 
+		method: 'POST', 
+		body: new URLSearchParams({ action: 'get_timer_settings' }) 
+	})
+	.then(r => r.json())
+	.then(settings => {
+		console.log('Timer settings loaded:', settings);
+		return settings;
+	})
+	.catch(err => {
+		console.error('Error loading timer settings:', err);
+		return {
+			timer_hours: 24,
+			report_time: '10:00',
+			notify_before_hours: 2,
+			enabled: 1
+		};
+	});
+}
+
+function saveTimerSettings() {
+	const timerHours = document.getElementById('timerHours')?.value;
+	const reportTime = document.getElementById('reportTime')?.value;
+	const notifyBefore = document.getElementById('notifyBeforeHours')?.value;
+	const enabled = document.getElementById('timerEnabled')?.checked ? 1 : 0;
+	
+	if (!timerHours || timerHours < 1) {
+		alert('Укажите время уведомления (не менее 1 часа)');
+		return;
+	}
+	
+	if (notifyBefore && notifyBefore >= timerHours) {
+		alert('Предварительное уведомление должно быть меньше основного времени');
+		return;
+	}
+	
+	const data = new URLSearchParams({
+		action: 'save_timer_settings',
+		timer_hours: timerHours,
+		report_time: reportTime,
+		notify_before_hours: notifyBefore || 0,
+		enabled: enabled
+	});
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: data 
+	})
+	.then(r => r.json())
+	.then(res => {
+		if (res.success) {
+			alert('Настройки таймеров сохранены!');
+			updateTimerSettingsDisplay();
+		} else {
+			alert('Ошибка сохранения настроек');
+		}
+	})
+	.catch(err => {
+		console.error('Error saving timer settings:', err);
+		alert('Ошибка сохранения настроек');
+	});
+}
+
+function updateTimerSettingsDisplay(settings = null) {
+	const settingsList = document.getElementById('current-timer-settings');
+	const nextReportTime = document.getElementById('next-report-time');
+	
+	if (!settingsList && !nextReportTime) return;
+	
+	const loadAndDisplay = settings ? Promise.resolve(settings) : loadTimerSettings();
+	
+	loadAndDisplay.then(s => {
+		// Обновляем форму
+		const timerHoursInput = document.getElementById('timerHours');
+		const reportTimeInput = document.getElementById('reportTime');
+		const notifyBeforeInput = document.getElementById('notifyBeforeHours');
+		const timerEnabledInput = document.getElementById('timerEnabled');
+		
+		if (timerHoursInput) timerHoursInput.value = s.timer_hours || 24;
+		if (reportTimeInput) reportTimeInput.value = s.report_time || '10:00';
+		if (notifyBeforeInput) notifyBeforeInput.value = s.notify_before_hours || 2;
+		if (timerEnabledInput) timerEnabledInput.checked = s.enabled == 1;
+		
+		// Обновляем информационный блок
+		if (settingsList) {
+			const statusIcon = s.enabled == 1 ? '🟢' : '🔴';
+			const statusText = s.enabled == 1 ? 'Включены' : 'Выключены';
+			
+			settingsList.innerHTML = `
+				<li><span class="status-dot ${s.enabled == 1 ? 'green' : 'red'}"></span> Уведомления: ${statusText}</li>
+				<li><span class="status-dot blue"></span> Время уведомления: ${s.timer_hours || 24} часа(ов)</li>
+				<li><span class="status-dot blue"></span> Предупреждение: за ${s.notify_before_hours || 2} часа(ов)</li>
+				<li><span class="status-dot blue"></span> Время отчета: ${s.report_time || '10:00'}</li>
+			`;
+		}
+		
+		if (nextReportTime) {
+			nextReportTime.textContent = s.report_time || '10:00';
+		}
+	});
+}
+
+function testTimerReminder() {
+	updateTestingStatus('⏳ Отправка тестового предварительного уведомления...', 'loading');
+	
+	fetch('api.php', { 
+		method: 'POST', 
+		body: new URLSearchParams({ action: 'test_timer_reminder' }) 
+	})
+	.then(r => r.json())
+	.then(res => {
+		if (res.success) {
+			updateTestingStatus('✅ Тестовое предварительное уведомление отправлено!', 'success');
+		} else {
+			const errorMsg = res.error ? `: ${res.error}` : '';
+			updateTestingStatus(`❌ Ошибка отправки предварительного уведомления${errorMsg}`, 'error');
+		}
+	})
+	.catch(err => {
+		console.error('Error testing timer reminder:', err);
+		updateTestingStatus('❌ Ошибка сети при тестировании предварительного уведомления.', 'error');
+	});
+}
+
+function setupTimersTab() {
+	console.log('Настройка вкладки таймеров...');
+	
+	// Загружаем и отображаем текущие настройки
+	updateTimerSettingsDisplay();
+	
+	// Находим кнопки
+	const saveBtn = document.querySelector('button[onclick="saveTimerSettings()"]');
+	const testMainBtn = document.querySelector('button[onclick="testTimerNotification()"]');
+	const testReminderBtn = document.querySelector('button[onclick="testTimerReminder()"]');
+	
+	// Перепривязываем обработчики
+	if (saveBtn) saveBtn.onclick = saveTimerSettings;
+	if (testMainBtn) testMainBtn.onclick = testTimerNotification;
+	if (testReminderBtn) testReminderBtn.onclick = testTimerReminder;
+}
+
 function loadColumns() {
 	return fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_columns' }) })
 		.then(r => r.json())
@@ -793,8 +935,9 @@ function openUserSettings() {
 	Promise.all([
 		loadUsers(),
 		fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_telegram_settings' }) }).then(r => r.json()),
-		loadLinks()
-	]).then(([usersData, tgData, linksData]) => {
+		loadLinks(),
+		loadTimerSettings()
+	]).then(([usersData, tgData, linksData, timerData]) => {
 		const template = document.getElementById('settings-modal-template');
 		if (template) {
 			openModal(template.innerHTML);
@@ -802,11 +945,12 @@ function openUserSettings() {
 			// Заполняем данные и инициализируем вкладки
 			setTimeout(() => {
 				fillSettingsData(usersData, tgData, linksData);
-				initSettingsTabs(); // Инициализируем вкладки после заполнения данных
-				setupTestingTab(); // Настраиваем вкладку тестирования
+				initSettingsTabs();
+				setupTestingTab();
+				setupTimersTab(); // Новая функция для настройки вкладки таймеров
 				
-				// Обновляем статус Cron
-				checkCronStatus();
+				// Передаем настройки таймеров для отображения
+				updateTimerSettingsDisplay(timerData);
 				
 				console.log('Модальное окно настроек инициализировано');
 			}, 100);
@@ -1229,4 +1373,16 @@ function archiveNow(id) {
 		console.error('Error archiving task:', err);
 		alert('Ошибка архивирования задачи');
 	});
+}
+
+async function loadVersion() {
+	try {
+		const response = await fetch('version.json');
+		if (!response.ok) throw new Error('Не удалось загрузить данные версии');
+		const data = await response.json();
+		document.getElementById('appVersion').textContent = data.version;
+	} catch (err) {
+		console.error('Ошибка загрузки версии:', err);
+		document.getElementById('appVersion').textContent = 'Неизвестно';
+	}
 }

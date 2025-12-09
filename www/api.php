@@ -2,7 +2,7 @@
 date_default_timezone_set('Europe/Moscow');  // <-- Добавлено: UTC+3 (Москва)
 session_start();
 if (!isset($_SESSION['user'])) exit('auth required');
-$db = new SQLite3(__DIR__ . '/db/db.sqlite');
+$db = new SQLite3(__DIR__ . '/db/db.sqlite');  // <-- ИСПРАВЛЕНО
 $user = $_SESSION['user'];
 $isAdmin = $_SESSION['is_admin'] ?? 0;
 $action = $_POST['action'] ?? '';
@@ -33,6 +33,17 @@ $tg_settings = $db->querySingle("SELECT bot_token, chat_id FROM telegram_setting
 $bot_token = $tg_settings['bot_token'] ?? '';
 $chat_id = $tg_settings['chat_id'] ?? '';
 
+// Получаем настройки таймеров
+$timer_settings = $db->querySingle("SELECT * FROM timer_settings WHERE id=1", true);
+if (!$timer_settings) {
+	$timer_settings = [
+		'timer_hours' => 24,
+		'report_time' => '10:00',
+		'notify_before_hours' => 2,
+		'enabled' => 1
+	];
+}
+
 // Получаем имя текущего пользователя
 $user_name_stmt = $db->prepare("SELECT name FROM users WHERE username = :u");
 $user_name_stmt->bindValue(':u', $user, SQLITE3_TEXT);
@@ -44,6 +55,56 @@ switch ($action) {
 		$stmt = $db->prepare("SELECT bot_token, chat_id FROM telegram_settings WHERE id=1");
 		$res = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
 		echo json_encode($res ?: ['bot_token' => '', 'chat_id' => ''], JSON_UNESCAPED_UNICODE);
+		break;
+		
+	case 'get_timer_settings':
+		if(!$isAdmin) exit('forbidden');
+		echo json_encode($timer_settings, JSON_UNESCAPED_UNICODE);
+		break;
+		
+	case 'save_timer_settings':
+		if(!$isAdmin) exit('forbidden');
+		$timer_hours = (int)($_POST['timer_hours'] ?? 24);
+		$report_time = trim($_POST['report_time'] ?? '10:00');
+		$notify_before = (int)($_POST['notify_before_hours'] ?? 2);
+		$enabled = (int)($_POST['enabled'] ?? 1);
+		
+		// Валидация времени
+		if (!preg_match('/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/', $report_time)) {
+			$report_time = '10:00';
+		}
+		
+		$stmt = $db->prepare("INSERT OR REPLACE INTO timer_settings (id, timer_hours, report_time, notify_before_hours, enabled) VALUES (1, :th, :rt, :nb, :en)");
+		$stmt->bindValue(':th', $timer_hours, SQLITE3_INTEGER);
+		$stmt->bindValue(':rt', $report_time, SQLITE3_TEXT);
+		$stmt->bindValue(':nb', $notify_before, SQLITE3_INTEGER);
+		$stmt->bindValue(':en', $enabled, SQLITE3_INTEGER);
+		$stmt->execute();
+		
+		echo json_encode(['success' => true]);
+		break;
+		
+	case 'test_timer_reminder':
+		if(!$isAdmin) exit('forbidden');
+		
+		if (empty($bot_token) || empty($chat_id)) {
+			echo json_encode(['success' => false, 'error' => 'Telegram не настроен']);
+			break;
+		}
+		
+		// Тестовое уведомление о приближении дедлайна
+		$message = "⏰ <b>ТЕСТ: Напоминание о задаче</b>\n"
+				 . "<blockquote>"
+				 . "📋 <b>Задача:</b> <i>Пример задачи с дедлайном</i>\n"
+				 . "🧑‍💻 <b>Исполнитель:</b> <i>Иван Иванов</i>\n"
+				 . "📅 <b>Дедлайн:</b> <i>Завтра, 12:00</i>\n"
+				 . "⏱️ <b>Осталось:</b> 2 часа\n"
+				 . "</blockquote>\n\n"
+				 . "<i>Это тестовое уведомление. Реальные уведомления отправляются за "
+				 . $timer_settings['notify_before_hours'] . " часа до истечения таймера.</i>";
+		
+		$result = sendTelegram($bot_token, $chat_id, $message);
+		echo json_encode(['success' => $result]);
 		break;
 
 	case 'save_telegram_settings':

@@ -1811,3 +1811,173 @@
 	animation: spin 1s linear infinite;
 	display: inline-block;
 }
+
+.input-with-unit {
+	display: flex;
+	align-items: center;
+}
+
+.input-with-unit .form-input {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	border-right: none;
+}
+
+.input-with-unit .input-unit {
+	background: rgba(30, 41, 59, 0.8);
+	border: 1px solid rgba(100, 116, 139, 0.3);
+	border-left: none;
+	border-top-right-radius: 0.75rem;
+	border-bottom-right-radius: 0.75rem;
+	padding: 0.75rem 1rem;
+	font-size: 0.875rem;
+	color: #cbd5e1;
+	min-width: 70px;
+}
+
+/* Анимация для статуса */
+@keyframes pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.5; }
+}
+
+.status-dot {
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	display: inline-block;
+	margin-right: 0.5rem;
+}
+
+.status-dot.green {
+	background-color: #10b981;
+	animation: pulse 2s infinite;
+}
+
+.status-dot.blue {
+	background-color: #3b82f6;
+}
+
+.status-dot.red {
+	background-color: #ef4444;
+}
+
+/* Стили для информационных блоков */
+.settings-info-box {
+	background: rgba(15, 23, 42, 0.5);
+	border-radius: 0.75rem;
+	padding: 1.5rem;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-info-box h6 {
+	font-weight: 600;
+	color: white;
+	margin-bottom: 1rem;
+	font-size: 0.875rem;
+}
+
+.settings-info-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.settings-info-list li {
+	display: flex;
+	align-items: center;
+	margin-bottom: 0.75rem;
+	font-size: 0.875rem;
+	color: #94a3b8;
+}
+
+.settings-info-list li:last-child {
+	margin-bottom: 0;
+}
+
+/* Стили для сетки тестирования */
+.testing-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 1rem;
+	margin-top: 1rem;
+}
+
+.testing-card {
+	background: rgba(30, 41, 59, 0.7);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 0.75rem;
+	padding: 1.5rem;
+	transition: all 0.3s ease;
+}
+
+.testing-card:hover {
+	border-color: rgba(59, 130, 246, 0.3);
+	background: rgba(30, 41, 59, 0.9);
+}
+
+.testing-card-header {
+	display: flex;
+	align-items: center;
+	margin-bottom: 1rem;
+}
+
+.testing-icon {
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: 0.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 1rem;
+	flex-shrink: 0;
+}
+
+.testing-icon-blue { background: #3b82f6; }
+.testing-icon-yellow { background: #f59e0b; }
+.testing-icon-green { background: #10b981; }
+.testing-icon-purple { background: #8b5cf6; }
+
+.testing-card-title {
+	font-weight: 600;
+	font-size: 1rem;
+	color: white;
+}
+
+.testing-card-description {
+	font-size: 0.875rem;
+	color: #94a3b8;
+	margin-bottom: 1rem;
+	line-height: 1.5;
+}
+
+.testing-btn {
+	width: 100%;
+	padding: 0.75rem;
+	border-radius: 0.5rem;
+	font-weight: 500;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	transition: all 0.2s ease;
+	border: none;
+	cursor: pointer;
+	color: white;
+}
+
+.testing-btn:hover {
+	transform: translateY(-1px);
+}
+
+.testing-btn-blue { background: #3b82f6; }
+.testing-btn-blue:hover { background: #2563eb; }
+
+.testing-btn-yellow { background: #f59e0b; }
+.testing-btn-yellow:hover { background: #d97706; }
+
+.testing-btn-green { background: #10b981; }
+.testing-btn-green:hover { background: #059669; }
+
+.testing-btn-purple { background: #8b5cf6; }
+.testing-btn-purple:hover { background: #7c3aed; }

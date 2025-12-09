@@ -1,5 +1,3 @@
-[file name]: init_db.php
-[file content begin]
 <?php
 date_default_timezone_set('Europe/Moscow');
 
@@ -84,6 +82,15 @@ $db->exec("CREATE TABLE IF NOT EXISTS links (
 	url TEXT NOT NULL
 )");
 
+// === НОВАЯ ТАБЛИЦА: Настройки таймеров ===
+$db->exec("CREATE TABLE IF NOT EXISTS timer_settings (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	timer_hours INTEGER DEFAULT 24,
+	report_time TEXT DEFAULT '10:00',
+	notify_before_hours INTEGER DEFAULT 2,
+	enabled INTEGER DEFAULT 1
+)");
+
 // === Дополнительные поля ===
 ensureColumn('users', 'name', 'TEXT');
 ensureColumn('columns', 'auto_complete', 'INTEGER DEFAULT 0');
@@ -98,6 +105,13 @@ ensureColumn('archive', 'responsible_name', 'TEXT');
 $tg_exists = $db->querySingle("SELECT COUNT(*) FROM telegram_settings WHERE id=1");
 if ($tg_exists == 0) {
 	$stmt = $db->prepare("INSERT INTO telegram_settings (id, bot_token, chat_id) VALUES (1, '', '')");
+	$stmt->execute();
+}
+
+// === Начальные настройки таймеров: добавляем только если не существуют ===
+$timer_exists = $db->querySingle("SELECT COUNT(*) FROM timer_settings WHERE id=1");
+if ($timer_exists == 0) {
+	$stmt = $db->prepare("INSERT INTO timer_settings (id, timer_hours, report_time, notify_before_hours, enabled) VALUES (1, 24, '10:00', 2, 1)");
 	$stmt->execute();
 }
 
@@ -146,4 +160,3 @@ if (file_exists($db_path)) {
 echo "<h2 class='text-green-500 font-bold'>База данных успешно инициализирована!</h2>";
 echo "<p><a href='auth.php' class='text-blue-400 underline'>Перейти к авторизации</a></p>";
 ?>
-[file content end]
