@@ -1,0 +1,2 @@
+* * * * * www-data /usr/local/bin/php /var/www/html/scheduled_kanban.php >> /var/log/cron.log 2>&1
+0 0 * * 0 echo "" > /var/log/cron.log

@@ -1,0 +1,161 @@
+<?php
+date_default_timezone_set('Europe/Moscow');
+
+$db_path = __DIR__ . '/var/www/html/db/db.sqlite';
+
+if (!file_exists($db_path)) {
+	error_log('Database file not found: ' . $db_path);
+	exit;
+}
+
+$db = new SQLite3($db_path);
+
+// Получаем настройки Telegram
+$tg_settings = $db->querySingle("SELECT bot_token, chat_id FROM telegram_settings WHERE id=1", true);
+$bot_token = $tg_settings['bot_token'] ?? '';
+$chat_id = $tg_settings['chat_id'] ?? '';
+
+if (empty($bot_token) || empty($chat_id)) {
+	error_log('Telegram settings not configured');
+	exit;
+}
+
+// Функция отправки Telegram
+function sendTelegram($bot_token, $chat_id, $text) {
+	if (empty($bot_token) || empty($chat_id)) return false;
+	
+	$url = "https://api.telegram.org/bot{$bot_token}/sendMessage";
+	$data = [
+		'chat_id' => $chat_id,
+		'text' => $text,
+		'parse_mode' => 'HTML'
+	];
+	
+	$options = [
+		'http' => [
+			'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+			'method' => 'POST',
+			'content' => http_build_query($data)
+		]
+	];
+	
+	$context = stream_context_create($options);
+	$result = @file_get_contents($url, false, $context);
+	
+	return $result !== false;
+}
+
+// === Проверка 24-часового таймера для задач ===
+function check24HourTimers($db, $bot_token, $chat_id) {
+	// Получаем задачи с включенным таймером, которые находятся в колонках с таймером
+	$query = "SELECT t.*, c.name as column_name, c.timer as column_timer, 
+					 COALESCE(u.name, t.responsible) as responsible_name
+			  FROM tasks t 
+			  JOIN columns c ON t.column_id = c.id 
+			  LEFT JOIN users u ON t.responsible = u.username
+			  WHERE c.timer = 1 
+				AND t.moved_at IS NOT NULL 
+				AND t.completed = 0";
+	
+	$result = $db->query($query);
+	
+	while ($task = $result->fetchArray(SQLITE3_ASSOC)) {
+		$moved_at = strtotime($task['moved_at']);
+		$current_time = time();
+		$hours_in_column = ($current_time - $moved_at) / 3600;
+		
+		// Проверяем, прошло ли 24 часа (с точностью до минуты)
+		if ($hours_in_column >= 24 && $hours_in_column < 24.0167) { // 24 часа + 1 минута
+			// Отправляем уведомление
+			$title = htmlspecialchars($task['title']);
+			$column_name = htmlspecialchars($task['column_name']);
+			$responsible = htmlspecialchars($task['responsible_name']);
+			
+			$message = "⏰ <b>Задача находится в колонке 24 часа</b>\n"
+					 . "<blockquote>"
+					 . "📋 <b>Задача:</b> <i>{$title}</i>\n"
+					 . "📂 <b>Колонка:</b> <i>{$column_name}</i>\n"
+					 . "🧑‍💻 <b>Исполнитель:</b> <i>{$responsible}</i>\n"
+					 . "⏱️ <b>В колонке:</b> 24 часа\n"
+					 . "</blockquote>";
+			
+			sendTelegram($bot_token, $chat_id, $message);
+			error_log("24-hour notification sent for task ID: {$task['id']}");
+		}
+	}
+}
+
+// === Ежедневный отчет в 10:00 ===
+function sendDailyReport($db, $bot_token, $chat_id) {
+	// Текущее время в Москве
+	$current_hour = (int)date('H');
+	$current_minute = (int)date('i');
+	
+	// Проверяем, что сейчас 10:00 (с допуском в 1 минуту)
+	if ($current_hour == 10 && $current_minute <= 1) {
+		// Получаем все не завершенные задачи, сгруппированные по колонкам
+		$query = "SELECT c.name as column_name, t.title as task_title, 
+						 COALESCE(u.name, t.responsible) as responsible_name,
+						 t.importance
+				  FROM tasks t 
+				  JOIN columns c ON t.column_id = c.id 
+				  LEFT JOIN users u ON t.responsible = u.username
+				  WHERE t.completed = 0 
+				  ORDER BY c.id, t.importance DESC, t.created_at";
+		
+		$result = $db->query($query);
+		
+		$tasks_by_column = [];
+		while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+			$column_name = $row['column_name'];
+			if (!isset($tasks_by_column[$column_name])) {
+				$tasks_by_column[$column_name] = [];
+			}
+			$tasks_by_column[$column_name][] = $row;
+		}
+		
+		// Формируем сообщение
+		$message = "📊 <b>Ежедневный отчет по открытым задачам</b>\n"
+				 . "<i>" . date('d.m.Y') . " 10:00</i>\n\n";
+		
+		if (empty($tasks_by_column)) {
+			$message .= "🎉 <b>Все задачи завершены!</b>\nОтличная работа!";
+		} else {
+			foreach ($tasks_by_column as $column_name => $tasks) {
+				$message .= "\n<b>📂 Колонка: {$column_name}</b>\n";
+				
+				foreach ($tasks as $task) {
+					$importance_icon = match($task['importance']) {
+						'срочно' => '🔴',
+						'средне' => '🟡',
+						default => '🟢'
+					};
+					
+					$message .= "{$importance_icon} <i>{$task['task_title']}</i> (👤 {$task['responsible_name']})\n";
+				}
+			}
+			
+			$total_tasks = array_sum(array_map('count', $tasks_by_column));
+			$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}";
+		}
+		
+		sendTelegram($bot_token, $chat_id, $message);
+		error_log("Daily report sent at " . date('Y-m-d H:i:s'));
+	}
+}
+
+// Выполняем проверки
+try {
+	// Проверяем 24-часовой таймер
+	check24HourTimers($db, $bot_token, $chat_id);
+	
+	// Проверяем ежедневный отчет
+	sendDailyReport($db, $bot_token, $chat_id);
+	
+	$db->close();
+	
+} catch (Exception $e) {
+	error_log('Error in scheduled task: ' . $e->getMessage());
+	exit(1);
+}
+?>
