@@ -98,6 +98,23 @@ $db->exec("CREATE TABLE IF NOT EXISTS links (
 	url TEXT NOT NULL
 )");
 
+$db->exec("CREATE TABLE IF NOT EXISTS sent_notifications (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	task_id INTEGER NOT NULL,
+	notification_type TEXT NOT NULL,
+	timer_minutes INTEGER NOT NULL,
+	sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	UNIQUE(task_id, notification_type, timer_minutes)
+)");
+
+$db->exec("CREATE TABLE IF NOT EXISTS sent_reports (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	report_date DATE NOT NULL,
+	report_time TEXT NOT NULL,
+	sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	UNIQUE(report_date, report_time)
+)");
+
 // === Дополнительные поля ===
 ensureColumn('users', 'name', 'TEXT');
 ensureColumn('columns', 'auto_complete', 'INTEGER DEFAULT 0');

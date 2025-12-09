@@ -294,6 +294,10 @@ switch ($action) {
 		$stmt->bindValue(':t', $task_id, SQLITE3_INTEGER);
 		$stmt->execute();
 		
+		// ОЧИСТКА УВЕДОМЛЕНИЙ: Удаляем все отправленные уведомления для этой задачи
+		$db->exec("DELETE FROM sent_notifications WHERE task_id = {$task_id}");
+		error_log("Cleared notifications for task ID: {$task_id} after move");
+		
 		// Получаем auto_complete новой колонки
 		$new_auto_complete = $db->querySingle("SELECT auto_complete FROM columns WHERE id = $col_id") ?? 0;
 		
