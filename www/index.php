@@ -78,6 +78,7 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 <meta charset="UTF-8">
 <title>Kanban Board</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="script.js" defer></script>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
@@ -288,7 +289,8 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 								<?php else: ?>
 									<span class="<?= $tagColor ?> text-white px-2 py-1 rounded text-xs"><?= htmlspecialchars($task['importance']) ?></span>
 									<?php if($col['timer'] && !empty($task['moved_at'])): ?>
-										<span class="bg-red-600 bg-opacity-20 text-red-500 px-2 py-1 rounded text-xs timer-display" id="timer-<?= $task['id'] ?>">
+										<span class="!bg-red-600 !bg-opacity-20 text-red-500 px-2 py-1 rounded text-xs timer-display" id="timer-<?= $task['id'] ?>"
+										style="background-color: rgba(220, 38, 38, 0.2) !important;">
 											⏱️ --:--:--
 										</span>
 									<?php endif; ?>
@@ -306,7 +308,7 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 
 <!-- Footer -->
 <footer class="bg-gray-800 text-gray-400 text-center py-4 mt-auto">
-	2025 © Болгов Иван
+	2025 © bolgov0zero | Версия: <span id="appVersion">Загрузка...</span>
 </footer>
 
 <!-- Scripts -->
