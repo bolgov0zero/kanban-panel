@@ -242,17 +242,11 @@ function sendDailyReport($db, $bot_token, $chat_id, $report_time) {
 			} else {
 				foreach ($tasks_by_column as $column_name => $tasks) {
 					$message .= "\n<b>📂 Колонка: {$column_name}</b>\n";
-					$message = "<blockquote>";
+					$message .= "<blockquote>";
 					foreach ($tasks as $task) {
-						$importance_icon = match($task['importance']) {
-							'срочно' => '🔴',
-							'средне' => '🟡',
-							default => '🟢'
-						};
-						
-						$message .= "{$importance_icon} <i>{$task['task_title']}</i> (👤 {$task['responsible_name']})\n";
+						$message .= "<i>{$task['task_title']}</i> (👤 {$task['responsible_name']})\n";
 					}
-					$message = "<blockquote>";
+					$message .= "</blockquote>";
 				}
 				
 				$message .= "\n<b>Всего открытых задач:</b> {$total_tasks}";
