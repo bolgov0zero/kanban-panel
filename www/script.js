@@ -353,17 +353,28 @@ function fillSettingsData(usersData, tgData, linksData) {
 	// Заполняем Telegram настройки
 	const tgToken = document.getElementById('tgToken');
 	const tgChat = document.getElementById('tgChat');
+	const dailyReportTime = document.getElementById('dailyReportTime');
+	const timerNotificationMinutes = document.getElementById('timerNotificationMinutes');
+	
 	if (tgToken) tgToken.value = tgData.bot_token || '';
 	if (tgChat) tgChat.value = tgData.chat_id || '';
+	if (dailyReportTime) dailyReportTime.value = tgData.daily_report_time || '10:00';
+	if (timerNotificationMinutes) {
+		timerNotificationMinutes.value = tgData.timer_notification_minutes || 1440;
+	}
+	
+	// Обновляем информацию о текущих настройках на вкладке тестирования
+	const currentReportTime = document.getElementById('current-report-time');
+	const currentTimerMinutes = document.getElementById('current-timer-minutes');
+	
+	if (currentReportTime) currentReportTime.textContent = tgData.daily_report_time || '10:00';
+	if (currentTimerMinutes) currentTimerMinutes.textContent = tgData.timer_notification_minutes || 1440;
 }
 
 // Инициализация вкладок настроек
 function initSettingsTabs() {
 	const menuItems = document.querySelectorAll('.settings-menu-item');
 	const tabContents = document.querySelectorAll('.tab-content');
-	
-	console.log('Найдено элементов меню:', menuItems.length);
-	console.log('Найдено вкладок:', tabContents.length);
 	
 	menuItems.forEach(item => {
 		item.addEventListener('click', function() {
@@ -374,38 +385,21 @@ function initSettingsTabs() {
 				return;
 			}
 			
-			console.log('Переключение на вкладку:', tabName);
-			
 			// Убираем активный класс у всех
-			menuItems.forEach(i => {
-				i.classList.remove('active');
-				console.log('Удален active у:', i.getAttribute('data-tab'));
-			});
-			
-			tabContents.forEach(tab => {
-				tab.classList.remove('active');
-				console.log('Удален active у вкладки:', tab.id);
-			});
+			menuItems.forEach(i => i.classList.remove('active'));
+			tabContents.forEach(tab => tab.classList.remove('active'));
 			
 			// Добавляем активный класс текущему
 			this.classList.add('active');
-			console.log('Добавлен active к меню:', tabName);
 			
 			const targetTab = document.getElementById(tabName + '-tab');
 			if (targetTab) {
 				targetTab.classList.add('active');
-				console.log('Добавлен active к вкладке:', targetTab.id);
 				
 				// Если открыли вкладку тестирования, обновляем статус cron
 				if (tabName === 'testing') {
 					checkCronStatus();
 				}
-			} else {
-				console.error('Вкладка не найдена:', tabName + '-tab');
-				// Показываем все доступные вкладки для отладки
-				tabContents.forEach(tab => {
-					console.log('Доступная вкладка:', tab.id);
-				});
 			}
 		});
 	});
@@ -417,49 +411,22 @@ function initSettingsTabs() {
 		if (firstTabContent) {
 			menuItems[0].classList.add('active');
 			firstTabContent.classList.add('active');
-			console.log('Активирована вкладка по умолчанию:', firstTab);
 		}
 	}
 }
 
 // Настройка вкладки тестирования
 function setupTestingTab() {
-	console.log('Настройка вкладки тестирования...');
-	
-	// Находим кнопки тестирования
+	// Перепривязываем обработчики на случай динамической загрузки
 	const testTelegramBtn = document.querySelector('button[onclick="testTelegram()"]');
 	const testTimerBtn = document.querySelector('button[onclick="testTimerNotification()"]');
 	const testReportBtn = document.querySelector('button[onclick="testDailyReport()"]');
 	const testCronBtn = document.querySelector('button[onclick="checkCronStatus()"]');
 	
-	console.log('Найдено кнопок тестирования:', {
-		telegram: !!testTelegramBtn,
-		timer: !!testTimerBtn,
-		report: !!testReportBtn,
-		cron: !!testCronBtn
-	});
-	
-	// Перепривязываем обработчики на случай динамической загрузки
-	if (testTelegramBtn) {
-		testTelegramBtn.onclick = testTelegram;
-	}
-	if (testTimerBtn) {
-		testTimerBtn.onclick = testTimerNotification;
-	}
-	if (testReportBtn) {
-		testReportBtn.onclick = testDailyReport;
-	}
-	if (testCronBtn) {
-		testCronBtn.onclick = checkCronStatus;
-	}
-	
-	// Обновляем статус Cron при открытии вкладки
-	const testingTab = document.getElementById('testing-tab');
-	if (testingTab) {
-		testingTab.addEventListener('click', function() {
-			checkCronStatus();
-		});
-	}
+	if (testTelegramBtn) testTelegramBtn.onclick = testTelegram;
+	if (testTimerBtn) testTimerBtn.onclick = testTimerNotification;
+	if (testReportBtn) testReportBtn.onclick = testDailyReport;
+	if (testCronBtn) testCronBtn.onclick = checkCronStatus;
 }
 
 function getAvatarFromName(name) {
@@ -476,11 +443,6 @@ function getAvatarFromName(name) {
 	}
 	
 	return initials || name.charAt(0).toUpperCase();
-}
-
-// Функция экспорта данных (заглушка)
-function exportData() {
-	alert('Функция экспорта данных будет реализована в будущем');
 }
 
 function deleteColumn() {
@@ -547,8 +509,6 @@ function editTask(id) {
 
 // Новая функция специально для редактирования задачи
 function fillEditTaskForm(task) {
-	console.log('Filling edit form with:', task);
-	
 	// Заполняем основные поля
 	const titleInput = document.getElementById('editTaskTitle');
 	const descInput = document.getElementById('editTaskDesc');
@@ -582,8 +542,6 @@ function fillEditTaskForm(task) {
 			`<option value='${c.id}' ${c.id == task.column_id ? 'selected' : ''}>${c.name}</option>`
 		).join('');
 	}
-	
-	console.log('Form filled successfully');
 }
 
 // Обновим также функцию fillTaskForm для создания задач
@@ -807,8 +765,6 @@ function openUserSettings() {
 				
 				// Обновляем статус Cron
 				checkCronStatus();
-				
-				console.log('Модальное окно настроек инициализировано');
 			}, 100);
 		}
 	})
@@ -933,11 +889,31 @@ function deleteUser(username) {
 	});
 }
 
+// Обновленная функция сохранения Telegram настроек
 function saveTelegram() {
+	const token = document.getElementById('tgToken')?.value || '';
+	const chat = document.getElementById('tgChat')?.value || '';
+	const dailyReportTime = document.getElementById('dailyReportTime')?.value || '10:00';
+	const timerMinutes = parseInt(document.getElementById('timerNotificationMinutes')?.value || '1440');
+	
+	// Валидация времени
+	if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(dailyReportTime)) {
+		alert('Неверный формат времени. Используйте формат ЧЧ:ММ (например, 10:00)');
+		return;
+	}
+	
+	// Валидация минут
+	if (timerMinutes < 1 || timerMinutes > 43200) {
+		alert('Количество минут должно быть от 1 до 43200 (30 дней)');
+		return;
+	}
+	
 	let data = new URLSearchParams({
 		action: 'save_telegram_settings',
-		bot_token: document.getElementById('tgToken')?.value || '',
-		chat_id: document.getElementById('tgChat')?.value || ''
+		bot_token: token,
+		chat_id: chat,
+		daily_report_time: dailyReportTime,
+		timer_notification_minutes: timerMinutes
 	});
 	
 	fetch('api.php', { 
@@ -945,7 +921,19 @@ function saveTelegram() {
 		body: data 
 	})
 	.then(r => r.json())
-	.then(res => alert(res.success ? 'Сохранено!' : 'Ошибка сохранения'))
+	.then(res => {
+		if (res.success) {
+			alert('Настройки успешно сохранены!');
+			// Обновляем информацию о текущих настройках
+			const currentReportTime = document.getElementById('current-report-time');
+			const currentTimerMinutes = document.getElementById('current-timer-minutes');
+			
+			if (currentReportTime) currentReportTime.textContent = dailyReportTime;
+			if (currentTimerMinutes) currentTimerMinutes.textContent = timerMinutes;
+		} else {
+			alert('Ошибка сохранения настроек');
+		}
+	})
 	.catch(err => {
 		console.error('Error saving telegram:', err);
 		alert('Ошибка сохранения');
@@ -973,9 +961,9 @@ function testTelegram() {
 
 // === НОВЫЕ ФУНКЦИИ ТЕСТИРОВАНИЯ ===
 
-// Тестирование уведомления о 24-часовом таймере
+// Тестирование уведомления о таймере
 function testTimerNotification() {
-	updateTestingStatus('⏳ Отправка тестового уведомления о 24-часовом таймере...', 'loading');
+	updateTestingStatus('⏳ Отправка тестового уведомления о таймере...', 'loading');
 	
 	fetch('api.php', { 
 		method: 'POST', 
@@ -984,7 +972,7 @@ function testTimerNotification() {
 	.then(r => r.json())
 	.then(res => {
 		if (res.success) {
-			updateTestingStatus('✅ Тестовое уведомление о 24-часовом таймере успешно отправлено!', 'success');
+			updateTestingStatus('✅ Тестовое уведомление о таймере успешно отправлено!', 'success');
 		} else {
 			const errorMsg = res.error ? `: ${res.error}` : '';
 			updateTestingStatus(`❌ Ошибка отправки уведомления таймера${errorMsg}`, 'error');
