@@ -305,7 +305,7 @@ $version = $version_data['version'] ?? 'неизвестно';
 ?>
 <!-- Footer -->
 <footer class="bg-gray-800 text-gray-400 text-center py-4 mt-auto">
-	2025 © bolgov0zero | Версия: <?php echo htmlspecialchars($version); ?>
+	2026 © bolgov0zero | Версия: <?php echo htmlspecialchars($version); ?>
 </footer>
 
 <!-- Scripts -->

@@ -244,7 +244,7 @@ function sendDailyReport($db, $bot_token, $chat_id, $report_time) {
 					foreach ($tasks as $task) {
 						$message .= "<blockquote>";
 						$message .= "📋 <b>Задача:</b> <i>{$task['task_title']}</i>\n🧑‍💻 <b>Исполнитель:</b> <i>{$task['responsible_name']}</i>";
-						$message .= "</blockquote>";
+						$message .= "</blockquote>\n";
 					}
 				}
 				
