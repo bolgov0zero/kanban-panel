@@ -110,7 +110,11 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 				</button>
 				<button onclick="openAddTask()" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-600" title="Новая задача">
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+						<img 
+						  src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23c3e2fe%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%20%3Cpath%20d%3D%22M15%202H6a2%202%200%200%200-2%202v16a2%202%200%200%200%202%202h12a2%202%200%200%200%202-2V7Z%22%2F%3E%20%3Cpath%20d%3D%22M14%202v4a2%202%200%200%200%202%202h4%22%2F%3E%20%3Cpath%20d%3D%22M9%2015h6%22%2F%3E%20%3Cpath%20d%3D%22M12%2018v-6%22%2F%3E%3C%2Fsvg%3E"
+						  alt="file plus icon"
+						  class="w-6 h-6"
+						/>
 					</svg>
 				</button>
 				<button onclick="openArchive()" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-600" title="Архив">
