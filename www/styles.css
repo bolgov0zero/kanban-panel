@@ -1812,3 +1812,7 @@
 	animation: spin 1s linear infinite;
 	display: inline-block;
 }
+
+button:hover img {
+	filter: brightness(0) invert(1);
+}
