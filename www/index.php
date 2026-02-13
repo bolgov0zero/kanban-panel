@@ -97,26 +97,24 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 			<div class="flex items-center gap-2 bg-gray-700 rounded-lg p-1">
 				<?php if ($isAdmin): ?>
 				<button onclick="openUserSettings()" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-600" title="Настройки">
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-					</svg>
+					<img src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2219%22%20height%3D%2219%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23c3e2fe%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20style%3D%22--noir-inline-color%3A%20%23a3d6fd%3B%22%20data-noir-inline-color%3D%22%22%3E%20%3Cpath%20d%3D%22M20%207h-9%22%3E%3C%2Fpath%3E%20%3Cpath%20d%3D%22M14%2017H5%22%3E%3C%2Fpath%3E%20%3Ccircle%20cx%3D%2217%22%20cy%3D%2217%22%20r%3D%223%22%3E%3C%2Fcircle%3E%20%3Ccircle%20cx%3D%227%22%20cy%3D%227%22%20r%3D%223%22%3E%3C%2Fcircle%3E%3C%2Fsvg%3E"
+						 alt="Настройки" class="w-5 h-5">
 				</button>
 				<?php endif; ?>
+			
 				<button onclick="openAddColumn()" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-600" title="Добавить колонку">
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-					</svg>
+					<img src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2219%22%20height%3D%2219%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23c3e2fe%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%20%3Cpath%20d%3D%22M12%2010v6%22%2F%3E%20%3Cpath%20d%3D%22M9%2013h6%22%2F%3E%20%3Cpath%20d%3D%22M20%2020a2%202%200%200%200%202-2V8a2%202%200%200%200-2-2h-7.9a2%202%200%200%201-1.69-.9L9.6%203.9A2%202%200%200%200%207.93%203H4a2%202%200%200%200-2%202v13a2%202%200%200%200%202%202Z%22%2F%3E%3C%2Fsvg%3E"
+						 alt="Добавить колонку" class="w-5 h-5">
 				</button>
+			
 				<button onclick="openAddTask()" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-600" title="Новая задача">
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-					</svg>
+					<img src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2219%22%20height%3D%2219%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23c3e2fe%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%20%3Cpath%20d%3D%22M15%202H6a2%202%200%200%200-2%202v16a2%202%200%200%200%202%202h12a2%202%200%200%200%202-2V7Z%22%2F%3E%20%3Cpath%20d%3D%22M14%202v4a2%202%200%200%200%202%202h4%22%2F%3E%20%3Cpath%20d%3D%22M9%2015h6%22%2F%3E%20%3Cpath%20d%3D%22M12%2018v-6%22%2F%3E%3C%2Fsvg%3E"
+						 alt="Новая задача" class="w-5 h-5">
 				</button>
+			
 				<button onclick="openArchive()" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-600" title="Архив">
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
-					</svg>
+					<img src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2219%22%20height%3D%2219%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23c3e2fe%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%20%3Crect%20width%3D%2220%22%20height%3D%225%22%20x%3D%222%22%20y%3D%223%22%20rx%3D%221%22%2F%3E%20%3Cpath%20d%3D%22M4%208v11a2%202%200%200%200%202%202h12a2%202%200%200%200%202-2V8%22%2F%3E%20%3Cpath%20d%3D%22M10%2012h4%22%2F%3E%3C%2Fsvg%3E"
+						 alt="Архив" class="w-5 h-5">
 				</button>
 			</div>
 
