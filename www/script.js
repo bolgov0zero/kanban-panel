@@ -7,8 +7,12 @@ let currentEditId = null;
 // === Drag & Drop ===
 function allowDrop(ev) { ev.preventDefault(); }
 function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
-function highlightDrop(el, on) { if (on) el.classList.add('drop-hover'); else el.classList.remove('drop-hover'); }
 
+function highlightDrop(el, on, ev) {
+	if (!on && ev && el.contains(ev.relatedTarget)) return; // не убираем если курсор перешёл в дочерний элемент
+	if (on) el.classList.add('drop-hover');
+	else el.classList.remove('drop-hover');
+}
 
 function drop(ev) {
 	ev.preventDefault();
@@ -17,26 +21,19 @@ function drop(ev) {
 	let task   = document.getElementById('task' + taskId);
 	let target = ev.currentTarget.querySelector('#col' + colId);
 	if (!target) return;
-	target.appendChild(task);
 
-	// Немедленно применяем стили - белый фон и цвет корешка из колонки
+	// Обновляем только цвет бордера под новую колонку
 	let colBg = ev.currentTarget.dataset.colBg || '#374151';
-	let txt = getContrastColor('#FFFFFF');
-	
-	// Сразу применяем стили
-	task.style.background = '#FFFFFF';
-	task.style.color = txt;
 	task.style.borderLeftColor = colBg;
+	target.appendChild(task);
 
 	ev.currentTarget.classList.remove('drop-hover');
 
-	// Отправляем запрос на сервер и обновляем страницу
+	// Сначала отправляем запрос, reload только после завершения
 	fetch('api.php', {
 		method: 'POST',
 		body: new URLSearchParams({ action: 'move_task', task_id: taskId, column_id: colId })
-	}).then(() => {
-		location.reload(); // Обновляем страницу для применения всех изменений
-	});
+	}).then(() => location.reload());
 }
 
 function getContrastColor(hex) {
@@ -223,21 +220,13 @@ function saveColumn() {
 		timer: document.getElementById('timer')?.checked ? 1 : 0
 	});
 	
-	fetch('api.php', { 
-		method: 'POST', 
-		body: data 
-	})
+	closeModal();
+	fetch('api.php', { method: 'POST', body: data })
 	.then(response => {
-		if (response.ok) {
-			location.reload();
-		} else {
-			alert('Ошибка при создании колонки');
-		}
+		if (response.ok) location.reload();
+		else alert('Ошибка при создании колонки');
 	})
-	.catch(err => {
-		console.error('Error:', err);
-		alert('Ошибка при создании колонки');
-	});
+	.catch(() => alert('Ошибка при создании колонки'));
 }
 
 function fillColumnForm(column) {
@@ -278,21 +267,13 @@ function updateColumn() {
 		timer: document.getElementById('editTimer')?.checked ? 1 : 0
 	});
 	
-	fetch('api.php', { 
-		method: 'POST', 
-		body: data 
-	})
+	closeModal();
+	fetch('api.php', { method: 'POST', body: data })
 	.then(response => {
-		if (response.ok) {
-			location.reload();
-		} else {
-			alert('Ошибка при обновлении колонки');
-		}
+		if (response.ok) location.reload();
+		else alert('Ошибка при обновлении колонки');
 	})
-	.catch(err => {
-		console.error('Error:', err);
-		alert('Ошибка при обновлении колонки');
-	});
+	.catch(() => alert('Ошибка при обновлении колонки'));
 }
 
 // Новая система вкладок для настроек
@@ -472,24 +453,18 @@ function getAvatarFromName(name) {
 
 function deleteColumn() {
 	if (!currentEditId) return;
-	
 	if (!confirm('Удалить колонку и все задачи в ней?')) return;
-	
-	fetch('api.php', { 
-		method: 'POST', 
-		body: new URLSearchParams({ action: 'delete_column', id: currentEditId }) 
+
+	closeModal();
+	fetch('api.php', {
+		method: 'POST',
+		body: new URLSearchParams({ action: 'delete_column', id: currentEditId })
 	})
 	.then(response => {
-		if (response.ok) {
-			location.reload();
-		} else {
-			alert('Ошибка при удалении колонки');
-		}
+		if (response.ok) location.reload();
+		else alert('Ошибка при удалении колонки');
 	})
-	.catch(err => {
-		console.error('Error:', err);
-		alert('Ошибка при удалении колонки');
-	});
+	.catch(() => alert('Ошибка при удалении колонки'));
 }
 
 // === Задачи ===
@@ -626,33 +601,21 @@ function saveTask() {
 		column_id: document.getElementById('taskCol')?.value || '1'
 	});
 	
-	fetch('api.php', { 
-		method: 'POST', 
-		body: data 
-	})
+	closeModal();
+	fetch('api.php', { method: 'POST', body: data })
 	.then(response => {
-		if (response.ok) {
-			location.reload();
-		} else {
-			alert('Ошибка при создании задачи');
-		}
+		if (response.ok) location.reload();
+		else alert('Ошибка при создании задачи');
 	})
-	.catch(err => {
-		console.error('Error:', err);
-		alert('Ошибка при создании задачи');
-	});
+	.catch(() => alert('Ошибка при создании задачи'));
 }
 
 function updateTask() {
 	if (!currentEditId) return;
-	
+
 	const title = document.getElementById('editTaskTitle')?.value;
-	
-	if (!title) {
-		alert('Введите заголовок задачи');
-		return;
-	}
-	
+	if (!title) { alert('Введите заголовок задачи'); return; }
+
 	let data = new URLSearchParams({
 		action: 'update_task',
 		id: currentEditId,
@@ -662,44 +625,30 @@ function updateTask() {
 		deadline: document.getElementById('editTaskDeadline')?.value || '',
 		importance: document.getElementById('editTaskImp')?.value || 'не срочно'
 	});
-	
-	fetch('api.php', { 
-		method: 'POST', 
-		body: data 
-	})
+
+	closeModal();
+	fetch('api.php', { method: 'POST', body: data })
 	.then(response => {
-		if (response.ok) {
-			location.reload();
-		} else {
-			alert('Ошибка при обновлении задачи');
-		}
+		if (response.ok) location.reload();
+		else alert('Ошибка при обновлении задачи');
 	})
-	.catch(err => {
-		console.error('Error:', err);
-		alert('Ошибка при обновлении задачи');
-	});
+	.catch(() => alert('Ошибка при обновлении задачи'));
 }
 
 function deleteTask() {
 	if (!currentEditId) return;
-	
 	if (!confirm('Удалить задачу?')) return;
-	
+
+	closeModal();
 	fetch('api.php', {
 		method: 'POST',
 		body: new URLSearchParams({ action: 'delete_task', id: currentEditId })
 	})
 	.then(response => {
-		if (response.ok) {
-			location.reload();
-		} else {
-			alert('Ошибка при удалении задачи');
-		}
+		if (response.ok) location.reload();
+		else alert('Ошибка при удалении задачи');
 	})
-	.catch(err => {
-		console.error('Error:', err);
-		alert('Ошибка при удалении задачи');
-	});
+	.catch(() => alert('Ошибка при удалении задачи'));
 }
 
 // === Архив ===

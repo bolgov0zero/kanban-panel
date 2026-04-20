@@ -127,8 +127,8 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 			 data-timer="<?= $col['timer'] ?>"
 			 ondrop="drop(event)"
 			 ondragover="allowDrop(event)"
-			 ondragenter="highlightDrop(this,true)"
-			 ondragleave="highlightDrop(this,false)"
+			 ondragenter="highlightDrop(this,true,event)"
+			 ondragleave="highlightDrop(this,false,event)"
 			 style="--col-accent:<?= $accent ?>;">
 
 			<!-- Column Header -->
