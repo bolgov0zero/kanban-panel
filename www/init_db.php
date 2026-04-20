@@ -126,6 +126,7 @@ ensureColumn('tasks', 'author', 'TEXT');
 ensureColumn('archive', 'responsible_name', 'TEXT');
 ensureColumn('telegram_settings', 'daily_report_time', 'TEXT DEFAULT "10:00"');
 ensureColumn('telegram_settings', 'timer_notification_minutes', 'INTEGER DEFAULT 1440');
+ensureColumn('telegram_settings', 'notifications_enabled', 'INTEGER DEFAULT 1');
 
 // === Начальные Telegram настройки: добавляем только если не существуют ===
 $tg_exists = $db->querySingle("SELECT COUNT(*) FROM telegram_settings WHERE id=1");

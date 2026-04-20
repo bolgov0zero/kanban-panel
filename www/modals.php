@@ -190,6 +190,12 @@
 
 						<div class="content-section">
 							<h4 class="section-title">Telegram уведомления</h4>
+							<div class="form-group" style="margin-bottom:12px;">
+								<label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+									<input type="checkbox" id="tgEnabled" style="width:16px;height:16px;cursor:pointer;">
+									<span class="form-label" style="margin:0;">Включить уведомления в Telegram</span>
+								</label>
+							</div>
 							<div class="form-grid">
 								<div class="form-group">
 									<label class="form-label">Токен бота</label>

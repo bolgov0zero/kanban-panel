@@ -9,29 +9,28 @@ $action = $_POST['action'] ?? '';
 
 // Функция отправки Telegram
 function sendTelegram($bot_token, $chat_id, $text) {
+	global $tg_notifications_enabled;
+	if (!$tg_notifications_enabled) return false;
 	if (empty($bot_token) || empty($chat_id)) return false;
 	$url = "https://api.telegram.org/bot{$bot_token}/sendMessage";
-	$data = [
-		'chat_id' => $chat_id,
-		'text' => $text,
-		'parse_mode' => 'HTML'
-	];
-	$options = [
-		'http' => [
-			'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-			'method' => 'POST',
-			'content' => http_build_query($data)
-		]
-	];
-	$context = stream_context_create($options);
-	$result = file_get_contents($url, false, $context);
+	$ch = curl_init($url);
+	curl_setopt_array($ch, [
+		CURLOPT_POST => true,
+		CURLOPT_POSTFIELDS => http_build_query(['chat_id' => $chat_id, 'text' => $text, 'parse_mode' => 'HTML']),
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_TIMEOUT => 5,
+		CURLOPT_CONNECTTIMEOUT => 5,
+	]);
+	$result = curl_exec($ch);
+	curl_close($ch);
 	return json_decode($result, true)['ok'] ?? false;
 }
 
 // Получаем Telegram настройки
-$tg_settings = $db->querySingle("SELECT bot_token, chat_id, daily_report_time, timer_notification_minutes FROM telegram_settings WHERE id=1", true);
+$tg_settings = $db->querySingle("SELECT bot_token, chat_id, daily_report_time, timer_notification_minutes, notifications_enabled FROM telegram_settings WHERE id=1", true);
 $bot_token = $tg_settings['bot_token'] ?? '';
 $chat_id = $tg_settings['chat_id'] ?? '';
+$tg_notifications_enabled = ($tg_settings['notifications_enabled'] ?? 1) ? true : false;
 
 // Получаем имя текущего пользователя
 $user_name_stmt = $db->prepare("SELECT name FROM users WHERE username = :u");
@@ -41,9 +40,9 @@ $user_name = $user_name_stmt->execute()->fetchArray(SQLITE3_ASSOC)['name'] ?? $u
 switch ($action) {
 	case 'get_telegram_settings':
 		if(!$isAdmin) exit('forbidden');
-		$stmt = $db->prepare("SELECT bot_token, chat_id, daily_report_time, timer_notification_minutes FROM telegram_settings WHERE id=1");
+		$stmt = $db->prepare("SELECT bot_token, chat_id, daily_report_time, timer_notification_minutes, notifications_enabled FROM telegram_settings WHERE id=1");
 		$res = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
-		echo json_encode($res ?: ['bot_token' => '', 'chat_id' => '', 'daily_report_time' => '10:00', 'timer_notification_minutes' => 1440], JSON_UNESCAPED_UNICODE);
+		echo json_encode($res ?: ['bot_token' => '', 'chat_id' => '', 'daily_report_time' => '10:00', 'timer_notification_minutes' => 1440, 'notifications_enabled' => 1], JSON_UNESCAPED_UNICODE);
 		break;
 
 	case 'save_telegram_settings':
@@ -52,21 +51,23 @@ switch ($action) {
 		$chat = trim($_POST['chat_id'] ?? '');
 		$daily_report_time = trim($_POST['daily_report_time'] ?? '10:00');
 		$timer_minutes = (int)($_POST['timer_notification_minutes'] ?? 1440);
-		
+		$notif_enabled = isset($_POST['notifications_enabled']) ? (int)$_POST['notifications_enabled'] : 1;
+
 		// Валидация времени
 		if (!preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $daily_report_time)) {
 			$daily_report_time = '10:00';
 		}
-		
+
 		// Валидация минут (от 1 минуты до 30 дней)
 		if ($timer_minutes < 1) $timer_minutes = 1;
 		if ($timer_minutes > 43200) $timer_minutes = 43200; // 30 дней
-		
-		$stmt = $db->prepare("INSERT OR REPLACE INTO telegram_settings (id, bot_token, chat_id, daily_report_time, timer_notification_minutes) VALUES (1, :t, :c, :drt, :tnm)");
+
+		$stmt = $db->prepare("INSERT OR REPLACE INTO telegram_settings (id, bot_token, chat_id, daily_report_time, timer_notification_minutes, notifications_enabled) VALUES (1, :t, :c, :drt, :tnm, :ne)");
 		$stmt->bindValue(':t', $token, SQLITE3_TEXT);
 		$stmt->bindValue(':c', $chat, SQLITE3_TEXT);
 		$stmt->bindValue(':drt', $daily_report_time, SQLITE3_TEXT);
 		$stmt->bindValue(':tnm', $timer_minutes, SQLITE3_INTEGER);
+		$stmt->bindValue(':ne', $notif_enabled, SQLITE3_INTEGER);
 		$stmt->execute();
 		echo json_encode(['success' => true]);
 		break;

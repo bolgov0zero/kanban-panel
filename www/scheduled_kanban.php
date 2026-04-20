@@ -11,7 +11,7 @@ if (!file_exists($db_path)) {
 $db = new SQLite3($db_path);
 
 // Получаем настройки Telegram
-$tg_settings = $db->querySingle("SELECT bot_token, chat_id, daily_report_time, timer_notification_minutes FROM telegram_settings WHERE id=1", true);
+$tg_settings = $db->querySingle("SELECT bot_token, chat_id, daily_report_time, timer_notification_minutes, notifications_enabled FROM telegram_settings WHERE id=1", true);
 $bot_token = $tg_settings['bot_token'] ?? '';
 $chat_id = $tg_settings['chat_id'] ?? '';
 $daily_report_time = $tg_settings['daily_report_time'] ?? '10:00';
@@ -19,6 +19,11 @@ $timer_minutes = $tg_settings['timer_notification_minutes'] ?? 1440;
 
 if (empty($bot_token) || empty($chat_id)) {
 	error_log('Telegram settings not configured');
+	exit;
+}
+
+if (!($tg_settings['notifications_enabled'] ?? 1)) {
+	error_log('Telegram notifications disabled');
 	exit;
 }
 
@@ -33,36 +38,31 @@ function sendTelegram($bot_token, $chat_id, $text) {
 		error_log("Cannot send Telegram: bot_token or chat_id empty");
 		return false;
 	}
-	
+
 	$url = "https://api.telegram.org/bot{$bot_token}/sendMessage";
-	$data = [
-		'chat_id' => $chat_id,
-		'text' => $text,
-		'parse_mode' => 'HTML'
-	];
-	
-	$options = [
-		'http' => [
-			'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-			'method' => 'POST',
-			'content' => http_build_query($data)
-		]
-	];
-	
-	$context = stream_context_create($options);
-	$result = @file_get_contents($url, false, $context);
-	
+	$ch = curl_init($url);
+	curl_setopt_array($ch, [
+		CURLOPT_POST => true,
+		CURLOPT_POSTFIELDS => http_build_query(['chat_id' => $chat_id, 'text' => $text, 'parse_mode' => 'HTML']),
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_TIMEOUT => 5,
+		CURLOPT_CONNECTTIMEOUT => 5,
+	]);
+	$result = curl_exec($ch);
+	$curl_error = curl_error($ch);
+	curl_close($ch);
+
 	if ($result === false) {
-		error_log("Telegram send failed");
+		error_log("Telegram send failed: " . $curl_error);
 		return false;
 	}
-	
+
 	$response = json_decode($result, true);
 	if (!$response['ok']) {
 		error_log("Telegram API error: " . ($response['description'] ?? 'Unknown'));
 		return false;
 	}
-	
+
 	return true;
 }
 

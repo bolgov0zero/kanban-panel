@@ -370,6 +370,8 @@ function fillSettingsData(usersData, tgData, linksData) {
 	if (timerNotificationMinutes) {
 		timerNotificationMinutes.value = tgData.timer_notification_minutes || 1440;
 	}
+	const tgEnabled = document.getElementById('tgEnabled');
+	if (tgEnabled) tgEnabled.checked = (tgData.notifications_enabled ?? 1) == 1;
 	
 	// Обновляем информацию о текущих настройках на вкладке тестирования
 	const currentReportTime = document.getElementById('current-report-time');
@@ -916,12 +918,14 @@ function saveTelegram() {
 		return;
 	}
 	
+	const notifEnabled = document.getElementById('tgEnabled')?.checked ? 1 : 0;
 	let data = new URLSearchParams({
 		action: 'save_telegram_settings',
 		bot_token: token,
 		chat_id: chat,
 		daily_report_time: dailyReportTime,
-		timer_notification_minutes: timerMinutes
+		timer_notification_minutes: timerMinutes,
+		notifications_enabled: notifEnabled
 	});
 	
 	fetch('api.php', { 
