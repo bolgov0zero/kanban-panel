@@ -7,6 +7,9 @@ $user = $_SESSION['user'];
 $isAdmin = $_SESSION['is_admin'] ?? 0;
 $action = $_POST['action'] ?? '';
 
+// Миграция: добавить колонку если её нет
+@$db->exec("ALTER TABLE telegram_settings ADD COLUMN notifications_enabled INTEGER DEFAULT 1");
+
 // Функция отправки Telegram
 function sendTelegram($bot_token, $chat_id, $text) {
 	global $tg_notifications_enabled;
