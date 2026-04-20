@@ -69,10 +69,8 @@ function sendEmail($text) {
 		);
 		$mail->Body = nl2br($body);
 		$plain = $text;
-		$plain = preg_replace('/<blockquote[^>]*>(.*?)<\/blockquote>/si', "\n| $1\n", $plain);
-		$plain = str_replace(['<b>', '</b>', '<i>', '</i>'], '', $plain);
 		$plain = str_replace('<br>', "\n", $plain);
-		$plain = strip_tags($plain);
+		$plain = preg_replace('/<(?!\\/?(b|i|blockquote)\\b)[^>]+>/', '', $plain);
 		$plain = html_entity_decode($plain, ENT_QUOTES, 'UTF-8');
 		$plain = preg_replace('/\n{3,}/', "\n\n", trim($plain));
 		$mail->AltBody = $plain;
