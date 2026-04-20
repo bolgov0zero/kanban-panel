@@ -119,153 +119,120 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 	<div id="board">
 		<?php while ($col = $columns->fetchArray(SQLITE3_ASSOC)):
 			$tasks_count = $db->querySingle("SELECT COUNT(*) FROM tasks WHERE column_id={$col['id']}");
+			$accent = htmlspecialchars($col['bg_color']);
 		?>
-		<div
+		<div class="col-wrap"
 			 data-col-id="<?= $col['id'] ?>"
-			 data-col-bg="<?= $col['bg_color'] ?>"
+			 data-col-bg="<?= $accent ?>"
 			 data-auto-complete="<?= $col['auto_complete'] ?>"
 			 data-timer="<?= $col['timer'] ?>"
-			 ondrop="drop(event)" 
-			 ondragover="allowDrop(event)" 
-			 ondragenter="highlightDrop(this,true)" 
-			 ondragleave="highlightDrop(this,false)">
-			
+			 ondrop="drop(event)"
+			 ondragover="allowDrop(event)"
+			 ondragenter="highlightDrop(this,true)"
+			 ondragleave="highlightDrop(this,false)"
+			 style="--col-accent:<?= $accent ?>;">
+
 			<!-- Column Header -->
-			<div class="column-header" style="background:<?= $col['bg_color'] ?>;color:<?= getContrastColor($col['bg_color']) ?>;">
-				<div class="column-header-content">
-					<h2 class="column-title"><?= $col['name'] ?></h2>
+			<div class="col-head">
+				<div class="col-head-left">
+					<span class="col-dot"></span>
+					<span class="col-name"><?= htmlspecialchars($col['name']) ?></span>
 				</div>
-				
-				<span class="task-count"><?= $tasks_count ?></span>
-				<button onclick="editColumn(<?= $col['id'] ?>)" class="column-edit-btn" title="Редактировать колонку">
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-					</svg>
-				</button>
+				<div class="col-head-right">
+					<span class="col-count"><?= $tasks_count ?></span>
+					<button onclick="editColumn(<?= $col['id'] ?>)" class="col-edit-btn" title="Редактировать колонку">
+						<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+					</button>
+				</div>
 			</div>
 
-			<!-- Tasks Container -->
-			<div class="min-h-200" id="col<?= $col['id'] ?>">
+			<!-- Tasks -->
+			<div class="tasks-list" id="col<?= $col['id'] ?>">
 				<?php
-				$tq = $db->query("SELECT t.*, 
-						 COALESCE(u1.name, t.responsible) as responsible_display_name,
-						 COALESCE(u2.name, t.author) as author_display_name,
-						 c.timer as column_timer
-				  FROM tasks t 
-				  LEFT JOIN users u1 ON t.responsible = u1.username
-				  LEFT JOIN users u2 ON t.author = u2.username
-				  JOIN columns c ON t.column_id = c.id
-				  WHERE t.column_id={$col['id']}
-				  ORDER BY t.created_at DESC");
-				
+				$tq = $db->query("SELECT t.*,
+						COALESCE(u1.name, t.responsible) as responsible_display_name,
+						COALESCE(u2.name, t.author) as author_display_name,
+						c.timer as column_timer
+					FROM tasks t
+					LEFT JOIN users u1 ON t.responsible = u1.username
+					LEFT JOIN users u2 ON t.author = u2.username
+					JOIN columns c ON t.column_id = c.id
+					WHERE t.column_id={$col['id']}
+					ORDER BY t.created_at DESC");
+
 				while($task = $tq->fetchArray(SQLITE3_ASSOC)):
-					$colors = ['не срочно' => 'bg-green-500', 'средне' => 'bg-yellow-500', 'срочно' => 'bg-red-500'];
-					$tagColor = $colors[$task['importance']] ?? 'bg-gray-600';
-					$author = $task['author'] ?? $user;
+					$importanceColors = ['не срочно' => '#22c55e', 'средне' => '#eab308', 'срочно' => '#ef4444'];
+					$impColor = $importanceColors[$task['importance']] ?? '#6b7280';
+					$author    = $task['author'] ?? $user;
 					$authorName = $task['author_display_name'] ?? $author;
-					$respName = $task['responsible_display_name'] ?? $task['responsible'];
+					$respName  = $task['responsible_display_name'] ?? $task['responsible'];
 					$authorAvatar = $userAvatars[$author] ?? getAvatarFromName($author);
-					$respAvatar = $userAvatars[$task['responsible']] ?? getAvatarFromName($task['responsible']);
+					$respAvatar   = $userAvatars[$task['responsible']] ?? getAvatarFromName($task['responsible']);
 				?>
-				<div draggable="true" 
-					 ondragstart="drag(event)" 
-					 id="task<?= $task['id'] ?>" 
-					 class="p-3 rounded cursor-move mb-3 task-card"
-					 style="border-left-color:<?= $col['bg_color'] ?>;"
+				<div draggable="true"
+					 ondragstart="drag(event)"
+					 id="task<?= $task['id'] ?>"
+					 class="task-card"
+					 style="border-left-color:<?= $accent ?>;"
 					 <?php if($col['timer'] && !empty($task['moved_at'])): ?>
-					 data-moved-at="<?= htmlspecialchars($task['moved_at']) ?>" 
+					 data-moved-at="<?= htmlspecialchars($task['moved_at']) ?>"
 					 data-task-id="<?= $task['id'] ?>"
-					 <?php endif; ?>
-					 >
-					
-					<!-- Task Header -->
-					<div class="mb-2">
-						<p class="text-xs text-gray-500 -mb-1 created-date" data-created="<?= htmlspecialchars($task['created_at']) ?>"></p>
-						<div class="flex justify-between items-start mb-1">
-							<h3 class="font-semibold text-sm"><?= htmlspecialchars($task['title']) ?></h3>
-							<button onclick="editTask(<?= $task['id'] ?>)" class="text-sm opacity-75 hover:opacity-100" title="Редактировать задачу">
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-								</svg>
-							</button>
-						</div>
+					 <?php endif; ?>>
+
+					<div class="task-top">
+						<p class="task-date created-date" data-created="<?= htmlspecialchars($task['created_at']) ?>"></p>
+						<button onclick="editTask(<?= $task['id'] ?>)" class="task-edit-btn" title="Редактировать">
+							<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+						</button>
 					</div>
 
-					<!-- Task Description -->
-					<div class="text-xs mb-3">
-						<?php 
-						$desc = $task['description'] ?? '';
-						
-						// Автолинкование URL
+					<h3 class="task-title"><?= htmlspecialchars($task['title']) ?></h3>
+
+					<?php
+					$desc = $task['description'] ?? '';
+					if (!empty($desc)):
 						$desc = preg_replace_callback('/(?<!\()\b(https?:\/\/[^\s<]+|www\.[^\s<]+)\b/i', function($m) {
 							$url = $m[0];
 							if (strpos($url, 'http') !== 0) $url = 'http://' . $url;
 							$host = parse_url($url, PHP_URL_HOST);
 							$short = $host ?: (strlen($url) > 30 ? substr($url, 0, 30) . '...' : $url);
-							$short_esc = htmlspecialchars($short, ENT_QUOTES, 'UTF-8');
-							$url_esc = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
-							return '<a href="' . $url_esc . '" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">' . $short_esc . '</a>';
+							return '<a href="' . htmlspecialchars($url, ENT_QUOTES) . '" target="_blank" rel="noopener noreferrer" class="task-link">' . htmlspecialchars($short, ENT_QUOTES) . '</a>';
 						}, $desc);
-						
-						// Markdown ссылки
 						$desc = preg_replace_callback('/\[([^\[\]]+)\]\((https?:\/\/[^\s\)]+)\)/i', function($m) {
-							$text = htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8');
-							$url = htmlspecialchars($m[2], ENT_QUOTES, 'UTF-8');
-							return '<a href="' . $url . '" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">' . $text . '</a>';
+							return '<a href="' . htmlspecialchars($m[2], ENT_QUOTES) . '" target="_blank" rel="noopener noreferrer" class="task-link">' . htmlspecialchars($m[1], ENT_QUOTES) . '</a>';
 						}, $desc);
-						
-						// Переносы строк
 						$desc = nl2br($desc, false);
-						
-						echo $desc;
-						?>
-					</div>
+					?>
+					<div class="task-desc"><?= $desc ?></div>
+					<?php endif; ?>
 
-					<!-- Task Meta -->
-					<div class="flex flex-col gap-2">
-						<?php if (!empty($task['deadline'])): ?>
-							<div class="w-fit">
-								<span class="bg-red-500 bg-opacity-20 text-red-500 px-2 py-1 rounded text-xs deadline-tag" data-deadline="<?= htmlspecialchars($task['deadline']) ?>">
-									📅 <span class="deadline-text"></span>
-								</span>
-							</div>
-						<?php endif; ?>
-						
-						<div class="flex justify-between items-center">
-							<!-- Users -->
-							<div class="flex gap-2">
-								<div class="ava-style w-9 h-7 bg-blue-500 flex items-center justify-center text-white text-xs" title="Автор: <?= htmlspecialchars($authorName) ?>">
-									<?= $authorAvatar ?>
-								</div>
-								<div class="arrow">
-									⇢
-								</div>
-								<div class="ava-style w-9 h-7 bg-green-500 flex items-center justify-center text-white text-xs" title="Исполнитель: <?= htmlspecialchars($respName) ?>">
-									<?= $respAvatar ?>
-								</div>
-							</div>
+					<div class="task-footer">
+						<div class="task-footer-left">
+							<?php if (!empty($task['deadline'])): ?>
+							<span class="task-badge badge-deadline deadline-tag" data-deadline="<?= htmlspecialchars($task['deadline']) ?>">
+								📅 <span class="deadline-text"></span>
+							</span>
+							<?php endif; ?>
+						</div>
 
-							<!-- Status & Actions -->
-							<div class="flex flex-col items-end gap-1">
-								<?php if($task['completed']): ?>
-									<div class="flex gap-1 items-center">
-										<span class="bg-blue-600 text-white px-2 py-1 rounded text-xs">Завершено</span>
-										<button onclick="archiveNow(<?= $task['id'] ?>)" class="text-sm hover:scale-110 transition-transform" title="Архивировать задачу">
-											<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
-											</svg>
-										</button>
-									</div>
-								<?php else: ?>
-									<span class="<?= $tagColor ?> text-white px-2 py-1 rounded text-xs"><?= htmlspecialchars($task['importance']) ?></span>
-									<?php if($col['timer'] && !empty($task['moved_at'])): ?>
-										<span class="!bg-red-600 !bg-opacity-20 text-red-500 px-2 py-1 rounded text-xs timer-display" id="timer-<?= $task['id'] ?>"
-										style="background-color: rgba(220, 38, 38, 0.2) !important;">
-											⏱️ --:--:--
-										</span>
-									<?php endif; ?>
+						<div class="task-avatars">
+							<span class="task-avatar" title="Автор: <?= htmlspecialchars($authorName) ?>"><?= $authorAvatar ?></span>
+							<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--text-4);flex-shrink:0;"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+							<span class="task-avatar" title="Исполнитель: <?= htmlspecialchars($respName) ?>"><?= $respAvatar ?></span>
+						</div>
+
+						<div class="task-status">
+							<?php if($task['completed']): ?>
+								<span class="task-badge badge-done">✓ Завершено</span>
+								<button onclick="archiveNow(<?= $task['id'] ?>)" class="task-archive-btn" title="Архивировать">
+									<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 002 2h12a2 2 0 002-2V8"/><path d="M10 12h4"/></svg>
+								</button>
+							<?php else: ?>
+								<span class="task-badge" style="background:<?= $impColor ?>22;color:<?= $impColor ?>;border-color:<?= $impColor ?>44;"><?= htmlspecialchars($task['importance']) ?></span>
+								<?php if($col['timer'] && !empty($task['moved_at'])): ?>
+									<span class="task-badge badge-timer timer-display" id="timer-<?= $task['id'] ?>">⏱ —</span>
 								<?php endif; ?>
-							</div>
+							<?php endif; ?>
 						</div>
 					</div>
 				</div>

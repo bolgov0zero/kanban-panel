@@ -21,14 +21,10 @@ $chat_id = $tg_settings['chat_id'] ?? '';
 $daily_report_time = $tg_settings['daily_report_time'] ?? '10:00';
 $timer_minutes = $tg_settings['timer_notification_minutes'] ?? 1440;
 
-if (empty($bot_token) || empty($chat_id)) {
-	error_log('Telegram settings not configured');
-	exit;
-}
-
-if (!($tg_settings['notifications_enabled'] ?? 1)) {
-	error_log('Telegram notifications disabled');
-	exit;
+$tg_enabled = !empty($bot_token) && !empty($chat_id) && ($tg_settings['notifications_enabled'] ?? 1);
+if (!$tg_enabled) {
+	error_log('Telegram notifications disabled or not configured');
+	// не выходим — email может быть включён
 }
 
 error_log("=== CRON STARTED at " . date('Y-m-d H:i:s') . " ===");
