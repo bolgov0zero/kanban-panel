@@ -81,55 +81,33 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 <script src="script.js" defer></script>
 <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
-<!-- Header -->
-<header class="bg-gray-800 border-b border-gray-700 sticky top-0 z-40">
-	<div class="flex items-center justify-between p-6">
-		<div class="flex items-center gap-4">
-			<div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-				<span class="text-white font-bold">K</span>
-			</div>
-			<h1 class="text-xl font-bold text-white">Kanban Доска</h1>
+<body>
+<header>
+	<div class="header-inner">
+		<div class="header-left">
+			<div class="logo-icon">K</div>
+			<span class="logo-text">Kanban Доска</span>
 		</div>
-		
-		<div class="flex items-center gap-4">
-			<!-- Action Buttons -->
-			<div class="flex items-center gap-2 bg-gray-700 rounded-lg p-1">
-				<?php if ($isAdmin): ?>
-				<button onclick="openUserSettings()" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-600" title="Настройки">
-					<img src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2219%22%20height%3D%2219%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23c3e2fe%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20style%3D%22--noir-inline-color%3A%20%23a3d6fd%3B%22%20data-noir-inline-color%3D%22%22%3E%20%3Cpath%20d%3D%22M20%207h-9%22%3E%3C%2Fpath%3E%20%3Cpath%20d%3D%22M14%2017H5%22%3E%3C%2Fpath%3E%20%3Ccircle%20cx%3D%2217%22%20cy%3D%2217%22%20r%3D%223%22%3E%3C%2Fcircle%3E%20%3Ccircle%20cx%3D%227%22%20cy%3D%227%22%20r%3D%223%22%3E%3C%2Fcircle%3E%3C%2Fsvg%3E"
-						 alt="Настройки" class="w-5 h-5">
-				</button>
-				<?php endif; ?>
-			
-				<button onclick="openAddColumn()" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-600" title="Добавить колонку">
-					<img src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2219%22%20height%3D%2219%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23c3e2fe%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%20%3Cpath%20d%3D%22M12%2010v6%22%2F%3E%20%3Cpath%20d%3D%22M9%2013h6%22%2F%3E%20%3Cpath%20d%3D%22M20%2020a2%202%200%200%200%202-2V8a2%202%200%200%200-2-2h-7.9a2%202%200%200%201-1.69-.9L9.6%203.9A2%202%200%200%200%207.93%203H4a2%202%200%200%200-2%202v13a2%202%200%200%200%202%202Z%22%2F%3E%3C%2Fsvg%3E"
-						 alt="Добавить колонку" class="w-5 h-5">
-				</button>
-			
-				<button onclick="openAddTask()" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-600" title="Новая задача">
-					<img src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2219%22%20height%3D%2219%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23c3e2fe%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%20%3Cpath%20d%3D%22M15%202H6a2%202%200%200%200-2%202v16a2%202%200%200%200%202%202h12a2%202%200%200%200%202-2V7Z%22%2F%3E%20%3Cpath%20d%3D%22M14%202v4a2%202%200%200%200%202%202h4%22%2F%3E%20%3Cpath%20d%3D%22M9%2015h6%22%2F%3E%20%3Cpath%20d%3D%22M12%2018v-6%22%2F%3E%3C%2Fsvg%3E"
-						 alt="Новая задача" class="w-5 h-5">
-				</button>
-			
-				<button onclick="openArchive()" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-600" title="Архив">
-					<img src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2219%22%20height%3D%2219%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23c3e2fe%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%20%3Crect%20width%3D%2220%22%20height%3D%225%22%20x%3D%222%22%20y%3D%223%22%20rx%3D%221%22%2F%3E%20%3Cpath%20d%3D%22M4%208v11a2%202%200%200%200%202%202h12a2%202%200%200%200%202-2V8%22%2F%3E%20%3Cpath%20d%3D%22M10%2012h4%22%2F%3E%3C%2Fsvg%3E"
-						 alt="Архив" class="w-5 h-5">
-				</button>
-			</div>
-
-			<!-- User Profile -->
-			<div class="flex items-center gap-4">
-				<div class="w-11 h-11 bg-gradient-to-r from-green-500 to-blue-500 ava-hed-style flex items-center justify-center text-white" title="<?= htmlspecialchars($user_name) ?>">
-					<?= getAvatarFromName($user_name) ?>
-				</div>
-				<span class="text-gray-300"><?= htmlspecialchars($user_name) ?></span>
-			</div>
-
-			<a href="logout.php" class="btn-danger text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-				</svg>
+		<div class="header-right">
+			<?php if ($isAdmin): ?>
+			<button onclick="openUserSettings()" class="nav-btn" title="Настройки">
+				<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+			</button>
+			<?php endif; ?>
+			<button onclick="openAddColumn()" class="nav-btn" title="Добавить колонку">
+				<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+			</button>
+			<button onclick="openAddTask()" class="nav-btn" title="Новая задача">
+				<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg>
+			</button>
+			<button onclick="openArchive()" class="nav-btn" title="Архив">
+				<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
+			</button>
+			<div class="header-divider"></div>
+			<div class="ava-hed-style" title="<?= htmlspecialchars($user_name) ?>"><?= getAvatarFromName($user_name) ?></div>
+			<span class="username-text"><?= htmlspecialchars($user_name) ?></span>
+			<a href="logout.php" class="btn-danger">
+				<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
 				Выйти
 			</a>
 		</div>
@@ -137,12 +115,12 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 </header>
 
 <!-- Main Content -->
-<main class="flex-1 p-6">
-	<div id="board" class="flex gap-6 overflow-x-auto pb-6">
-		<?php while ($col = $columns->fetchArray(SQLITE3_ASSOC)): 
+<main>
+	<div id="board">
+		<?php while ($col = $columns->fetchArray(SQLITE3_ASSOC)):
 			$tasks_count = $db->querySingle("SELECT COUNT(*) FROM tasks WHERE column_id={$col['id']}");
 		?>
-		<div class="w-80 bg-gray-800 rounded-lg p-4"
+		<div
 			 data-col-id="<?= $col['id'] ?>"
 			 data-col-bg="<?= $col['bg_color'] ?>"
 			 data-auto-complete="<?= $col['auto_complete'] ?>"
@@ -302,7 +280,7 @@ $version_data = json_decode(file_get_contents(__DIR__ . '/version.json'), true);
 $version = $version_data['version'] ?? 'неизвестно';
 ?>
 <!-- Footer -->
-<footer class="bg-gray-800 text-gray-400 text-center py-4 mt-auto">
+<footer>
 	2026 <font color="#E1E1E1">©</font> bolgov0zero<br/><font color="#E1E1E1"><b>Версия:</b></font> <font color="#2E958F"><b><?php echo htmlspecialchars($version); ?></b></font>
 </footer>
 

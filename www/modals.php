@@ -69,18 +69,15 @@
 <div id="settings-modal-template" style="display: none;">
 	<div class="modal-container xlarge">
 		<div class="modal-header">
-			<h2 class="modal-title">Управление системой</h2>
-			<button onclick="closeModal()" class="modal-close-btn">
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-				</svg>
-			</button>
+			<h2 class="modal-title" style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3);">Настройки</h2>
+			<button onclick="closeModal()" class="modal-close-btn">×</button>
 		</div>
 
 		<div class="modal-body" style="padding: 0;">
 			<div class="settings-layout">
 				<!-- Боковое меню -->
 				<div class="settings-sidebar">
+					<div class="sidebar-label">Раздел</div>
 					<div class="settings-nav">
 						<button data-tab="users" class="settings-menu-item active">
 							<div class="nav-icon">
