@@ -171,8 +171,8 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 				<div draggable="true"
 					 ondragstart="drag(event)"
 					 id="task<?= $task['id'] ?>"
-					 class="task-card"
-					 style="border-left-color:<?= $accent ?>;"
+					 class="task-card<?= $task['completed'] ? ' task-card--done' : '' ?>"
+					 style="--card-accent:<?= $accent ?>;"
 					 <?php if($col['timer'] && !empty($task['moved_at'])): ?>
 					 data-moved-at="<?= htmlspecialchars($task['moved_at']) ?>"
 					 data-task-id="<?= $task['id'] ?>"
@@ -206,32 +206,34 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 					<?php endif; ?>
 
 					<div class="task-footer">
-						<div class="task-footer-left">
+						<div class="task-badges">
+							<?php if($task['completed']): ?>
+								<span class="task-badge badge-done">✓ Выполнено</span>
+							<?php else: ?>
+								<span class="task-badge badge-imp" style="color:<?= $impColor ?>;background:<?= $impColor ?>18;border-color:<?= $impColor ?>40;"><?= htmlspecialchars($task['importance']) ?></span>
+							<?php endif; ?>
 							<?php if (!empty($task['deadline'])): ?>
 							<span class="task-badge badge-deadline deadline-tag" data-deadline="<?= htmlspecialchars($task['deadline']) ?>">
-								📅 <span class="deadline-text"></span>
+								<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+								<span class="deadline-text"></span>
 							</span>
 							<?php endif; ?>
-						</div>
-
-						<div class="task-avatars">
-							<span class="task-avatar" title="Автор: <?= htmlspecialchars($authorName) ?>"><?= $authorAvatar ?></span>
-							<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--text-4);flex-shrink:0;"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
-							<span class="task-avatar" title="Исполнитель: <?= htmlspecialchars($respName) ?>"><?= $respAvatar ?></span>
-						</div>
-
-						<div class="task-status">
-							<?php if($task['completed']): ?>
-								<span class="task-badge badge-done">✓ Завершено</span>
-								<button onclick="archiveNow(<?= $task['id'] ?>)" class="task-archive-btn" title="Архивировать">
-									<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 002 2h12a2 2 0 002-2V8"/><path d="M10 12h4"/></svg>
-								</button>
-							<?php else: ?>
-								<span class="task-badge" style="background:<?= $impColor ?>22;color:<?= $impColor ?>;border-color:<?= $impColor ?>44;"><?= htmlspecialchars($task['importance']) ?></span>
-								<?php if($col['timer'] && !empty($task['moved_at'])): ?>
-									<span class="task-badge badge-timer timer-display" id="timer-<?= $task['id'] ?>">⏱ —</span>
-								<?php endif; ?>
+							<?php if($col['timer'] && !empty($task['moved_at'])): ?>
+								<span class="task-badge badge-timer timer-display" id="timer-<?= $task['id'] ?>">⏱ —</span>
 							<?php endif; ?>
+						</div>
+
+						<div class="task-right">
+							<?php if($task['completed']): ?>
+							<button onclick="archiveNow(<?= $task['id'] ?>)" class="task-archive-btn" title="В архив">
+								<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 002 2h12a2 2 0 002-2V8"/><path d="M10 12h4"/></svg>
+							</button>
+							<?php endif; ?>
+							<div class="task-avatars">
+								<span class="task-avatar" title="Автор: <?= htmlspecialchars($authorName) ?>"><?= $authorAvatar ?></span>
+								<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" class="task-avatar-arrow"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+								<span class="task-avatar task-avatar--resp" title="Исполнитель: <?= htmlspecialchars($respName) ?>"><?= $respAvatar ?></span>
+							</div>
 						</div>
 					</div>
 				</div>
