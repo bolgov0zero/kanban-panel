@@ -12,6 +12,7 @@ if (!file_exists($db_dir)) {
 
 // Создаем соединение с базой данных
 $db = new SQLite3($db_path);
+$db->exec("PRAGMA journal_mode=WAL");
 
 function ensureColumn($table, $column, $definition) {
 	global $db;

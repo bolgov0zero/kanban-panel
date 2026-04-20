@@ -9,6 +9,7 @@ if (!file_exists($db_path)) {
 }
 
 $db = new SQLite3($db_path);
+$db->busyTimeout(3000);
 
 // Получаем настройки Telegram
 $tg_settings = $db->querySingle("SELECT bot_token, chat_id, daily_report_time, timer_notification_minutes, notifications_enabled FROM telegram_settings WHERE id=1", true);
