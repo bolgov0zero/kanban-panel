@@ -402,20 +402,6 @@
 							<div class="testing-container">
 								<div class="testing-card">
 									<div class="testing-card-header">
-										<div class="testing-card-icon" style="background:rgba(59,130,246,0.15);">
-											<svg width="18" height="18" fill="none" stroke="#3b82f6" stroke-width="1.75" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-										</div>
-										<span class="testing-card-title">Базовое уведомление</span>
-									</div>
-									<p class="testing-card-description">Проверка подключения к Telegram и отправки простого сообщения.</p>
-									<button onclick="testTelegram()" class="testing-button testing-button-blue">
-										<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-										Отправить тест
-									</button>
-								</div>
-
-								<div class="testing-card">
-									<div class="testing-card-header">
 										<div class="testing-card-icon" style="background:rgba(245,158,11,0.15);">
 											<svg width="18" height="18" fill="none" stroke="#f59e0b" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
 										</div>

@@ -163,113 +163,65 @@ switch ($action) {
 	// НОВЫЙ CASE: Тестирование таймера
 	case 'test_timer_notification':
 		if(!$isAdmin) exit('forbidden');
-		
-		if (empty($bot_token) || empty($chat_id)) {
-			echo json_encode(['success' => false, 'error' => 'Telegram не настроен']);
-			break;
-		}
-		
-		// Получаем настройки таймера
+
 		$timer_minutes = $tg_settings['timer_notification_minutes'] ?? 1440;
 		$hours = floor($timer_minutes / 60);
-		$minutes = $timer_minutes % 60;
-		$time_text = $hours > 0 ? "{$hours}ч {$minutes}м" : "{$minutes}м";
-		
-		// Ищем задачу с включенным таймером для демонстрации
-		$task_query = "SELECT t.*, c.name as column_name, 
-							  COALESCE(u.name, t.responsible) as responsible_name
-					   FROM tasks t 
-					   JOIN columns c ON t.column_id = c.id 
-					   LEFT JOIN users u ON t.responsible = u.username
-					   WHERE c.timer = 1 
-					   LIMIT 1";
-		
-		$task = $db->query($task_query)->fetchArray(SQLITE3_ASSOC);
-		
-		if ($task) {
-			// Используем реальную задачу
-			$title = htmlspecialchars($task['title']);
-			$column_name = htmlspecialchars($task['column_name']);
-			$responsible = htmlspecialchars($task['responsible_name']);
-			
+		$mins  = $timer_minutes % 60;
+		$time_text = $hours > 0 ? "{$hours}ч {$mins}м" : "{$mins}м";
+
+		$task_row = $db->query("SELECT t.*, c.name as column_name, COALESCE(u.name, t.responsible) as responsible_name
+			FROM tasks t JOIN columns c ON t.column_id = c.id LEFT JOIN users u ON t.responsible = u.username
+			WHERE c.timer = 1 LIMIT 1")->fetchArray(SQLITE3_ASSOC);
+
+		if ($task_row) {
 			$message = "⏰ <b>ТЕСТ: Уведомление о таймере ({$time_text})</b>\n"
-					 . "<blockquote>"
-					 . "📋 <b>Задача:</b> <i>{$title}</i>\n"
-					 . "📂 <b>Колонка:</b> <i>{$column_name}</i>\n"
-					 . "🧑‍💻 <b>Исполнитель:</b> <i>{$responsible}</i>\n"
-					 . "⏱️ <b>В колонке:</b> {$time_text} (тестовое уведомление)\n"
-					 . "</blockquote>\n\n"
-					 . "<i>Это тестовое уведомление для проверки работы таймера.</i>";
+				. "<blockquote>"
+				. "📋 <b>Задача:</b> <i>" . htmlspecialchars($task_row['title']) . "</i>\n"
+				. "📂 <b>Колонка:</b> <i>" . htmlspecialchars($task_row['column_name']) . "</i>\n"
+				. "🧑‍💻 <b>Исполнитель:</b> <i>" . htmlspecialchars($task_row['responsible_name']) . "</i>\n"
+				. "</blockquote>\n<i>Тестовое уведомление</i>";
 		} else {
-			// Демо-уведомление, если нет задач с таймером
 			$message = "⏰ <b>ТЕСТ: Уведомление о таймере ({$time_text})</b>\n"
-					 . "<blockquote>"
-					 . "📋 <b>Задача:</b> <i>Пример задачи</i>\n"
-					 . "📂 <b>Колонка:</b> <i>В работе</i>\n"
-					 . "🧑‍💻 <b>Исполнитель:</b> <i>Иван Иванов</i>\n"
-					 . "⏱️ <b>В колонке:</b> {$time_text} (тестовое уведомление)\n"
-					 . "</blockquote>\n\n"
-					 . "<i>Это тестовое уведомление для проверки работы таймера.</i>";
+				. "<blockquote>📋 <b>Задача:</b> <i>Пример задачи</i>\n📂 <b>Колонка:</b> <i>В работе</i>\n🧑‍💻 <b>Исполнитель:</b> <i>Иван Иванов</i>\n</blockquote>\n<i>Тестовое уведомление (нет задач с таймером)</i>";
 		}
-		
-		$result = sendTelegram($bot_token, $chat_id, $message);
-		echo json_encode(['success' => $result]);
+
+		$tg_ok    = sendTelegram($bot_token, $chat_id, $message);
+		$email_ok = sendEmail($message);
+		if ($tg_ok || $email_ok) echo json_encode(['success' => true]);
+		else echo json_encode(['success' => false, 'error' => 'Ни один канал уведомлений не настроен или не отвечает']);
 		break;
 
-	// НОВЫЙ CASE: Тестирование ежедневного отчета
 	case 'test_daily_report':
 		if(!$isAdmin) exit('forbidden');
-		
-		if (empty($bot_token) || empty($chat_id)) {
-			echo json_encode(['success' => false, 'error' => 'Telegram не настроен']);
-			break;
-		}
-		
-		// Получаем время отчета из настроек
-		$report_time = $tg_settings['daily_report_time'] ?? '10:00';
-		
-		// Получаем все не завершенные задачи для отчета
-		$query = "SELECT c.name as column_name, t.title as task_title, 
-						 COALESCE(u.name, t.responsible) as responsible_name,
-						 t.importance
-				  FROM tasks t 
-				  JOIN columns c ON t.column_id = c.id 
-				  LEFT JOIN users u ON t.responsible = u.username
-				  WHERE t.completed = 0 
-				  ORDER BY c.id, t.importance DESC, t.created_at";
-		
-		$result = $db->query($query);
-		
+
+		$res2 = $db->query("SELECT c.name as column_name, t.title as task_title,
+				COALESCE(u.name, t.responsible) as responsible_name, t.importance
+			FROM tasks t JOIN columns c ON t.column_id = c.id LEFT JOIN users u ON t.responsible = u.username
+			WHERE t.completed = 0 ORDER BY c.id, t.importance DESC, t.created_at");
+
 		$tasks_by_column = [];
-		while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-			$column_name = $row['column_name'];
-			if (!isset($tasks_by_column[$column_name])) {
-				$tasks_by_column[$column_name] = [];
-			}
-			$tasks_by_column[$column_name][] = $row;
+		while ($row2 = $res2->fetchArray(SQLITE3_ASSOC)) {
+			$tasks_by_column[$row2['column_name']][] = $row2;
 		}
-		
-		// Формируем тестовое сообщение
-		$message = "📊 <b>Ежедневный отчет</b>\n\n";
-		
+
+		$message = "📊 <b>ТЕСТ: Ежедневный отчет</b>\n\n";
 		if (empty($tasks_by_column)) {
 			$message .= "🎉 <b>Все задачи завершены!</b>";
 		} else {
-			foreach ($tasks_by_column as $column_name => $tasks) {
-				$message .= "<b>📂 {$column_name}</b>\n";
-				foreach ($tasks as $task) {
-					$message .= "<blockquote>";
-					$message .= "📋 <b>Задача:</b> <i>{$task['task_title']}</i>\n🧑‍💻 <b>Исполнитель:</b> <i>{$task['responsible_name']}</i>";
-					$message .= "</blockquote>";
+			foreach ($tasks_by_column as $col_name => $col_tasks) {
+				$message .= "<b>📂 {$col_name}</b>\n";
+				foreach ($col_tasks as $col_task) {
+					$message .= "<blockquote>📋 <b>Задача:</b> <i>{$col_task['task_title']}</i>\n🧑‍💻 <b>Исполнитель:</b> <i>{$col_task['responsible_name']}</i></blockquote>";
 				}
 			}
-			
-			$total_tasks = array_sum(array_map('count', $tasks_by_column));
-			$message .= "\n\n<b>Всего открытых задач:</b> {$total_tasks}";
+			$total = array_sum(array_map('count', $tasks_by_column));
+			$message .= "\n\n<b>Всего открытых задач:</b> {$total}";
 		}
-		
-		$result = sendTelegram($bot_token, $chat_id, $message);
-		echo json_encode(['success' => $result]);
+
+		$tg_ok    = sendTelegram($bot_token, $chat_id, $message);
+		$email_ok = sendEmail($message);
+		if ($tg_ok || $email_ok) echo json_encode(['success' => true]);
+		else echo json_encode(['success' => false, 'error' => 'Ни один канал уведомлений не настроен или не отвечает']);
 		break;
 
 	case 'add_column':
