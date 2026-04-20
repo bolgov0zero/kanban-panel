@@ -240,6 +240,74 @@
 						</div>
 
 						<div class="content-section">
+							<h4 class="section-title">Email уведомления</h4>
+							<div class="form-group" style="margin-bottom:12px;">
+								<label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+									<input type="checkbox" id="emailEnabled" style="width:16px;height:16px;cursor:pointer;">
+									<span class="form-label" style="margin:0;">Включить уведомления на Email</span>
+								</label>
+							</div>
+							<div class="form-grid">
+								<div class="form-group">
+									<label class="form-label">SMTP хост</label>
+									<input id="emailHost" placeholder="smtp.gmail.com" class="form-input">
+								</div>
+								<div class="form-group">
+									<label class="form-label">Порт</label>
+									<input id="emailPort" type="number" placeholder="587" value="587" class="form-input">
+								</div>
+							</div>
+							<div class="form-grid">
+								<div class="form-group">
+									<label class="form-label">Шифрование</label>
+									<select id="emailEncryption" class="form-input">
+										<option value="tls">TLS (STARTTLS)</option>
+										<option value="ssl">SSL</option>
+										<option value="none">Нет</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label class="form-label">Логин</label>
+									<input id="emailUsername" placeholder="user@example.com" class="form-input">
+								</div>
+							</div>
+							<div class="form-grid">
+								<div class="form-group">
+									<label class="form-label">Пароль</label>
+									<input id="emailPassword" type="password" placeholder="••••••••" class="form-input">
+								</div>
+								<div class="form-group">
+									<label class="form-label">От кого (адрес)</label>
+									<input id="emailFromEmail" placeholder="kanban@example.com" class="form-input">
+								</div>
+							</div>
+							<div class="form-grid">
+								<div class="form-group">
+									<label class="form-label">От кого (имя)</label>
+									<input id="emailFromName" placeholder="Kanban" value="Kanban" class="form-input">
+								</div>
+								<div class="form-group">
+									<label class="form-label">Кому (получатель)</label>
+									<input id="emailToEmail" placeholder="admin@example.com" class="form-input">
+								</div>
+							</div>
+							<div class="action-buttons">
+								<button onclick="saveEmail()" class="btn-primary">
+									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+									</svg>
+									Сохранить настройки
+								</button>
+								<button onclick="testEmail()" class="btn-secondary">
+									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+									</svg>
+									Тест уведомления
+								</button>
+							</div>
+						</div>
+
+						<div class="content-section">
 							<h4 class="section-title">Быстрые ссылки</h4>
 							<div class="form-grid compact">
 								<div class="form-group">

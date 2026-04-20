@@ -11,6 +11,9 @@ if (!file_exists($db_path)) {
 $db = new SQLite3($db_path);
 $db->busyTimeout(3000);
 
+// Получаем Email настройки
+$email_settings = $db->querySingle("SELECT * FROM email_settings WHERE id=1", true) ?: [];
+
 // Получаем настройки Telegram
 $tg_settings = $db->querySingle("SELECT bot_token, chat_id, daily_report_time, timer_notification_minutes, notifications_enabled FROM telegram_settings WHERE id=1", true);
 $bot_token = $tg_settings['bot_token'] ?? '';
@@ -32,6 +35,51 @@ error_log("=== CRON STARTED at " . date('Y-m-d H:i:s') . " ===");
 error_log("Telegram configured: " . (!empty($bot_token) ? 'YES' : 'NO'));
 error_log("Daily report time: {$daily_report_time}");
 error_log("Timer minutes: {$timer_minutes}");
+
+// Функция отправки Email
+function sendEmail($text) {
+	global $email_settings;
+	if (!($email_settings['enabled'] ?? 0)) return false;
+	if (empty($email_settings['host']) || empty($email_settings['to_email'])) return false;
+
+	require_once __DIR__ . '/vendor/autoload.php';
+	$mail = new PHPMailer\PHPMailer\PHPMailer(true);
+	try {
+		$mail->isSMTP();
+		$mail->Host = $email_settings['host'];
+		$mail->Port = (int)($email_settings['port'] ?? 587);
+		$mail->SMTPAuth = !empty($email_settings['username']);
+		$mail->Username = $email_settings['username'] ?? '';
+		$mail->Password = $email_settings['password'] ?? '';
+		$enc = strtolower($email_settings['encryption'] ?? 'tls');
+		if ($enc === 'ssl') {
+			$mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+		} elseif ($enc === 'tls') {
+			$mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+		} else {
+			$mail->SMTPSecure = '';
+			$mail->SMTPAutoTLS = false;
+		}
+		$mail->CharSet = 'UTF-8';
+		$mail->Timeout = 5;
+		$mail->setFrom($email_settings['from_email'], $email_settings['from_name'] ?? 'Kanban');
+		$mail->addAddress($email_settings['to_email']);
+		$mail->isHTML(true);
+		$mail->Subject = trim(strip_tags(explode("\n", $text)[0])) ?: 'Уведомление Kanban';
+		$body = str_replace(
+			['<blockquote>', '</blockquote>'],
+			['<blockquote style="border-left:3px solid #ccc;margin:4px 0;padding:4px 10px;color:#555;">', '</blockquote>'],
+			$text
+		);
+		$mail->Body = nl2br($body);
+		$mail->AltBody = strip_tags(str_replace("\n", " ", $text));
+		$mail->send();
+		return true;
+	} catch (Exception $e) {
+		error_log("Email error: " . $mail->ErrorInfo);
+		return false;
+	}
+}
 
 // Функция отправки Telegram
 function sendTelegram($bot_token, $chat_id, $text) {
@@ -140,6 +188,7 @@ function checkTimerNotifications($db, $bot_token, $chat_id, $timer_minutes) {
 						 . "🧑‍💻 <b>Исполнитель:</b> <i>{$responsible}</i>\n"
 						 . "</blockquote>";
 				
+				sendEmail($message);
 				if (sendTelegram($bot_token, $chat_id, $message)) {
 					// Сохраняем факт отправки уведомления
 					$stmt = $db->prepare("
@@ -252,6 +301,7 @@ function sendDailyReport($db, $bot_token, $chat_id, $report_time) {
 				$message .= "\n\n<b>Всего открытых задач:</b> {$total_tasks}";
 			}
 			
+			sendEmail($message);
 			if (sendTelegram($bot_token, $chat_id, $message)) {
 				// Сохраняем факт отправки отчета
 				$stmt = $db->prepare("

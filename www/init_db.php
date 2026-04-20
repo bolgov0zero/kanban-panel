@@ -129,6 +129,24 @@ ensureColumn('telegram_settings', 'daily_report_time', 'TEXT DEFAULT "10:00"');
 ensureColumn('telegram_settings', 'timer_notification_minutes', 'INTEGER DEFAULT 1440');
 ensureColumn('telegram_settings', 'notifications_enabled', 'INTEGER DEFAULT 1');
 
+// === Email настройки ===
+$db->exec("CREATE TABLE IF NOT EXISTS email_settings (
+	id INTEGER PRIMARY KEY,
+	enabled INTEGER DEFAULT 0,
+	host TEXT DEFAULT '',
+	port INTEGER DEFAULT 587,
+	encryption TEXT DEFAULT 'tls',
+	username TEXT DEFAULT '',
+	password TEXT DEFAULT '',
+	from_email TEXT DEFAULT '',
+	from_name TEXT DEFAULT 'Kanban',
+	to_email TEXT DEFAULT ''
+)");
+$email_exists = $db->querySingle("SELECT COUNT(*) FROM email_settings WHERE id=1");
+if ($email_exists == 0) {
+	$db->exec("INSERT INTO email_settings (id) VALUES (1)");
+}
+
 // === Начальные Telegram настройки: добавляем только если не существуют ===
 $tg_exists = $db->querySingle("SELECT COUNT(*) FROM telegram_settings WHERE id=1");
 if ($tg_exists == 0) {

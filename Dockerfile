@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    libcurl4-openssl-dev \
     openssl \
     zip \
     unzip \
@@ -19,7 +20,11 @@ RUN docker-php-ext-install \
     pdo_sqlite \
     mbstring \
     xml \
-    zip
+    zip \
+    curl
+
+# Устанавливаем Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Включаем модули Apache
 RUN a2enmod rewrite
@@ -42,6 +47,9 @@ RUN openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
 # Копируем ВСЕ файлы приложения
 COPY www/ /var/www/html/
 COPY version.json /var/www/html/
+
+# Устанавливаем зависимости PHP
+RUN composer install --working-dir=/var/www/html --no-dev --optimize-autoloader
 
 # Копируем entrypoint скрипт
 COPY docker-entrypoint.sh /usr/local/bin/

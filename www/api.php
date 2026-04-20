@@ -9,6 +9,51 @@ $user = $_SESSION['user'];
 $isAdmin = $_SESSION['is_admin'] ?? 0;
 $action = $_POST['action'] ?? '';
 
+// Функция отправки Email
+function sendEmail($text) {
+	global $email_settings;
+	if (!($email_settings['enabled'] ?? 0)) return false;
+	if (empty($email_settings['host']) || empty($email_settings['to_email'])) return false;
+
+	require_once __DIR__ . '/vendor/autoload.php';
+	$mail = new PHPMailer\PHPMailer\PHPMailer(true);
+	try {
+		$mail->isSMTP();
+		$mail->Host = $email_settings['host'];
+		$mail->Port = (int)($email_settings['port'] ?? 587);
+		$mail->SMTPAuth = !empty($email_settings['username']);
+		$mail->Username = $email_settings['username'] ?? '';
+		$mail->Password = $email_settings['password'] ?? '';
+		$enc = strtolower($email_settings['encryption'] ?? 'tls');
+		if ($enc === 'ssl') {
+			$mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+		} elseif ($enc === 'tls') {
+			$mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+		} else {
+			$mail->SMTPSecure = '';
+			$mail->SMTPAutoTLS = false;
+		}
+		$mail->CharSet = 'UTF-8';
+		$mail->Timeout = 5;
+		$mail->setFrom($email_settings['from_email'], $email_settings['from_name'] ?? 'Kanban');
+		$mail->addAddress($email_settings['to_email']);
+		$mail->isHTML(true);
+		$mail->Subject = trim(strip_tags(explode("\n", $text)[0])) ?: 'Уведомление Kanban';
+		$body = str_replace(
+			['<blockquote>', '</blockquote>'],
+			['<blockquote style="border-left:3px solid #ccc;margin:4px 0;padding:4px 10px;color:#555;">', '</blockquote>'],
+			$text
+		);
+		$mail->Body = nl2br($body);
+		$mail->AltBody = strip_tags(str_replace("\n", " ", $text));
+		$mail->send();
+		return true;
+	} catch (Exception $e) {
+		error_log("Email error: " . $mail->ErrorInfo);
+		return false;
+	}
+}
+
 // Функция отправки Telegram
 function sendTelegram($bot_token, $chat_id, $text) {
 	global $tg_notifications_enabled;
@@ -33,6 +78,9 @@ $tg_settings = $db->querySingle("SELECT bot_token, chat_id, daily_report_time, t
 $bot_token = $tg_settings['bot_token'] ?? '';
 $chat_id = $tg_settings['chat_id'] ?? '';
 $tg_notifications_enabled = ($tg_settings['notifications_enabled'] ?? 1) ? true : false;
+
+// Получаем Email настройки
+$email_settings = $db->querySingle("SELECT * FROM email_settings WHERE id=1", true) ?: [];
 
 // Получаем имя текущего пользователя
 $user_name_stmt = $db->prepare("SELECT name FROM users WHERE username = :u");
@@ -78,6 +126,37 @@ switch ($action) {
 		if(!$isAdmin) exit('forbidden');
 		$text = "🔔 <b>Тестовое уведомление</b> от Kanban-доски\nДата: " . date('Y-m-d H:i:s');
 		$result = sendTelegram($bot_token, $chat_id, $text);
+		echo json_encode(['success' => $result]);
+		break;
+
+	case 'get_email_settings':
+		if(!$isAdmin) exit('forbidden');
+		$res = $db->querySingle("SELECT * FROM email_settings WHERE id=1", true);
+		echo json_encode($res ?: [], JSON_UNESCAPED_UNICODE);
+		break;
+
+	case 'save_email_settings':
+		if(!$isAdmin) exit('forbidden');
+		$stmt = $db->prepare("INSERT OR REPLACE INTO email_settings
+			(id, enabled, host, port, encryption, username, password, from_email, from_name, to_email)
+			VALUES (1, :en, :h, :p, :enc, :u, :pw, :fe, :fn, :te)");
+		$stmt->bindValue(':en',  (int)($_POST['enabled'] ?? 0),           SQLITE3_INTEGER);
+		$stmt->bindValue(':h',   trim($_POST['host'] ?? ''),              SQLITE3_TEXT);
+		$stmt->bindValue(':p',   (int)($_POST['port'] ?? 587),            SQLITE3_INTEGER);
+		$stmt->bindValue(':enc', trim($_POST['encryption'] ?? 'tls'),     SQLITE3_TEXT);
+		$stmt->bindValue(':u',   trim($_POST['username'] ?? ''),          SQLITE3_TEXT);
+		$stmt->bindValue(':pw',  trim($_POST['password'] ?? ''),          SQLITE3_TEXT);
+		$stmt->bindValue(':fe',  trim($_POST['from_email'] ?? ''),        SQLITE3_TEXT);
+		$stmt->bindValue(':fn',  trim($_POST['from_name'] ?? 'Kanban'),   SQLITE3_TEXT);
+		$stmt->bindValue(':te',  trim($_POST['to_email'] ?? ''),          SQLITE3_TEXT);
+		$ok = $stmt->execute();
+		echo json_encode(['success' => (bool)$ok]);
+		break;
+
+	case 'test_email':
+		if(!$isAdmin) exit('forbidden');
+		$text = "🔔 <b>Тестовое уведомление</b> от Kanban-доски\nДата: " . date('Y-m-d H:i:s');
+		$result = sendEmail($text);
 		echo json_encode(['success' => $result]);
 		break;
 
@@ -242,6 +321,7 @@ switch ($action) {
 			$resp_name = $db->querySingle("SELECT name FROM users WHERE username='$resp'", true)['name'] ?? $resp;
 			$text = "🆕 <b>Новая задача</b>\n<blockquote>👤 <b>Автор:</b> <i>$user_name</i>\n📋 <b>Задача:</b> <i>$title</i>\n🧑‍💻 <b>Исполнитель:</b> <i>$resp_name</i></blockquote>";
 			sendTelegram($bot_token, $chat_id, $text);
+			sendEmail($text);
 		}
 		break;
 
@@ -262,6 +342,7 @@ switch ($action) {
 		if (!empty($bot_token) && !empty($chat_id) && $task_data) {
 			$text = "🚮 <b>Задача удалена</b>\n<blockquote>👤 <b>Кем:</b> <i>$user_name</i>\n📋 <b>Задача:</b> <i>{$task_data['title']}</i></blockquote>";
 			sendTelegram($bot_token, $chat_id, $text);
+			sendEmail($text);
 		}
 		break;
 
@@ -317,6 +398,7 @@ switch ($action) {
 				$text = "↔️ <b>Задача перемещена</b>\n<blockquote>👤 <b>Кем:</b> <i>$user_name</i>\n📋 <b>Задача:</b> <i>$task_title</i>\n📂 <b>В колонку:</b> <i>$col_name</i></blockquote>";
 			}
 			sendTelegram($bot_token, $chat_id, $text);
+			sendEmail($text);
 		}
 		break;
 
@@ -339,6 +421,7 @@ switch ($action) {
 				$resp_name = $row['responsible_name'] ?? 'Не указан';
 				$text = "⏸️ <b>Задача заархивирована</b>\n<blockquote>👤 <b>Кем:</b> <i>$user_name</i>\n📋 <b>Задача:</b> <i>$title</i></blockquote>";
 				sendTelegram($bot_token, $chat_id, $text);
+				sendEmail($text);
 			}
 		} 
 		break;
@@ -369,6 +452,7 @@ switch ($action) {
 				$first_col = $db->querySingle("SELECT name FROM columns WHERE id=1");
 				$text = "↩️ <b>Задача восстановлена</b>\n<blockquote>👤 <b>Кем:</b> <i>$user_name</i>\n📋 <b>Задача:</b> <i>$title</i></blockquote>";
 				sendTelegram($bot_token, $chat_id, $text);
+				sendEmail($text);
 			}
 		} break;
 

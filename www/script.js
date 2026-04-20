@@ -296,7 +296,7 @@ function updateColumn() {
 }
 
 // Новая система вкладок для настроек
-function fillSettingsData(usersData, tgData, linksData) {
+function fillSettingsData(usersData, tgData, emailData, linksData) {
 	// Заполняем список пользователей
 	const usersList = document.getElementById('users-list');
 	if (usersList) {
@@ -372,6 +372,21 @@ function fillSettingsData(usersData, tgData, linksData) {
 	}
 	const tgEnabled = document.getElementById('tgEnabled');
 	if (tgEnabled) tgEnabled.checked = (tgData.notifications_enabled ?? 1) == 1;
+
+	// Заполняем Email настройки
+	if (emailData) {
+		const f = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+		document.getElementById('emailEnabled') && (document.getElementById('emailEnabled').checked = emailData.enabled == 1);
+		f('emailHost', emailData.host);
+		f('emailPort', emailData.port || 587);
+		f('emailUsername', emailData.username);
+		f('emailPassword', emailData.password);
+		f('emailFromEmail', emailData.from_email);
+		f('emailFromName', emailData.from_name || 'Kanban');
+		f('emailToEmail', emailData.to_email);
+		const enc = document.getElementById('emailEncryption');
+		if (enc) enc.value = emailData.encryption || 'tls';
+	}
 	
 	// Обновляем информацию о текущих настройках на вкладке тестирования
 	const currentReportTime = document.getElementById('current-report-time');
@@ -761,15 +776,16 @@ function openUserSettings() {
 	Promise.all([
 		loadUsers(),
 		fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_telegram_settings' }) }).then(r => r.json()),
+		fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_email_settings' }) }).then(r => r.json()),
 		loadLinks()
-	]).then(([usersData, tgData, linksData]) => {
+	]).then(([usersData, tgData, emailData, linksData]) => {
 		const template = document.getElementById('settings-modal-template');
 		if (template) {
 			openModal(template.innerHTML);
 			
 			// Заполняем данные и инициализируем вкладки
 			setTimeout(() => {
-				fillSettingsData(usersData, tgData, linksData);
+				fillSettingsData(usersData, tgData, emailData, linksData);
 				initSettingsTabs(); // Инициализируем вкладки после заполнения данных
 				setupTestingTab(); // Настраиваем вкладку тестирования
 				
@@ -950,6 +966,33 @@ function saveTelegram() {
 		console.error('Error saving telegram:', err);
 		alert('Ошибка сохранения');
 	});
+}
+
+function saveEmail() {
+	const g = id => document.getElementById(id)?.value || '';
+	const data = new URLSearchParams({
+		action: 'save_email_settings',
+		enabled: document.getElementById('emailEnabled')?.checked ? 1 : 0,
+		host: g('emailHost'),
+		port: g('emailPort') || 587,
+		encryption: g('emailEncryption') || 'tls',
+		username: g('emailUsername'),
+		password: g('emailPassword'),
+		from_email: g('emailFromEmail'),
+		from_name: g('emailFromName') || 'Kanban',
+		to_email: g('emailToEmail')
+	});
+	fetch('api.php', { method: 'POST', body: data })
+		.then(r => r.json())
+		.then(res => alert(res.success ? 'Email настройки сохранены!' : 'Ошибка сохранения'))
+		.catch(() => alert('Ошибка сети'));
+}
+
+function testEmail() {
+	fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'test_email' }) })
+		.then(r => r.json())
+		.then(res => alert(res.success ? '✅ Тестовое письмо отправлено!' : '❌ Ошибка отправки. Проверьте настройки Email.'))
+		.catch(() => alert('❌ Ошибка сети'));
 }
 
 function testTelegram() {
