@@ -382,7 +382,7 @@
 										<h5 class="danger-title">Очистка архива</h5>
 										<p class="danger-description">Удаление всех завершенных задач из архива</p>
 									</div>
-									<button onclick="clearArchive()" class="btn-danger">
+									<button onclick="clearArchive()" class="btn-delete">
 										Очистить архив
 									</button>
 								</div>
@@ -614,7 +614,7 @@
 		</div>
 
 		<div class="modal-footer">
-			<button onclick='deleteColumn()' class='btn-danger'>Удалить</button>
+			<button onclick='deleteColumn()' class='btn-delete'>Удалить</button>
 			<button onclick='closeModal()' class='btn-secondary'>Отмена</button>
 			<button onclick='updateColumn()' class='btn-primary'>Сохранить</button>
 		</div>
@@ -747,7 +747,7 @@
 		</div>
 
 		<div class="modal-footer">
-			<button onclick='deleteTask()' class='btn-danger'>Удалить</button>
+			<button onclick='deleteTask()' class='btn-delete'>Удалить</button>
 			<button onclick='closeModal()' class='btn-secondary'>Отмена</button>
 			<button onclick='updateTask()' class='btn-primary'>Сохранить</button>
 		</div>

@@ -455,10 +455,11 @@ function deleteColumn() {
 	if (!currentEditId) return;
 	if (!confirm('Удалить колонку и все задачи в ней?')) return;
 
+	const id = currentEditId;
 	closeModal();
 	fetch('api.php', {
 		method: 'POST',
-		body: new URLSearchParams({ action: 'delete_column', id: currentEditId })
+		body: new URLSearchParams({ action: 'delete_column', id })
 	})
 	.then(response => {
 		if (response.ok) location.reload();
@@ -639,10 +640,11 @@ function deleteTask() {
 	if (!currentEditId) return;
 	if (!confirm('Удалить задачу?')) return;
 
+	const id = currentEditId; // сохраняем до closeModal, который сбрасывает currentEditId
 	closeModal();
 	fetch('api.php', {
 		method: 'POST',
-		body: new URLSearchParams({ action: 'delete_task', id: currentEditId })
+		body: new URLSearchParams({ action: 'delete_task', id })
 	})
 	.then(response => {
 		if (response.ok) location.reload();
