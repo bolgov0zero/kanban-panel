@@ -78,7 +78,6 @@ $columns = $db->query("SELECT * FROM columns ORDER BY id");
 <meta charset="UTF-8">
 <title>Kanban Board</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="script.js" defer></script>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>

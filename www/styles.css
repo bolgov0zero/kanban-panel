@@ -825,6 +825,8 @@ footer {
 	flex-wrap: wrap;
 }
 
+.full-width { width: 100%; justify-content: center; }
+
 /* ===== SETTINGS MODAL ===== */
 .settings-layout {
 	display: flex;
