@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
 date_default_timezone_set('Europe/Moscow');  // <-- Добавлено: UTC+3 (Москва)
 session_start();
 if (!isset($_SESSION['user'])) exit('auth required');
@@ -71,8 +72,8 @@ switch ($action) {
 		$stmt->bindValue(':drt', $daily_report_time, SQLITE3_TEXT);
 		$stmt->bindValue(':tnm', $timer_minutes, SQLITE3_INTEGER);
 		$stmt->bindValue(':ne', $notif_enabled, SQLITE3_INTEGER);
-		$stmt->execute();
-		echo json_encode(['success' => true]);
+		$ok = $stmt->execute();
+		echo json_encode(['success' => (bool)$ok, 'error' => $ok ? null : $db->lastErrorMsg()]);
 		break;
 
 	case 'test_telegram':
