@@ -70,6 +70,7 @@ function sendEmail($text) {
 		$mail->Body = nl2br($body);
 		$plain = $text;
 		$plain = str_replace('<br>', "\n", $plain);
+		$plain = str_replace('</blockquote>', "</blockquote>\n", $plain);
 		$plain = preg_replace('/<(?!\\/?(b|i|blockquote)\\b)[^>]+>/', '', $plain);
 		$plain = html_entity_decode($plain, ENT_QUOTES, 'UTF-8');
 		$plain = preg_replace('/\n{3,}/', "\n\n", trim($plain));
