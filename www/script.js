@@ -865,25 +865,57 @@ function deleteUser(username) {
 }
 
 // Обновленная функция сохранения Telegram настроек
+function saveNotificationGlobals() {
+	const dailyReportTime = document.getElementById('dailyReportTime')?.value || '10:00';
+	const timerMinutes = parseInt(document.getElementById('timerNotificationMinutes')?.value || '1440');
+
+	if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(dailyReportTime)) {
+		alert('Неверный формат времени. Используйте формат ЧЧ:ММ (например, 10:00)');
+		return;
+	}
+	if (timerMinutes < 1 || timerMinutes > 43200) {
+		alert('Количество минут должно быть от 1 до 43200');
+		return;
+	}
+
+	// Читаем текущие Telegram-поля, чтобы не затирать их при сохранении
+	const token = document.getElementById('tgToken')?.value || '';
+	const chat = document.getElementById('tgChat')?.value || '';
+	const notifEnabled = document.getElementById('tgEnabled')?.checked ? 1 : 0;
+
+	fetch('api.php', {
+		method: 'POST',
+		body: new URLSearchParams({
+			action: 'save_telegram_settings',
+			bot_token: token,
+			chat_id: chat,
+			daily_report_time: dailyReportTime,
+			timer_notification_minutes: timerMinutes,
+			notifications_enabled: notifEnabled
+		})
+	})
+	.then(r => r.json())
+	.then(res => {
+		if (res.success) {
+			const el1 = document.getElementById('current-report-time');
+			const el2 = document.getElementById('current-timer-minutes');
+			if (el1) el1.textContent = dailyReportTime;
+			if (el2) el2.textContent = timerMinutes;
+			alert('Настройки уведомлений сохранены');
+		} else {
+			alert('Ошибка сохранения');
+		}
+	})
+	.catch(() => alert('Ошибка сети'));
+}
+
 function saveTelegram() {
 	const token = document.getElementById('tgToken')?.value || '';
 	const chat = document.getElementById('tgChat')?.value || '';
 	const dailyReportTime = document.getElementById('dailyReportTime')?.value || '10:00';
 	const timerMinutes = parseInt(document.getElementById('timerNotificationMinutes')?.value || '1440');
-	
-	// Валидация времени
-	if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(dailyReportTime)) {
-		alert('Неверный формат времени. Используйте формат ЧЧ:ММ (например, 10:00)');
-		return;
-	}
-	
-	// Валидация минут
-	if (timerMinutes < 1 || timerMinutes > 43200) {
-		alert('Количество минут должно быть от 1 до 43200 (30 дней)');
-		return;
-	}
-	
 	const notifEnabled = document.getElementById('tgEnabled')?.checked ? 1 : 0;
+
 	let data = new URLSearchParams({
 		action: 'save_telegram_settings',
 		bot_token: token,

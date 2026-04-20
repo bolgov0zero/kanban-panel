@@ -186,6 +186,31 @@
 						</div>
 
 						<div class="content-section">
+							<h4 class="section-title">Общие настройки уведомлений</h4>
+							<p class="tab-description" style="margin-bottom:1rem;">Применяются ко всем включённым каналам: Telegram, Email.</p>
+							<div class="form-grid">
+								<div class="form-group">
+									<label class="form-label">Время ежедневного отчета (МСК)</label>
+									<input id="dailyReportTime" type="time" value="10:00" class="form-input">
+									<p class="form-hint">Отчёт по открытым задачам отправляется каждый день в это время</p>
+								</div>
+								<div class="form-group">
+									<label class="form-label">Интервал уведомления таймера</label>
+									<input id="timerNotificationMinutes" type="number" min="1" max="43200" value="1440" class="form-input">
+									<p class="form-hint">Через сколько минут уведомлять о задаче в колонке с таймером (1–43200)</p>
+								</div>
+							</div>
+							<div class="action-buttons">
+								<button onclick="saveNotificationGlobals()" class="btn-primary">
+									<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+									</svg>
+									Сохранить
+								</button>
+							</div>
+						</div>
+
+						<div class="content-section">
 							<h4 class="section-title">Telegram уведомления</h4>
 							<div class="form-group" style="margin-bottom:12px;">
 								<label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
@@ -205,21 +230,6 @@
 									<p class="form-hint">ID чата для отправки уведомлений</p>
 								</div>
 							</div>
-							
-							<!-- НОВЫЕ НАСТРОЙКИ: Время отправки отчета и таймер -->
-							<div class="form-grid">
-								<div class="form-group">
-									<label class="form-label">Время ежедневного отчета (МСК)</label>
-									<input id="dailyReportTime" type="time" value="10:00" class="form-input">
-									<p class="form-hint">Время отправки ежедневного отчета (формат ЧЧ:ММ)</p>
-								</div>
-								<div class="form-group">
-									<label class="form-label">Таймер уведомления (минуты)</label>
-									<input id="timerNotificationMinutes" type="number" min="1" max="43200" value="1440" class="form-input">
-									<p class="form-hint">Через сколько минут отправлять уведомление о задаче (1-43200 = 30 дней)</p>
-								</div>
-							</div>
-							
 							<div class="action-buttons">
 								<button onclick="saveTelegram()" class="btn-primary">
 									<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
