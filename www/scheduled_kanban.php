@@ -190,21 +190,23 @@ function checkTimerNotifications($db, $bot_token, $chat_id, $timer_minutes) {
 						 . "🧑‍💻 <b>Исполнитель:</b> <i>{$responsible}</i>\n"
 						 . "</blockquote>";
 				
-				sendEmail($message);
-				if (sendTelegram($bot_token, $chat_id, $message)) {
-					// Сохраняем факт отправки уведомления
+				$email_ok = sendEmail($message);
+				$tg_ok    = sendTelegram($bot_token, $chat_id, $message);
+
+				if ($tg_ok || $email_ok) {
+					// Сохраняем факт отправки если хотя бы один канал сработал
 					$stmt = $db->prepare("
-						INSERT INTO sent_notifications (task_id, notification_type, timer_minutes) 
+						INSERT INTO sent_notifications (task_id, notification_type, timer_minutes)
 						VALUES (:task_id, 'timer', :timer_minutes)
 					");
 					$stmt->bindValue(':task_id', $task_id, SQLITE3_INTEGER);
 					$stmt->bindValue(':timer_minutes', $timer_minutes, SQLITE3_INTEGER);
 					$stmt->execute();
-					
+
 					$notified_tasks++;
-					error_log("✅ Notification sent and saved for task ID: {$task_id}");
+					error_log("✅ Notification sent and saved for task ID: {$task_id} (tg={$tg_ok}, email={$email_ok})");
 				} else {
-					error_log("❌ Failed to send notification for task ID: {$task_id}");
+					error_log("❌ Failed to send notification for task ID: {$task_id} — no channels available");
 				}
 			} else {
 				error_log("ℹ️ Notification already sent for task ID: {$task_id} with timer = {$timer_minutes}");
@@ -303,20 +305,22 @@ function sendDailyReport($db, $bot_token, $chat_id, $report_time) {
 				$message .= "\n\n<b>Всего открытых задач:</b> {$total_tasks}";
 			}
 			
-			sendEmail($message);
-			if (sendTelegram($bot_token, $chat_id, $message)) {
-				// Сохраняем факт отправки отчета
+			$email_ok = sendEmail($message);
+			$tg_ok    = sendTelegram($bot_token, $chat_id, $message);
+
+			if ($tg_ok || $email_ok) {
+				// Сохраняем факт отправки если хотя бы один канал сработал
 				$stmt = $db->prepare("
-					INSERT INTO sent_reports (report_date, report_time) 
+					INSERT INTO sent_reports (report_date, report_time)
 					VALUES (:report_date, :report_time)
 				");
 				$stmt->bindValue(':report_date', $today, SQLITE3_TEXT);
 				$stmt->bindValue(':report_time', $report_time, SQLITE3_TEXT);
 				$stmt->execute();
-				
-				error_log("✅ Daily report sent and saved at " . date('Y-m-d H:i:s'));
+
+				error_log("✅ Daily report sent at " . date('Y-m-d H:i:s') . " (tg={$tg_ok}, email={$email_ok})");
 			} else {
-				error_log("❌ Failed to send daily report");
+				error_log("❌ Failed to send daily report — no channels available");
 			}
 		} else {
 			error_log("ℹ️ Daily report already sent today at {$report_time}");
