@@ -173,9 +173,16 @@ $version = $version_data['version'] ?? '—';
 
 				<div class="card-meta">
 					<span class="card-time<?= $isUrgent ? ' urgent' : '' ?> created-date" data-created="<?= htmlspecialchars($task['created_at']) ?>"></span>
-					<button onclick="editTask(<?= $task['id'] ?>)" class="icon-btn icon-btn-sm" title="Редактировать">
-						<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg>
-					</button>
+					<div style="display:flex;gap:2px;align-items:center;">
+						<?php if ($col['auto_complete']): ?>
+						<button onclick="archiveNow(<?= $task['id'] ?>)" class="icon-btn icon-btn-sm" title="Архивировать">
+							<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
+						</button>
+						<?php endif; ?>
+						<button onclick="editTask(<?= $task['id'] ?>)" class="icon-btn icon-btn-sm" title="Редактировать">
+							<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg>
+						</button>
+					</div>
 				</div>
 
 				<div class="card-title"><?= htmlspecialchars($task['title']) ?></div>
