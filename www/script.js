@@ -10,8 +10,8 @@ function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
 
 function highlightDrop(el, on, ev) {
 	if (!on && ev && el.contains(ev.relatedTarget)) return; // не убираем если курсор перешёл в дочерний элемент
-	if (on) el.classList.add('drop-hover');
-	else el.classList.remove('drop-hover');
+	if (on) el.classList.add('drag-over');
+	else el.classList.remove('drag-over');
 }
 
 function drop(ev) {
@@ -27,7 +27,7 @@ function drop(ev) {
 	task.style.borderLeftColor = colBg;
 	target.appendChild(task);
 
-	ev.currentTarget.classList.remove('drop-hover');
+	ev.currentTarget.classList.remove('drag-over');
 
 	// Сначала отправляем запрос, reload только после завершения
 	fetch('api.php', {
@@ -282,25 +282,19 @@ function fillSettingsData(usersData, tgData, emailData, linksData) {
 	const usersList = document.getElementById('users-list');
 	if (usersList) {
 		usersList.innerHTML = usersData.map(u => `
-			<div class="user-card">
-				<div class="user-info">
-					<div class="user-avatar-medium">${getAvatarFromName(u.name || u.username)}</div>
-					<div class="user-details">
-						<div class="user-username">${u.username}</div>
-						<div class="user-name">${u.name || 'Без имени'}</div>
-					</div>
+			<div class="user-row">
+				<span class="avatar" style="background:var(--accent);width:32px;height:32px;font-size:12px;border-radius:5px;">${getAvatarFromName(u.name || u.username)}</span>
+				<div class="user-row-info">
+					<div class="user-row-name">${u.name || u.username}</div>
+					<div class="user-row-sub">${u.username}</div>
 				</div>
-				<div class="user-actions">
-					${u.is_admin ? '<span class="admin-badge">Admin</span>' : ''}
-					<button onclick="editUserSettings('${u.username}')" class="user-action-btn user-edit-btn" title="Редактировать">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-						</svg>
+				<div class="user-row-actions">
+					${u.is_admin ? '<span class="badge">Admin</span>' : ''}
+					<button onclick="editUserSettings('${u.username}')" class="icon-btn icon-btn-sm" title="Редактировать">
+						<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg>
 					</button>
-					<button onclick="deleteUser('${u.username}')" class="user-action-btn user-delete-btn" title="Удалить">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-						</svg>
+					<button onclick="deleteUser('${u.username}')" class="icon-btn icon-btn-sm" title="Удалить" style="color:var(--danger);">
+						<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
 					</button>
 				</div>
 			</div>
@@ -317,16 +311,14 @@ function fillSettingsData(usersData, tgData, emailData, linksData) {
 	const linksList = document.getElementById('admin-links-list');
 	if (linksList) {
 		linksList.innerHTML = linksData.map(l => `
-			<div class="link-card">
-				<div class="link-info">
-					<div class="link-name">${l.name}</div>
-					<div class="link-url">${l.url}</div>
+			<div class="user-row">
+				<div class="user-row-info">
+					<div class="user-row-name">${l.name}</div>
+					<div class="user-row-sub" style="font-family:var(--font-mono);font-size:10.5px;">${l.url}</div>
 				</div>
-				<div class="user-actions">
-					<button onclick="deleteLink(${l.id})" class="user-action-btn user-delete-btn" title="Удалить">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-						</svg>
+				<div class="user-row-actions">
+					<button onclick="deleteLink(${l.id})" class="icon-btn icon-btn-sm" title="Удалить" style="color:var(--danger);">
+						<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
 					</button>
 				</div>
 			</div>
@@ -379,7 +371,7 @@ function fillSettingsData(usersData, tgData, emailData, linksData) {
 
 // Инициализация вкладок настроек
 function initSettingsTabs() {
-	const menuItems = document.querySelectorAll('.settings-menu-item');
+	const menuItems = document.querySelectorAll('.settings-nav-item');
 	const tabContents = document.querySelectorAll('.tab-content');
 	
 	menuItems.forEach(item => {
@@ -665,20 +657,23 @@ function openArchive() {
 				// Заменяем содержимое archive-list
 				const archiveHTML = archive.length ? archive.map(t => `
 					<div class="archive-item">
-						<h4 class="archive-title">${t.title}</h4>
-						<p class="archive-description">${t.description || ''}</p>
+						<div class="archive-title">${t.title}</div>
+						${t.description ? `<div class="archive-desc">${t.description}</div>` : ''}
 						<div class="archive-meta">
-							<span>👤 ${t.responsible_name || t.responsible}</span>
-							<button onclick="restore(${t.id})" class="restore-btn">Восстановить</button>
+							<span class="archive-author">
+								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/></svg>
+								${t.responsible_name || t.responsible}
+							</span>
+							<button onclick="restore(${t.id})" class="restore-link">↺ Восстановить</button>
 						</div>
 					</div>
-				`).join('') : '<p class="text-gray-400 text-center py-4">Архив пуст</p>';
-				
+				`).join('') : '<p style="color:var(--text-tertiary);text-align:center;padding:24px 0;font-size:13px;">Архив пуст</p>';
+
 				html = html.replace('<!-- Archive items will be inserted here -->', archiveHTML);
-				
+
 				// Скрываем кнопку очистки если не админ
 				if (!window.isAdmin) {
-					html = html.replace('<button onclick="clearArchive()" class="btn-danger">Очистить архив</button>', '');
+					html = html.replace('<button onclick="clearArchive()" class="btn btn-danger">Очистить архив</button>', '');
 				}
 				
 				openModal(html);
@@ -1141,11 +1136,13 @@ function loadLinksList() {
 			const linksList = document.getElementById('links-list');
 			if (linksList) {
 				linksList.innerHTML = data.length ? data.map(l => `
-					<div class="flex justify-between items-center p-1 hover:bg-gray-600 rounded">
-						<span class="text-sm cursor-pointer text-blue-400 hover:underline" onclick="insertLink('${l.name}', '${l.url}')">${l.name}</span>
-						<button onclick="deleteLink(${l.id})" class="text-red-400 text-xs">✖</button>
+					<div class="link-row">
+						<span class="link-row-name" onclick="insertLink('${l.name}', '${l.url}')">${l.name}</span>
+						<button onclick="deleteLink(${l.id})" class="icon-btn icon-btn-sm" style="color:var(--danger);">
+							<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+						</button>
 					</div>
-				`).join('') : '<p class="text-gray-500 text-xs">Нет сохранённых ссылок</p>';
+				`).join('') : '<p style="color:var(--text-quaternary);font-size:12px;">Нет сохранённых ссылок</p>';
 			}
 		})
 		.catch(err => console.error('Error loading links:', err));
