@@ -1,0 +1,134 @@
+/* =========================================================================
+   Soft Modern · Design Tokens
+   Drop-in CSS variables for the Kanban redesign (V4 — Soft Modern).
+   Prefix: --sm-*
+   Usage: <link rel="stylesheet" href="design-tokens.css">
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif&display=swap');
+
+:root {
+  /* ── Type ─────────────────────────────────────────────────────────────
+     Sans  → Geist (UI, body, labels, buttons)
+     Mono  → Geist Mono (даты, ID, числа, логины, таймеры)
+     Serif → Instrument Serif (только крупные заголовки экранов/секций
+             и эмфаза слова через <em>; никогда в body или кнопках)
+     ────────────────────────────────────────────────────────────────── */
+  --sm-font-sans: 'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --sm-font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --sm-font-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+
+  /* ── Surfaces (warm cream palette) ───────────────────────────────── */
+  --sm-bg:        #f4f1ea;  /* page bg — тёплый бежевый */
+  --sm-panel:     #fbf9f4;  /* карточки, модалки — кремовая бумага */
+  --sm-panel-alt: #efece4;  /* hover/inset поверхностей */
+
+  /* ── Foreground ──────────────────────────────────────────────────── */
+  --sm-fg:        #1c1612;  /* основной текст / primary CTA bg */
+  --sm-fg-dim:    #5a4f44;  /* вторичный текст, labels */
+  --sm-fg-mute:   #8a8074;  /* подсказки, meta-данные */
+  --sm-fg-faint:  #bcb3a6;  /* placeholder, иконки decorative */
+
+  /* ── Hairlines / borders ─────────────────────────────────────────── */
+  --sm-hairline:  rgba(40, 30, 20, 0.09);
+  --sm-hairline-strong: rgba(40, 30, 20, 0.16);
+
+  /* ── Accents ─────────────────────────────────────────────────────── */
+  --sm-accent:        #c7593c;   /* терракота — primary brand accent */
+  --sm-accent-soft:   #fbe9e0;   /* фон для chip-ов и hover */
+  --sm-accent-strong: #a8442b;   /* hover/pressed CTA */
+
+  /* ── Semantic ────────────────────────────────────────────────────── */
+  --sm-good:        #3f7a4e;
+  --sm-good-soft:   #e3efd9;
+  --sm-warn:        #a8721a;
+  --sm-warn-soft:   #f4ebd6;
+  --sm-danger:      #c7593c;   /* совпадает с accent — это ОК для этой системы */
+  --sm-danger-soft: #fbe9e0;
+
+  /* ── Member / avatar palette (стабильный набор для назначенцев) ───── */
+  --sm-avatar-1: #7c5cff;
+  --sm-avatar-2: #ff7849;
+  --sm-avatar-3: #3a3a44;
+  --sm-avatar-4: #2f8f6d;
+  --sm-avatar-5: #d4a356;
+  --sm-avatar-6: #b04f7a;
+
+  /* ── Radii ───────────────────────────────────────────────────────── */
+  --sm-r-xs: 5px;   /* small chips, tags */
+  --sm-r-sm: 7px;   /* icon-buttons */
+  --sm-r-md: 10px;  /* inputs, selects, small cards */
+  --sm-r-lg: 12px;  /* task cards */
+  --sm-r-xl: 14px;  /* inner panels */
+  --sm-r-2xl: 16px; /* modals */
+  --sm-r-pill: 999px;
+
+  /* ── Spacing (4px grid) ──────────────────────────────────────────── */
+  --sm-space-1: 4px;
+  --sm-space-2: 8px;
+  --sm-space-3: 12px;
+  --sm-space-4: 14px;
+  --sm-space-5: 16px;
+  --sm-space-6: 20px;
+  --sm-space-7: 24px;
+  --sm-space-8: 28px;
+  --sm-space-9: 32px;
+
+  /* ── Shadows ─────────────────────────────────────────────────────── */
+  --sm-shadow-card:    0 1px 0 rgba(40, 30, 20, 0.04);
+  --sm-shadow-card-hover: 0 1px 2px rgba(40, 30, 20, 0.06), 0 8px 24px -12px rgba(40, 30, 20, 0.10);
+  --sm-shadow-modal:   0 1px 0 rgba(40, 30, 20, 0.04),
+                       0 24px 60px -20px rgba(40, 30, 20, 0.18),
+                       0 8px 24px -12px rgba(40, 30, 20, 0.08);
+  --sm-shadow-popover: 0 8px 24px -8px rgba(40, 30, 20, 0.16),
+                       0 2px 6px rgba(40, 30, 20, 0.06);
+
+  /* ── Focus ring ──────────────────────────────────────────────────── */
+  --sm-focus-ring: 0 0 0 4px rgba(28, 22, 18, 0.06);
+
+  /* ── Type scale ──────────────────────────────────────────────────── */
+  --sm-text-xs:   11px;   /* meta, eyebrow uppercase */
+  --sm-text-sm:   12px;   /* secondary UI */
+  --sm-text-base: 13px;   /* default body */
+  --sm-text-md:   14px;   /* default labels, list items */
+  --sm-text-lg:   15px;   /* card titles */
+  --sm-text-xl:   18px;   /* small section titles */
+
+  /* ── Display scale (всегда Serif italic) ─────────────────────────── */
+  --sm-display-1: 44px;   /* hero на странице доски */
+  --sm-display-2: 32px;   /* modal title */
+  --sm-display-3: 28px;   /* section title внутри модалок */
+
+  /* ── Misc ────────────────────────────────────────────────────────── */
+  --sm-backdrop:  rgba(28, 22, 18, 0.42);
+  --sm-backdrop-blur: 6px;
+  --sm-transition-fast: 120ms cubic-bezier(0.3, 0.7, 0.4, 1);
+  --sm-transition-base: 180ms cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Reusable base rules. Тонкие основы — не претендуют на дизайн-систему,
+   но кладут floor для текста и форм.
+   ─────────────────────────────────────────────────────────────────── */
+
+html {
+  font-family: var(--sm-font-sans);
+  color: var(--sm-fg);
+  background: var(--sm-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Числа всегда табличные — для дат, таймеров, ID, версий */
+.sm-tabular { font-variant-numeric: tabular-nums; font-family: var(--sm-font-mono); }
+
+/* Display headlines: Instrument Serif italic, terracotta-accent на <em> */
+.sm-display {
+  font-family: var(--sm-font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--sm-fg);
+}
+.sm-display em { font-style: italic; color: var(--sm-accent); }

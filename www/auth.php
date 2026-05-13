@@ -61,31 +61,165 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="ru" class="dark">
+<html lang="ru">
 <head>
 	<meta charset="UTF-8">
-	<title>Авторизация</title>
-	<script src="https://cdn.tailwindcss.com"></script>
+	<title>Вход · Kanban</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="design-tokens.css">
+	<style>
+		*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+		html, body {
+			height: 100%;
+			font-family: var(--sm-font-sans);
+			background: var(--sm-bg);
+			color: var(--sm-fg);
+			-webkit-font-smoothing: antialiased;
+		}
+		body {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			min-height: 100vh;
+			padding: 24px;
+		}
+		.auth-card {
+			background: var(--sm-panel);
+			border: 1px solid var(--sm-hairline);
+			border-radius: var(--sm-r-2xl);
+			box-shadow: var(--sm-shadow-modal);
+			padding: 40px 36px 36px;
+			width: 100%;
+			max-width: 380px;
+			display: flex;
+			flex-direction: column;
+			gap: 24px;
+		}
+		.auth-logo {
+			width: 36px;
+			height: 36px;
+			border-radius: var(--sm-r-md);
+			background: var(--sm-fg);
+			color: var(--sm-panel);
+			font-size: 18px;
+			font-family: var(--sm-font-serif);
+			font-style: italic;
+			font-weight: 700;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		.auth-title {
+			font-family: var(--sm-font-serif);
+			font-style: italic;
+			font-size: 28px;
+			font-weight: 400;
+			letter-spacing: -0.02em;
+			color: var(--sm-fg);
+			line-height: 1.1;
+			margin-top: 4px;
+		}
+		.auth-title em { color: var(--sm-accent); font-style: italic; }
+		.auth-sub {
+			font-size: 13px;
+			color: var(--sm-fg-mute);
+			margin-top: 2px;
+		}
+		.auth-fields { display: flex; flex-direction: column; gap: 12px; }
+		.field-label {
+			font-size: 12px;
+			font-weight: 500;
+			color: var(--sm-fg-dim);
+			margin-bottom: 5px;
+			display: block;
+		}
+		.auth-input {
+			width: 100%;
+			padding: 9px 12px;
+			border-radius: var(--sm-r-md);
+			border: 1px solid var(--sm-hairline-strong);
+			background: var(--sm-bg);
+			color: var(--sm-fg);
+			font-family: var(--sm-font-sans);
+			font-size: 13px;
+			outline: none;
+			transition: border-color 120ms, box-shadow 120ms;
+			appearance: none;
+		}
+		.auth-input::placeholder { color: var(--sm-fg-faint); }
+		.auth-input:focus {
+			border-color: var(--sm-fg);
+			box-shadow: var(--sm-focus-ring);
+		}
+		.auth-btn {
+			width: 100%;
+			padding: 10px 16px;
+			border-radius: var(--sm-r-pill);
+			background: var(--sm-fg);
+			color: var(--sm-bg);
+			border: none;
+			cursor: pointer;
+			font-family: var(--sm-font-sans);
+			font-size: 13px;
+			font-weight: 500;
+			transition: background 120ms;
+		}
+		.auth-btn:hover { background: #2c2318; }
+		.auth-error {
+			font-size: 12px;
+			color: var(--sm-danger);
+			background: var(--sm-danger-soft);
+			border-radius: var(--sm-r-md);
+			padding: 9px 12px;
+		}
+		.auth-hint {
+			font-size: 11px;
+			color: var(--sm-fg-faint);
+			text-align: center;
+		}
+	</style>
 </head>
-<body class="bg-gray-900 text-gray-100 flex items-center justify-center h-screen">
-	<?php if ($first_user): ?>
-		<form method="POST" class="bg-gray-800 p-8 rounded-xl shadow-md w-80">
-			<h2 class="text-xl mb-4 text-center">Создать первого администратора</h2>
-			<?php if (!empty($error)) echo "<p class='text-red-400 mb-3'>$error</p>"; ?>
-			<input name="username" placeholder="Логин" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600" required>
-			<input name="password" type="password" placeholder="Пароль" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600" required>
-			<input name="name" placeholder="Имя (опционально)" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600">
-			<button class="w-full bg-green-600 hover:bg-green-500 p-2 rounded">Создать</button>
-			<p class="text-xs text-gray-400 mt-3 text-center">Этот аккаунт получит права администратора</p>
+<body>
+	<div class="auth-card">
+		<div>
+			<div class="auth-logo">K</div>
+			<?php if ($first_user): ?>
+			<div class="auth-title" style="margin-top:14px;">Добро <em>пожаловать</em></div>
+			<p class="auth-sub">Создайте первого администратора системы</p>
+			<?php else: ?>
+			<div class="auth-title" style="margin-top:14px;">Вход в <em>систему</em></div>
+			<p class="auth-sub">Kanban · управление задачами</p>
+			<?php endif; ?>
+		</div>
+
+		<?php if (!empty($error)): ?>
+		<div class="auth-error"><?= htmlspecialchars($error) ?></div>
+		<?php endif; ?>
+
+		<form method="POST" class="auth-fields">
+			<div>
+				<label class="field-label">Логин</label>
+				<input name="username" placeholder="Имя пользователя" class="auth-input" autocomplete="username" required>
+			</div>
+			<div>
+				<label class="field-label">Пароль</label>
+				<input name="password" type="password" placeholder="••••••••" class="auth-input" autocomplete="current-password" required>
+			</div>
+			<?php if ($first_user): ?>
+			<div>
+				<label class="field-label">Полное имя <span style="color:var(--sm-fg-faint);font-weight:400;">(необязательно)</span></label>
+				<input name="name" placeholder="Иван Иванов" class="auth-input">
+			</div>
+			<?php endif; ?>
+			<button type="submit" class="auth-btn" style="margin-top:4px;">
+				<?= $first_user ? 'Создать аккаунт' : 'Войти' ?>
+			</button>
 		</form>
-	<?php else: ?>
-		<form method="POST" class="bg-gray-800 p-8 rounded-xl shadow-md w-80">
-			<h2 class="text-xl mb-4 text-center">Вход в Kanban</h2>
-			<?php if (!empty($error)) echo "<p class='text-red-400 mb-3'>$error</p>"; ?>
-			<input name="username" placeholder="Логин" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600">
-			<input type="password" name="password" placeholder="Пароль" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600">
-			<button class="w-full bg-blue-600 hover:bg-blue-500 p-2 rounded">Войти</button>
-		</form>
-	<?php endif; ?>
+
+		<?php if ($first_user): ?>
+		<p class="auth-hint">Этот аккаунт получит права администратора</p>
+		<?php endif; ?>
+	</div>
 </body>
 </html>

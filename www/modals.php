@@ -1,5 +1,6 @@
 <?php
-// Модальные окна. Функции управления — в script.js
+// Модальные окна · Soft Modern
+// Управление — в script.js
 ?>
 
 <!-- Main Modal Backdrop -->
@@ -7,36 +8,16 @@
 	<div id="modal-content" style="display:contents"></div>
 </div>
 
-<!-- Link Picker -->
-<div id="link-picker" class="modal-backdrop hidden" onclick="if(event.target===this)closeLinkPicker()" style="z-index:200">
-	<div class="link-picker-container">
-		<div class="link-picker-header">
-			<span class="link-picker-title">Быстрые ссылки</span>
-			<button onclick="closeLinkPicker()" class="link-picker-close">
-				<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-			</button>
-		</div>
-		<div id="links-list" class="links-list"></div>
-		<?php if ($isAdmin): ?>
-		<div class="link-picker-form">
-			<input id="linkName" placeholder="Название" class="input">
-			<input id="linkUrl" placeholder="https://..." class="input">
-			<button onclick="saveLink()" class="link-add-btn">
-				<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-				Добавить
-			</button>
-		</div>
-		<?php endif; ?>
-	</div>
-</div>
-
 <!-- Archive Modal Template -->
 <div id="archive-modal-template" style="display:none">
 <div class="modal modal-md">
 	<div class="modal-header">
-		<span class="modal-title">Архив задач</span>
-		<button onclick="closeModal()" class="icon-btn icon-btn-sm">
-			<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+		<div class="modal-header-left">
+			<span class="modal-eyebrow">История</span>
+			<span class="modal-title-serif">Архив <em>задач</em></span>
+		</div>
+		<button onclick="closeModal()" class="modal-close">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
 		</button>
 	</div>
 	<div class="modal-body">
@@ -52,9 +33,12 @@
 <div id="settings-modal-template" style="display:none">
 <div class="modal modal-lg">
 	<div class="modal-header">
-		<span class="modal-title">Настройки</span>
-		<button onclick="closeModal()" class="icon-btn icon-btn-sm">
-			<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+		<div class="modal-header-left">
+			<span class="modal-eyebrow">Администрирование</span>
+			<span class="modal-title-serif">Настройки <em>системы</em></span>
+		</div>
+		<button onclick="closeModal()" class="modal-close">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
 		</button>
 	</div>
 	<div class="modal-body" style="padding:0;overflow:hidden;">
@@ -117,14 +101,14 @@
 								</label>
 							</div>
 						</div>
-						<button onclick="addUser()" class="btn btn-primary" style="width:100%;margin-top:4px;">
+						<button onclick="addUser()" class="btn btn-primary" style="width:100%;margin-top:14px;">
 							<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
 							Создать пользователя
 						</button>
 					</div>
 
 					<div class="section-card">
-						<h3 style="display:flex;justify-content:space-between;">
+						<h3>
 							<span>Активные пользователи</span>
 							<span class="section-meta" id="users-count">0 пользователей</span>
 						</h3>
@@ -250,28 +234,6 @@
 							</button>
 							<button onclick="testEmail()" class="btn">Тест</button>
 						</div>
-					</div>
-
-					<div class="section-card">
-						<h3 style="display:flex;justify-content:space-between;">
-							<span>Быстрые ссылки</span>
-							<span class="section-meta" id="links-count">0 ссылок</span>
-						</h3>
-						<div class="form-grid form-grid-1">
-							<div>
-								<label class="field-label">Название</label>
-								<input id="newLinkName" placeholder="Документация" class="input">
-							</div>
-							<div>
-								<label class="field-label">URL</label>
-								<input id="newLinkUrl" placeholder="https://example.com" class="input">
-							</div>
-						</div>
-						<button onclick="adminAddLink()" class="btn btn-primary" style="width:100%;">
-							<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-							Добавить ссылку
-						</button>
-						<div id="admin-links-list" style="margin-top:12px;"></div>
 					</div>
 				</div>
 
@@ -399,21 +361,24 @@
 <div id="edit-user-modal-template" style="display:none">
 <div class="modal modal-sm">
 	<div class="modal-header">
-		<span class="modal-title">Редактировать пользователя</span>
-		<button onclick="closeModal()" class="icon-btn icon-btn-sm">
-			<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+		<div class="modal-header-left">
+			<span class="modal-eyebrow">Учётная запись</span>
+			<span class="modal-title-serif">Редактировать <em>пользователя</em></span>
+		</div>
+		<button onclick="closeModal()" class="modal-close">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
 		</button>
 	</div>
 	<div class="modal-body">
-		<div style="margin-bottom:14px;">
+		<div class="field">
 			<label class="field-label">Логин</label>
 			<input id="editUser" class="input" readonly>
 		</div>
-		<div style="margin-bottom:14px;">
+		<div class="field">
 			<label class="field-label">Имя</label>
 			<input id="editName" class="input" placeholder="Полное имя">
 		</div>
-		<div style="margin-bottom:14px;">
+		<div class="field">
 			<label class="field-label">Новый пароль</label>
 			<input id="editPass" type="password" class="input" placeholder="Оставьте пустым, чтобы не менять">
 		</div>
@@ -434,37 +399,43 @@
 <div id="add-column-modal-template" style="display:none">
 <div class="modal modal-sm">
 	<div class="modal-header">
-		<span class="modal-title">Новая колонка</span>
-		<button onclick="closeModal()" class="icon-btn icon-btn-sm">
-			<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+		<div class="modal-header-left">
+			<span class="modal-eyebrow">Доска</span>
+			<span class="modal-title-serif">Новая <em>колонка</em></span>
+		</div>
+		<button onclick="closeModal()" class="modal-close">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
 		</button>
 	</div>
 	<div class="modal-body">
-		<div style="margin-bottom:14px;">
-			<label class="field-label">Название</label>
+		<div class="field">
+			<label class="field-label">Название <span class="req">*</span></label>
 			<input id="colName" placeholder="Например: В работе" class="input">
 		</div>
-		<div style="margin-bottom:14px;">
+		<div class="field">
 			<label class="field-label">Цвет</label>
-			<div class="color-pick">
-				<input id="colBg" type="color" value="#374151" class="color-swatch">
-				<span class="color-hex-val" id="colBgValue">#374151</span>
+			<div class="swatches" id="col-swatches">
+				<button type="button" class="swatch is-selected" data-color="#c7593c" style="background:#c7593c;" title="#c7593c"></button>
+				<button type="button" class="swatch" data-color="#d4a356" style="background:#d4a356;" title="#d4a356"></button>
+				<button type="button" class="swatch" data-color="#669c35" style="background:#669c35;" title="#669c35"></button>
+				<button type="button" class="swatch" data-color="#2f8f6d" style="background:#2f8f6d;" title="#2f8f6d"></button>
+				<button type="button" class="swatch" data-color="#4378b8" style="background:#4378b8;" title="#4378b8"></button>
+				<button type="button" class="swatch" data-color="#7c5cff" style="background:#7c5cff;" title="#7c5cff"></button>
+				<button type="button" class="swatch" data-color="#b04f7a" style="background:#b04f7a;" title="#b04f7a"></button>
+				<button type="button" class="swatch" data-color="#3a3a44" style="background:#3a3a44;" title="#3a3a44"></button>
+				<span class="swatch-hex" id="col-swatch-hex">#c7593c</span>
 			</div>
 		</div>
-		<div style="margin-bottom:10px;">
-			<label class="checkbox">
-				<input id="autoComplete" type="checkbox">
-				<span class="box"></span>
-				Автоматически завершать задачи
-			</label>
-		</div>
-		<div>
-			<label class="checkbox">
-				<input id="timer" type="checkbox">
-				<span class="box"></span>
-				Включить таймер для задач
-			</label>
-		</div>
+		<label class="checkbox">
+			<input id="autoComplete" type="checkbox">
+			<span class="box"></span>
+			Автоматически завершать задачи
+		</label>
+		<label class="checkbox">
+			<input id="timer" type="checkbox">
+			<span class="box"></span>
+			Включить таймер для задач
+		</label>
 	</div>
 	<div class="modal-footer">
 		<button onclick="closeModal()" class="btn">Отмена</button>
@@ -477,37 +448,43 @@
 <div id="edit-column-modal-template" style="display:none">
 <div class="modal modal-sm">
 	<div class="modal-header">
-		<span class="modal-title">Редактировать колонку</span>
-		<button onclick="closeModal()" class="icon-btn icon-btn-sm">
-			<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+		<div class="modal-header-left">
+			<span class="modal-eyebrow">Доска</span>
+			<span class="modal-title-serif">Редактировать <em>колонку</em></span>
+		</div>
+		<button onclick="closeModal()" class="modal-close">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
 		</button>
 	</div>
 	<div class="modal-body">
-		<div style="margin-bottom:14px;">
+		<div class="field">
 			<label class="field-label">Название</label>
 			<input id="editColName" class="input">
 		</div>
-		<div style="margin-bottom:14px;">
+		<div class="field">
 			<label class="field-label">Цвет</label>
-			<div class="color-pick">
-				<input id="editColBg" type="color" class="color-swatch">
-				<span class="color-hex-val" id="editColBgValue">#374151</span>
+			<div class="swatches" id="edit-col-swatches">
+				<button type="button" class="swatch" data-color="#c7593c" style="background:#c7593c;" title="#c7593c"></button>
+				<button type="button" class="swatch" data-color="#d4a356" style="background:#d4a356;" title="#d4a356"></button>
+				<button type="button" class="swatch" data-color="#669c35" style="background:#669c35;" title="#669c35"></button>
+				<button type="button" class="swatch" data-color="#2f8f6d" style="background:#2f8f6d;" title="#2f8f6d"></button>
+				<button type="button" class="swatch" data-color="#4378b8" style="background:#4378b8;" title="#4378b8"></button>
+				<button type="button" class="swatch" data-color="#7c5cff" style="background:#7c5cff;" title="#7c5cff"></button>
+				<button type="button" class="swatch" data-color="#b04f7a" style="background:#b04f7a;" title="#b04f7a"></button>
+				<button type="button" class="swatch" data-color="#3a3a44" style="background:#3a3a44;" title="#3a3a44"></button>
+				<span class="swatch-hex" id="edit-col-swatch-hex">#c7593c</span>
 			</div>
 		</div>
-		<div style="margin-bottom:10px;">
-			<label class="checkbox">
-				<input id="editAutoComplete" type="checkbox">
-				<span class="box"></span>
-				Автоматически завершать задачи
-			</label>
-		</div>
-		<div>
-			<label class="checkbox">
-				<input id="editTimer" type="checkbox">
-				<span class="box"></span>
-				Включить таймер для задач
-			</label>
-		</div>
+		<label class="checkbox">
+			<input id="editAutoComplete" type="checkbox">
+			<span class="box"></span>
+			Автоматически завершать задачи
+		</label>
+		<label class="checkbox">
+			<input id="editTimer" type="checkbox">
+			<span class="box"></span>
+			Включить таймер для задач
+		</label>
 	</div>
 	<div class="modal-footer between">
 		<button onclick="deleteColumn()" class="btn btn-danger">Удалить</button>
@@ -523,37 +500,35 @@
 <div id="add-task-modal-template" style="display:none">
 <div class="modal modal-md">
 	<div class="modal-header">
-		<span class="modal-title">Новая задача</span>
-		<button onclick="closeModal()" class="icon-btn icon-btn-sm">
-			<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+		<div class="modal-header-left">
+			<span class="modal-eyebrow">Задача</span>
+			<span class="modal-title-serif">Новая <em>задача</em></span>
+		</div>
+		<button onclick="closeModal()" class="modal-close">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
 		</button>
 	</div>
 	<div class="modal-body">
-		<div style="margin-bottom:14px;">
+		<div class="field">
 			<label class="field-label">Заголовок <span class="req">*</span></label>
 			<input id="taskTitle" placeholder="Например: Подготовить отчёт" class="input">
 		</div>
-		<div style="margin-bottom:14px;">
+		<div class="field">
 			<label class="field-label">Описание</label>
-			<div style="position:relative;">
-				<textarea id="taskDesc" placeholder="Описание задачи..." class="textarea"></textarea>
-				<button type="button" onclick="openLinkPicker()" class="link-picker-btn icon-btn icon-btn-sm" title="Добавить ссылку" style="position:absolute;top:8px;right:8px;">
-					<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 1 0-7.07-7.07l-1.5 1.5M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 1 0 7.07 7.07l1.5-1.5"/></svg>
-				</button>
-			</div>
+			<textarea id="taskDesc" placeholder="Описание задачи..." class="textarea"></textarea>
 		</div>
 		<div class="form-grid">
-			<div>
+			<div class="field">
 				<label class="field-label">Исполнитель</label>
 				<select id="taskResp" class="select"></select>
 			</div>
-			<div>
+			<div class="field">
 				<label class="field-label">Срок выполнения</label>
 				<input id="taskDeadline" type="date" class="input input-mono">
 			</div>
 		</div>
 		<div class="form-grid">
-			<div>
+			<div class="field">
 				<label class="field-label">Приоритет</label>
 				<select id="taskImp" class="select">
 					<option value="не срочно">🟢 Не срочно</option>
@@ -561,7 +536,7 @@
 					<option value="срочно">🔴 Срочно</option>
 				</select>
 			</div>
-			<div>
+			<div class="field">
 				<label class="field-label">Колонка</label>
 				<select id="taskCol" class="select"></select>
 			</div>
@@ -578,37 +553,35 @@
 <div id="edit-task-modal-template" style="display:none">
 <div class="modal modal-md">
 	<div class="modal-header">
-		<span class="modal-title">Редактировать задачу</span>
-		<button onclick="closeModal()" class="icon-btn icon-btn-sm">
-			<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+		<div class="modal-header-left">
+			<span class="modal-eyebrow">Задача</span>
+			<span class="modal-title-serif">Редактировать <em>задачу</em></span>
+		</div>
+		<button onclick="closeModal()" class="modal-close">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
 		</button>
 	</div>
 	<div class="modal-body">
-		<div style="margin-bottom:14px;">
+		<div class="field">
 			<label class="field-label">Заголовок <span class="req">*</span></label>
 			<input id="editTaskTitle" class="input">
 		</div>
-		<div style="margin-bottom:14px;">
+		<div class="field">
 			<label class="field-label">Описание</label>
-			<div style="position:relative;">
-				<textarea id="editTaskDesc" class="textarea"></textarea>
-				<button type="button" onclick="openLinkPicker()" class="link-picker-btn icon-btn icon-btn-sm" title="Добавить ссылку" style="position:absolute;top:8px;right:8px;">
-					<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 1 0-7.07-7.07l-1.5 1.5M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 1 0 7.07 7.07l1.5-1.5"/></svg>
-				</button>
-			</div>
+			<textarea id="editTaskDesc" class="textarea"></textarea>
 		</div>
 		<div class="form-grid">
-			<div>
+			<div class="field">
 				<label class="field-label">Исполнитель</label>
 				<select id="editTaskResp" class="select"></select>
 			</div>
-			<div>
+			<div class="field">
 				<label class="field-label">Срок выполнения</label>
 				<input id="editTaskDeadline" type="date" class="input input-mono">
 			</div>
 		</div>
 		<div class="form-grid">
-			<div>
+			<div class="field">
 				<label class="field-label">Приоритет</label>
 				<select id="editTaskImp" class="select">
 					<option value="не срочно">🟢 Не срочно</option>
@@ -616,7 +589,7 @@
 					<option value="срочно">🔴 Срочно</option>
 				</select>
 			</div>
-			<div>
+			<div class="field">
 				<label class="field-label">Колонка</label>
 				<select id="editTaskCol" class="select"></select>
 			</div>

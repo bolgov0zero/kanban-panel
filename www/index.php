@@ -43,23 +43,30 @@ function getAvatarFromName($name) {
 	return $initials ?: (function_exists('mb_substr') ? mb_strtoupper(mb_substr($name, 0, 1, 'UTF-8'), 'UTF-8') : substr($name, 0, 2));
 }
 
-function getUserColor($username) {
-	$colors = ['#00d4aa','#7c5cff','#ff5d6c','#ffb547','#4adf8a','#00b4d8','#e040fb','#ff7043'];
-	return $colors[abs(crc32($username)) % count($colors)];
+// Avatar color from --sm-avatar-1..6 palette using username hash
+function getUserAvatarVar($username) {
+	$idx = (abs(crc32($username)) % 6) + 1;
+	return "var(--sm-avatar-{$idx})";
 }
 
 $userAvatars = [];
-$userColors  = [];
+$userColorVars = [];
 foreach ($userNames as $username => $name) {
 	$userAvatars[$username] = getAvatarFromName($name);
-	$userColors[$username]  = getUserColor($username);
+	$userColorVars[$username] = getUserAvatarVar($username);
 }
 
-$columns = $db->query("SELECT * FROM columns ORDER BY id");
 $totalTasks = $db->querySingle("SELECT COUNT(*) FROM tasks WHERE completed=0");
 
 $version_data = json_decode(file_get_contents(__DIR__ . '/version.json'), true);
 $version = $version_data['version'] ?? '—';
+
+// Members for hero avatar stack
+$allUsers = [];
+$resAll = $db->query("SELECT username, name FROM users ORDER BY id LIMIT 6");
+while ($u = $resAll->fetchArray(SQLITE3_ASSOC)) {
+	$allUsers[] = $u;
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -68,49 +75,74 @@ $version = $version_data['version'] ?? '—';
 <title>Kanban Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="design-tokens.css">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- Ambient background -->
-<div class="bg-ambient"></div>
-
 <!-- Topbar -->
 <header class="topbar">
-	<div class="topbar-left">
-		<div class="logo">K</div>
-		<span class="brand">Kanban Доска</span>
-		<span class="topbar-meta"><?= $totalTasks ?> задач · <?= date('d.m.Y') ?></span>
-	</div>
-	<div class="topbar-right">
-		<button onclick="openAddTask()" class="icon-btn" title="Новая задача">
-			<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-		</button>
-		<button onclick="openArchive()" class="icon-btn" title="Архив">
-			<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
-		</button>
-		<?php if ($isAdmin): ?>
-		<button onclick="openUserSettings()" class="icon-btn" title="Настройки">
-			<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06A2 2 0 1 1 7.04 4.24l.06.06A1.7 1.7 0 0 0 9 4.64 1.7 1.7 0 0 0 10.04 3.08V3a2 2 0 0 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.62.26 1.04.86 1.04 1.56V11a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1Z"/></svg>
-		</button>
-		<?php endif; ?>
-		<div class="topbar-divider"></div>
-		<div class="user-chip">
-			<span class="avatar" style="background: <?= getUserColor($user) ?>"><?= getAvatarFromName($user_name) ?></span>
-			<?= htmlspecialchars($user_name) ?>
-		</div>
-		<a href="logout.php" class="icon-btn" title="Выйти">
-			<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-		</a>
+	<div class="topbar-logo">K</div>
+	<span class="topbar-brand">Kanban</span>
+	<div class="topbar-spacer"></div>
+	<span class="topbar-meta"><?= date('d.m.Y') ?></span>
+	<span class="topbar-sep">·</span>
+	<span class="topbar-day"><?php
+		$days = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+		echo $days[date('w')];
+	?></span>
+
+	<button onclick="openArchive()" class="topbar-icon-btn" title="Архив">
+		<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
+	</button>
+	<?php if ($isAdmin): ?>
+	<button onclick="openUserSettings()" class="topbar-icon-btn" title="Настройки">
+		<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+	</button>
+	<?php endif; ?>
+	<a href="logout.php" class="topbar-icon-btn" title="Выйти">
+		<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+	</a>
+	<div class="topbar-avatar" style="background:<?= getUserAvatarVar($user) ?>;" title="<?= htmlspecialchars($user_name) ?>">
+		<?= getAvatarFromName($user_name) ?>
 	</div>
 </header>
 
+<!-- Hero -->
+<div class="hero">
+	<div>
+		<h1 class="hero-title">Доска <em>задач</em></h1>
+		<div class="hero-sub">
+			<span><strong><?= $totalTasks ?></strong> в работе</span>
+			<span class="hero-sub-sep">·</span>
+			<span>0 запланировано</span>
+			<span class="hero-sub-sep">·</span>
+			<span>0 завершено сегодня</span>
+		</div>
+	</div>
+	<div class="hero-right">
+		<div class="avatar-stack">
+			<?php foreach ($allUsers as $u): ?>
+			<div class="avatar-stack-item" style="background:<?= getUserAvatarVar($u['username']) ?>;" title="<?= htmlspecialchars($u['name'] ?: $u['username']) ?>">
+				<?= getAvatarFromName($u['name'] ?: $u['username']) ?>
+			</div>
+			<?php endforeach; ?>
+		</div>
+		<button onclick="openAddTask()" class="btn-hero">
+			<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M12 5v14"/></svg>
+			Новая задача
+		</button>
+	</div>
+</div>
+
 <!-- Board -->
 <div class="board" id="board">
-	<?php while ($col = $columns->fetchArray(SQLITE3_ASSOC)):
+	<?php
+	$columns = $db->query("SELECT * FROM columns ORDER BY id");
+	while ($col = $columns->fetchArray(SQLITE3_ASSOC)):
 		$tasks_count = $db->querySingle("SELECT COUNT(*) FROM tasks WHERE column_id={$col['id']}");
 		$accent = htmlspecialchars($col['bg_color']);
+		$countStr = str_pad($tasks_count, 2, '0', STR_PAD_LEFT);
 	?>
 	<div class="column"
 		 data-col-id="<?= $col['id'] ?>"
@@ -124,17 +156,21 @@ $version = $version_data['version'] ?? '—';
 		 ondragleave="highlightDrop(this,false,event)">
 
 		<div class="column-header">
-			<div class="column-title">
-				<span class="dot"></span>
-				<?= htmlspecialchars($col['name']) ?>
+			<div class="column-title-group">
+				<span class="column-title"><?= htmlspecialchars($col['name']) ?></span>
+				<span class="column-count"><?= $countStr ?></span>
 			</div>
 			<div class="column-actions">
-				<span class="count-chip"><?= $tasks_count ?></span>
-				<button onclick="editColumn(<?= $col['id'] ?>)" class="icon-btn icon-btn-sm" title="Редактировать">
-					<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg>
+				<button onclick="editColumn(<?= $col['id'] ?>)" class="col-icon-btn" title="Редактировать">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg>
+				</button>
+				<button onclick="openAddTask(<?= $col['id'] ?>)" class="col-icon-btn" title="Добавить задачу">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg>
 				</button>
 			</div>
 		</div>
+
+		<div class="col-divider"></div>
 
 		<div class="col-list" id="col<?= $col['id'] ?>">
 			<?php
@@ -152,35 +188,33 @@ $version = $version_data['version'] ?? '—';
 			while($task = $tq->fetchArray(SQLITE3_ASSOC)):
 				$importance = $task['importance'] ?? 'не срочно';
 				$priClass = $importance === 'срочно' ? 'p-high' : ($importance === 'средне' ? 'p-med' : 'p-low');
-				$isUrgent  = $importance === 'срочно';
 
 				$author     = $task['author'] ?? $user;
 				$authorName = $task['author_display_name'] ?? $author;
 				$respName   = $task['responsible_display_name'] ?? $task['responsible'];
 				$authorAvatar = $userAvatars[$author] ?? getAvatarFromName($author);
 				$respAvatar   = $userAvatars[$task['responsible']] ?? getAvatarFromName($task['responsible']);
-				$respColor    = $userColors[$task['responsible']] ?? getUserColor($task['responsible']);
+				$respColorVar = $userColorVars[$task['responsible']] ?? getUserAvatarVar($task['responsible']);
 			?>
 			<div draggable="true"
 				 ondragstart="drag(event)"
 				 id="task<?= $task['id'] ?>"
 				 class="card<?= $task['completed'] ? ' card--done' : '' ?>"
-				 style="--col-color:<?= $accent ?>;"
 				 <?php if($col['timer'] && !empty($task['moved_at'])): ?>
 				 data-moved-at="<?= htmlspecialchars($task['moved_at']) ?>"
 				 data-task-id="<?= $task['id'] ?>"
 				 <?php endif; ?>>
 
-				<div class="card-meta">
-					<span class="card-time<?= $isUrgent ? ' urgent' : '' ?> created-date" data-created="<?= htmlspecialchars($task['created_at']) ?>"></span>
+				<div class="card-top">
+					<span class="card-created created-date" data-created="<?= htmlspecialchars($task['created_at']) ?>"></span>
 					<div style="display:flex;gap:2px;align-items:center;">
 						<?php if ($col['auto_complete']): ?>
-						<button onclick="archiveNow(<?= $task['id'] ?>)" class="icon-btn icon-btn-sm" title="Архивировать">
-							<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
+						<button onclick="archiveNow(<?= $task['id'] ?>)" class="card-menu-btn" title="Архивировать">
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
 						</button>
 						<?php endif; ?>
-						<button onclick="editTask(<?= $task['id'] ?>)" class="icon-btn icon-btn-sm" title="Редактировать">
-							<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg>
+						<button onclick="editTask(<?= $task['id'] ?>)" class="card-menu-btn" title="Редактировать">
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg>
 						</button>
 					</div>
 				</div>
@@ -190,13 +224,10 @@ $version = $version_data['version'] ?? '—';
 				<?php
 				$desc = $task['description'] ?? '';
 				if (!empty($desc)):
-					// Сначала экранируем, потом парсим ссылки
 					$descEsc = htmlspecialchars($desc, ENT_QUOTES);
-					// Markdown [текст](url)
 					$descEsc = preg_replace_callback('/\[([^\[\]]+)\]\((https?:\/\/[^\s\)]+)\)/i', function($m) {
 						return '<a href="' . $m[2] . '" target="_blank" rel="noopener noreferrer" class="task-link">' . $m[1] . '</a>';
 					}, $descEsc);
-					// Голые URL
 					$descEsc = preg_replace_callback('/(?<![="\'])\b(https?:\/\/[^\s<&"\']+)/i', function($m) {
 						$url = $m[1];
 						$host = parse_url($url, PHP_URL_HOST) ?: (strlen($url) > 30 ? substr($url, 0, 30) . '…' : $url);
@@ -208,37 +239,44 @@ $version = $version_data['version'] ?? '—';
 				<?php endif; ?>
 
 				<div class="card-foot">
-					<div style="display:flex;flex-direction:column;gap:4px;">
-						<span class="priority <?= $priClass ?>">
-							<span class="pdot"></span><?= htmlspecialchars($importance) ?>
+					<div class="card-foot-left">
+						<span class="priority-chip <?= $priClass ?>">
+							<span class="chip-dot"></span><?= htmlspecialchars($importance) ?>
 						</span>
 						<?php if (!empty($task['deadline'])): ?>
-						<span class="card-time deadline-tag" data-deadline="<?= htmlspecialchars($task['deadline']) ?>" style="font-size:10px;">
+						<span class="card-deadline deadline-tag" data-deadline="<?= htmlspecialchars($task['deadline']) ?>">
 							<span class="deadline-text"></span>
 						</span>
 						<?php endif; ?>
 						<?php if($col['timer'] && !empty($task['moved_at'])): ?>
-						<span class="card-time timer-display" id="timer-<?= $task['id'] ?>" style="font-size:10px;">⏱ —</span>
+						<span class="card-timer" id="timer-<?= $task['id'] ?>">⏱ —</span>
 						<?php endif; ?>
 					</div>
 					<div class="card-people">
-						<span class="avatar avatar-ghost" title="Автор: <?= htmlspecialchars($authorName) ?>"><?= $authorAvatar ?></span>
+						<span class="avatar-xs ghost" title="Автор: <?= htmlspecialchars($authorName) ?>"><?= $authorAvatar ?></span>
 						<span class="people-arrow">→</span>
-						<span class="avatar" style="background:<?= $respColor ?>;" title="Исполнитель: <?= htmlspecialchars($respName) ?>"><?= $respAvatar ?></span>
+						<span class="avatar-xs" style="background:<?= $respColorVar ?>;" title="Исполнитель: <?= htmlspecialchars($respName) ?>"><?= $respAvatar ?></span>
 					</div>
 				</div>
 			</div>
 			<?php endwhile; ?>
+
+			<?php if ($tasks_count == 0): ?>
+			<div class="col-empty">Пока пусто</div>
+			<?php endif; ?>
 		</div>
 
-		<button class="add-card-btn" onclick="openAddTask(<?= $col['id'] ?>)">+ Добавить задачу</button>
+		<button class="add-card-btn" onclick="openAddTask(<?= $col['id'] ?>)">
+			<span class="add-card-icon">+</span>
+			Добавить задачу
+		</button>
 	</div>
 	<?php endwhile; ?>
 
-	<!-- New column button -->
-	<button class="column" onclick="openAddColumn()"
-		style="flex:0 0 220px;min-height:120px;border:1px dashed var(--border-strong);background:transparent;color:var(--text-tertiary);cursor:pointer;display:grid;place-items:center;font-family:var(--font-sans);font-size:13px;backdrop-filter:none;-webkit-backdrop-filter:none;">
-		+ Новая колонка
+	<!-- Ghost new column -->
+	<button class="ghost-column" onclick="openAddColumn()">
+		<div class="ghost-column-label">+ новая колонка</div>
+		<div class="ghost-column-hint">например, «На ревью» или «Заблокировано»</div>
 	</button>
 </div>
 
@@ -264,7 +302,6 @@ function updateCreatedDates() {
 		const d = parseMoscowDate(el.getAttribute('data-created'));
 		el.textContent = d.toLocaleDateString('ru-RU', {
 			day:'2-digit', month:'2-digit', year:'numeric',
-			hour:'2-digit', minute:'2-digit',
 			timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
 		});
 	});
@@ -303,17 +340,18 @@ document.addEventListener('DOMContentLoaded', function() {
 	updateTimers();
 	setInterval(updateTimers, 60000);
 });
+
+// Drag class
+document.addEventListener('dragstart', function(e) {
+	const card = e.target.closest('.card');
+	if (card) card.classList.add('dragging');
+});
+document.addEventListener('dragend', function(e) {
+	const card = e.target.closest('.card');
+	if (card) card.classList.remove('dragging');
+});
 </script>
 
 <?php include 'modals.php'; ?>
 </body>
 </html>
-<?php
-function getContrastColor($hex){
-	if(!$hex) return "#fff";
-	$hex = ltrim($hex,'#');
-	if(strlen($hex) === 3) $hex = "{$hex[0]}{$hex[0]}{$hex[1]}{$hex[1]}{$hex[2]}{$hex[2]}";
-	$r = hexdec(substr($hex,0,2)); $g = hexdec(substr($hex,2,2)); $b = hexdec(substr($hex,4,2));
-	return (0.299*$r + 0.587*$g + 0.114*$b) > 160 ? "#000" : "#fff";
-}
-?>

@@ -1,7 +1,6 @@
 // Глобальные переменные
 let users = [];
 let columns = [];
-let links = [];
 let currentEditId = null;
 
 // === Drag & Drop ===
@@ -68,63 +67,40 @@ function loadColumns() {
 		.catch(err => console.error('Error loading columns:', err));
 }
 
-function loadLinks() {
-	return fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_links' }) })
-		.then(r => r.json())
-		.then(data => { links = data; return data; })
-		.catch(err => console.error('Error loading links:', err));
-}
-
 // Загрузка при старте
 document.addEventListener('DOMContentLoaded', function() {
 	loadUsers();
 	loadColumns();
-	loadLinks();
 });
 
 function openModal(html) {
 	const modalBg = document.getElementById('modal-bg');
 	const modalContent = document.getElementById('modal-content');
-	
+
 	if (!modalBg || !modalContent) {
 		console.error('Modal elements not found');
 		return;
 	}
-	
+
 	modalContent.innerHTML = html;
 	modalBg.classList.remove('hidden');
-	
-	// Перепривязываем обработчики для кнопок ссылок СРАЗУ
-	setTimeout(() => {
-		const linkPickerBtns = modalContent.querySelectorAll('.link-picker-btn');
-		linkPickerBtns.forEach(btn => {
-			btn.onclick = openLinkPicker;
-		});
-		
-		// Также перепривязываем обработчики для текстовых полей описания
-		const textareas = modalContent.querySelectorAll('textarea');
-		textareas.forEach(textarea => {
-			// Сохраняем ссылку на текстовое поле для использования в insertLink
-			textarea.dataset.hasPicker = 'true';
-		});
-	}, 0); // Уменьшаем таймаут до 0
-	
+
 	// Добавляем обработчик Escape для закрытия
 	const handleEscape = (e) => {
 		if (e.key === 'Escape') {
 			closeModal();
 		}
 	};
-	
+
 	document.addEventListener('keydown', handleEscape);
 	modalBg._escapeHandler = handleEscape;
-	
+
 	// Фокусируемся на первом инпуте
 	const firstInput = modalContent.querySelector('input, textarea, select');
 	if (firstInput) {
 		setTimeout(() => firstInput.focus(), 100);
 	}
-	
+
 	// Предотвращаем прокрутку body при открытой модалке
 	document.body.style.overflow = 'hidden';
 }
@@ -145,46 +121,30 @@ function closeModal() {
 	document.body.style.overflow = '';
 }
 
-function closeLinkPicker() {
-	const linkPicker = document.getElementById('link-picker');
-	if (linkPicker) {
-		linkPicker.classList.add('hidden');
-	}
-}
-
 // === Колонки ===
 function openAddColumn() {
 	const template = document.getElementById('add-column-modal-template');
 	if (template) {
 		openModal(template.innerHTML);
-		
-		// Настройка обновления цветов
-		setTimeout(() => {
-			setupColorInputs('colBg', 'colBgValue');
-			setupColorInputs('taskBg', 'taskBgValue');
-		}, 100);
+		setTimeout(() => { initSwatches('col-swatches', 'col-swatch-hex'); }, 0);
 	}
 }
 
 function editColumn(id) {
 	currentEditId = id;
-	
+
 	fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_column', id }) })
 		.then(r => r.json())
 		.then(c => {
-			if (!c) {
-				alert('Колонка не найдена');
-				return;
-			}
-			
+			if (!c) { alert('Колонка не найдена'); return; }
+
 			const template = document.getElementById('edit-column-modal-template');
 			if (template) {
 				openModal(template.innerHTML);
-				
-				// Заполняем данные после открытия модалки
 				setTimeout(() => {
+					initSwatches('edit-col-swatches', 'edit-col-swatch-hex');
 					fillColumnForm(c);
-				}, 100);
+				}, 0);
 			}
 		})
 		.catch(err => {
@@ -193,29 +153,62 @@ function editColumn(id) {
 		});
 }
 
-function setupColorInputs(inputId, valueId) {
-	const colorInput = document.getElementById(inputId);
-	const valueElement = document.getElementById(valueId);
-	
-	if (colorInput && valueElement) {
-		colorInput.addEventListener('input', function(e) {
-			valueElement.textContent = e.target.value;
+// ── Swatch picker ─────────────────────────────────────────────────────
+function initSwatches(containerId, hexId) {
+	const container = document.getElementById(containerId);
+	if (!container) return;
+
+	container.querySelectorAll('.swatch').forEach(sw => {
+		sw.addEventListener('click', function() {
+			container.querySelectorAll('.swatch').forEach(s => s.classList.remove('is-selected'));
+			this.classList.add('is-selected');
+			const hex = this.dataset.color;
+			const hexEl = document.getElementById(hexId);
+			if (hexEl) hexEl.textContent = hex;
 		});
+	});
+}
+
+function getSelectedSwatch(containerId) {
+	const container = document.getElementById(containerId);
+	if (!container) return '#c7593c';
+	const sel = container.querySelector('.swatch.is-selected');
+	return sel ? sel.dataset.color : '#c7593c';
+}
+
+function setSelectedSwatch(containerId, hexId, color) {
+	const container = document.getElementById(containerId);
+	if (!container) return;
+	let matched = false;
+	container.querySelectorAll('.swatch').forEach(sw => {
+		sw.classList.remove('is-selected');
+		if (sw.dataset.color.toLowerCase() === color.toLowerCase()) {
+			sw.classList.add('is-selected');
+			matched = true;
+		}
+	});
+	// if no exact match, select first
+	if (!matched) {
+		const first = container.querySelector('.swatch');
+		if (first) first.classList.add('is-selected');
 	}
+	const hexEl = document.getElementById(hexId);
+	const sel = container.querySelector('.swatch.is-selected');
+	if (hexEl && sel) hexEl.textContent = sel.dataset.color;
 }
 
 function saveColumn() {
 	const name = document.getElementById('colName')?.value;
-	
+
 	if (!name) {
 		alert('Введите название колонки');
 		return;
 	}
-	
+
 	let data = new URLSearchParams({
 		action: 'add_column',
 		name: name,
-		bg_color: document.getElementById('colBg')?.value || '#374151',
+		bg_color: getSelectedSwatch('col-swatches'),
 		auto_complete: document.getElementById('autoComplete')?.checked ? 1 : 0,
 		timer: document.getElementById('timer')?.checked ? 1 : 0
 	});
@@ -231,38 +224,31 @@ function saveColumn() {
 
 function fillColumnForm(column) {
 	const nameInput = document.getElementById('editColName');
-	const colBgInput = document.getElementById('editColBg');
-	const colBgValue = document.getElementById('editColBgValue');
 	const autoCompleteInput = document.getElementById('editAutoComplete');
 	const timerInput = document.getElementById('editTimer');
-	
+
 	if (nameInput) nameInput.value = column.name || '';
-	if (colBgInput) {
-		colBgInput.value = column.bg_color || '#FFFFFF';
-		if (colBgValue) colBgValue.textContent = column.bg_color || '#FFFFFF';
-	}
 	if (autoCompleteInput) autoCompleteInput.checked = column.auto_complete == 1;
 	if (timerInput) timerInput.checked = column.timer == 1;
-	
-	// Настройка обновления цвета в реальном времени
-	setupColorInputs('editColBg', 'editColBgValue');
+
+	setSelectedSwatch('edit-col-swatches', 'edit-col-swatch-hex', column.bg_color || '#c7593c');
 }
 
 function updateColumn() {
 	if (!currentEditId) return;
-	
+
 	const name = document.getElementById('editColName')?.value;
-	
+
 	if (!name) {
 		alert('Введите название колонки');
 		return;
 	}
-	
+
 	let data = new URLSearchParams({
 		action: 'update_column',
 		id: currentEditId,
 		name: name,
-		bg_color: document.getElementById('editColBg')?.value || '#374151',
+		bg_color: getSelectedSwatch('edit-col-swatches'),
 		auto_complete: document.getElementById('editAutoComplete')?.checked ? 1 : 0,
 		timer: document.getElementById('editTimer')?.checked ? 1 : 0
 	});
@@ -277,58 +263,31 @@ function updateColumn() {
 }
 
 // Новая система вкладок для настроек
-function fillSettingsData(usersData, tgData, emailData, linksData) {
+function fillSettingsData(usersData, tgData, emailData) {
 	// Заполняем список пользователей
 	const usersList = document.getElementById('users-list');
 	if (usersList) {
 		usersList.innerHTML = usersData.map(u => `
 			<div class="user-row">
-				<span class="avatar" style="background:var(--accent);width:32px;height:32px;font-size:12px;border-radius:5px;">${getAvatarFromName(u.name || u.username)}</span>
+				<div class="user-avatar-md" style="background:var(--sm-avatar-${(Math.abs(hashCode(u.username)) % 6) + 1});">${getAvatarFromName(u.name || u.username)}</div>
 				<div class="user-row-info">
 					<div class="user-row-name">${u.name || u.username}</div>
 					<div class="user-row-sub">${u.username}</div>
 				</div>
 				<div class="user-row-actions">
 					${u.is_admin ? '<span class="badge">Admin</span>' : ''}
-					<button onclick="editUserSettings('${u.username}')" class="icon-btn icon-btn-sm" title="Редактировать">
+					<button onclick="editUserSettings('${u.username}')" class="icon-btn-sm" title="Редактировать">
 						<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg>
 					</button>
-					<button onclick="deleteUser('${u.username}')" class="icon-btn icon-btn-sm" title="Удалить" style="color:var(--danger);">
+					<button onclick="deleteUser('${u.username}')" class="icon-btn-sm" title="Удалить" style="color:var(--sm-danger);">
 						<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
 					</button>
 				</div>
 			</div>
 		`).join('');
-		
-		// Обновляем счетчик пользователей
-		const usersCount = document.getElementById('users-count');
-		if (usersCount) {
-			usersCount.textContent = usersData.length + ' пользователей';
-		}
-	}
 
-	// Заполняем список ссылок
-	const linksList = document.getElementById('admin-links-list');
-	if (linksList) {
-		linksList.innerHTML = linksData.map(l => `
-			<div class="user-row">
-				<div class="user-row-info">
-					<div class="user-row-name">${l.name}</div>
-					<div class="user-row-sub" style="font-family:var(--font-mono);font-size:10.5px;">${l.url}</div>
-				</div>
-				<div class="user-row-actions">
-					<button onclick="deleteLink(${l.id})" class="icon-btn icon-btn-sm" title="Удалить" style="color:var(--danger);">
-						<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-					</button>
-				</div>
-			</div>
-		`).join('');
-		
-		// Обновляем счетчик ссылок
-		const linksCount = document.getElementById('links-count');
-		if (linksCount) {
-			linksCount.textContent = linksData.length + ' ссылок';
-		}
+		const usersCount = document.getElementById('users-count');
+		if (usersCount) usersCount.textContent = usersData.length + ' пользователей';
 	}
 
 	// Заполняем Telegram настройки
@@ -722,20 +681,16 @@ function openUserSettings() {
 	Promise.all([
 		loadUsers(),
 		fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_telegram_settings' }) }).then(r => r.json()),
-		fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_email_settings' }) }).then(r => r.json()),
-		loadLinks()
-	]).then(([usersData, tgData, emailData, linksData]) => {
+		fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_email_settings' }) }).then(r => r.json())
+	]).then(([usersData, tgData, emailData]) => {
 		const template = document.getElementById('settings-modal-template');
 		if (template) {
 			openModal(template.innerHTML);
-			
-			// Заполняем данные и инициализируем вкладки
+
 			setTimeout(() => {
-				fillSettingsData(usersData, tgData, emailData, linksData);
-				initSettingsTabs(); // Инициализируем вкладки после заполнения данных
-				setupTestingTab(); // Настраиваем вкладку тестирования
-				
-				// Обновляем статус Cron
+				fillSettingsData(usersData, tgData, emailData);
+				initSettingsTabs();
+				setupTestingTab();
 				checkCronStatus();
 			}, 100);
 		}
@@ -1117,143 +1072,15 @@ function updateTestingStatus(message, type = 'info') {
 	}
 }
 
-// === Ссылки ===
-function openLinkPicker() {
-	const linkPicker = document.getElementById('link-picker');
-	if (linkPicker) {
-		linkPicker.classList.remove('hidden');
-		loadLinksList();
-		
-		// Убедимся, что пикер поверх основной модалки
-		linkPicker.style.zIndex = '100';
+// ── Helper ────────────────────────────────────────────────────────────
+function hashCode(str) {
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) {
+		const chr = str.charCodeAt(i);
+		hash = ((hash << 5) - hash) + chr;
+		hash |= 0;
 	}
-}
-
-function loadLinksList() {
-	fetch('api.php', { method: 'POST', body: new URLSearchParams({ action: 'get_links' }) })
-		.then(r => r.json())
-		.then(data => {
-			const linksList = document.getElementById('links-list');
-			if (linksList) {
-				linksList.innerHTML = data.length ? data.map(l => `
-					<div class="link-row">
-						<span class="link-row-name" onclick="insertLink('${l.name}', '${l.url}')">${l.name}</span>
-						<button onclick="deleteLink(${l.id})" class="icon-btn icon-btn-sm" style="color:var(--danger);">
-							<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-						</button>
-					</div>
-				`).join('') : '<p style="color:var(--text-quaternary);font-size:12px;">Нет сохранённых ссылок</p>';
-			}
-		})
-		.catch(err => console.error('Error loading links:', err));
-}
-
-function insertLink(name, url) {
-	// Получаем текущее активное текстовое поле
-	let desc = null;
-	
-	// Ищем активное текстовое поле в текущей модалке
-	const modalContent = document.getElementById('modal-content');
-	if (modalContent) {
-		// Сначала пробуем найти текстовое поле, которое сейчас в фокусе
-		const activeElement = document.activeElement;
-		if (activeElement && (activeElement.tagName === 'TEXTAREA' || 
-			(activeElement.tagName === 'INPUT' && activeElement.type === 'text'))) {
-			desc = activeElement;
-		}
-		
-		// Если не нашли активный элемент, ищем текстовые поля с описанием задачи
-		if (!desc) {
-			desc = modalContent.querySelector('#editTaskDesc') || 
-				   modalContent.querySelector('#taskDesc');
-		}
-	}
-	
-	if (!desc) {
-		console.error('Could not find textarea for inserting link');
-		alert('Сначала кликните в поле описания, чтобы вставить ссылку');
-		return;
-	}
-	
-	const start = desc.selectionStart;
-	const end = desc.selectionEnd;
-	const text = desc.value;
-	const insert = `[${name}](${url})`;
-	
-	desc.value = text.slice(0, start) + insert + text.slice(end);
-	desc.focus();
-	desc.setSelectionRange(start + insert.length, start + insert.length);
-	
-	// Закрываем пикер ссылок
-	closeLinkPicker();
-}
-
-function saveLink() {
-	const name = document.getElementById('linkName')?.value.trim();
-	const url = document.getElementById('linkUrl')?.value.trim();
-	
-	if (!name || !url) {
-		alert('Заполните имя и URL');
-		return;
-	}
-	
-	fetch('api.php', {
-		method: 'POST',
-		body: new URLSearchParams({ action: 'add_link', name, url })
-	})
-	.then(() => {
-		document.getElementById('linkName').value = '';
-		document.getElementById('linkUrl').value = '';
-		loadLinksList();
-	})
-	.catch(err => {
-		console.error('Error saving link:', err);
-		alert('Ошибка сохранения ссылки');
-	});
-}
-
-function adminAddLink() {
-	const name = document.getElementById('newLinkName')?.value.trim();
-	const url = document.getElementById('newLinkUrl')?.value.trim();
-	
-	if (!name || !url) {
-		alert('Заполните поля');
-		return;
-	}
-	
-	fetch('api.php', {
-		method: 'POST',
-		body: new URLSearchParams({ action: 'add_link', name, url })
-	})
-	.then(() => {
-		document.getElementById('newLinkName').value = '';
-		document.getElementById('newLinkUrl').value = '';
-		openUserSettings(); // Перезагружаем настройки
-	})
-	.catch(err => {
-		console.error('Error adding link:', err);
-		alert('Ошибка добавления ссылки');
-	});
-}
-
-function deleteLink(id) {
-	if (!confirm('Удалить ссылку?')) return;
-	
-	fetch('api.php', {
-		method: 'POST',
-		body: new URLSearchParams({ action: 'delete_link', id })
-	})
-	.then(() => {
-		loadLinksList();
-		// Если открыты настройки, обновляем их
-		if (!document.getElementById('modal-bg').classList.contains('hidden')) {
-			openUserSettings();
-		}
-	})
-	.catch(err => {
-		console.error('Error deleting link:', err);
-		alert('Ошибка удаления ссылки');
-	});
+	return hash;
 }
 
 function archiveNow(id) {
