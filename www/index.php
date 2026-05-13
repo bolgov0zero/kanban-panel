@@ -187,8 +187,24 @@ $version = $version_data['version'] ?? '—';
 
 				<div class="card-title"><?= htmlspecialchars($task['title']) ?></div>
 
-				<?php if (!empty($task['description'])): ?>
-				<div class="card-desc"><?= htmlspecialchars($task['description']) ?></div>
+				<?php
+				$desc = $task['description'] ?? '';
+				if (!empty($desc)):
+					// Сначала экранируем, потом парсим ссылки
+					$descEsc = htmlspecialchars($desc, ENT_QUOTES);
+					// Markdown [текст](url)
+					$descEsc = preg_replace_callback('/\[([^\[\]]+)\]\((https?:\/\/[^\s\)]+)\)/i', function($m) {
+						return '<a href="' . $m[2] . '" target="_blank" rel="noopener noreferrer" class="task-link">' . $m[1] . '</a>';
+					}, $descEsc);
+					// Голые URL
+					$descEsc = preg_replace_callback('/(?<![="\'])\b(https?:\/\/[^\s<&"\']+)/i', function($m) {
+						$url = $m[1];
+						$host = parse_url($url, PHP_URL_HOST) ?: (strlen($url) > 30 ? substr($url, 0, 30) . '…' : $url);
+						return '<a href="' . $url . '" target="_blank" rel="noopener noreferrer" class="task-link">' . $host . '</a>';
+					}, $descEsc);
+					$descEsc = nl2br($descEsc, false);
+				?>
+				<div class="card-desc"><?= $descEsc ?></div>
 				<?php endif; ?>
 
 				<div class="card-foot">

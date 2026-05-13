@@ -897,6 +897,13 @@ body {
   filter: drop-shadow(0 14px 30px rgba(0,0,0,0.6));
 }
 
+/* Task links */
+.task-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+.task-link:hover { text-decoration: underline; }
+
 /* Utility */
 .hidden { display: none !important; }
 
