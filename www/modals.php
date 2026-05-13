@@ -3,7 +3,7 @@
 ?>
 
 <!-- Main Modal Backdrop -->
-<div id="modal-bg" class="modal-backdrop hidden" onclick="if(event.target===this)closeModal()">
+<div id="modal-bg" class="modal-backdrop hidden">
 	<div id="modal-content" style="display:contents"></div>
 </div>
 
